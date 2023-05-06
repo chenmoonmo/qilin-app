@@ -19,6 +19,7 @@
     "react-dom": "18.2.0",
     "typescript": "5.0.4",
     "wagmi": "^0.12.13",
+    "@qilin/component": "workspace:*",
     "@qilin/utils": "workspace:*",
     "@qilin/wagmi-provider": "workspace:*"
   }
