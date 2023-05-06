@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-}
+  reactStrictMode: false,
+  transpilePackages: ['@qilin/wagmi-provider'],
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
