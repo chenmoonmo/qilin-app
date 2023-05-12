@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:app": "pnpm -F @qilin/app dev",
-    "build:app": "pnpm -F @qilin/app build",
-    "start:app": "pnpm -F @qilin/app start",
+    "dev:pvp": "pnpm -F @qilin/pvp dev",
+    "build:pvp": "pnpm -F @qilin/pvp build",
+    "start:pvp": "pnpm -F @qilin/pvp start",
     "prepare": "husky install"
   },
   "keywords": [],

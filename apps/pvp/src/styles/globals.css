@@ -1,0 +1,31 @@
+:root {
+  /* colors */
+  --background-color: #1f2127;
+  --border-color: #363a45;
+
+  /* text */
+  --text-color: #ffffff;
+  --text-color-sub: #737884;
+  --text-l: 14px;
+  --text-xl: 16px;
+
+  /* Dialog */
+  --dialog-overlay-color: rgba(0, 0, 0, 0.7);
+  --dialog-background-color: #2a2d35;
+  --dialog-radius: 9px;
+  --dialog-border-color: #363a45;
+  --dialog-title-color: var(--text-color);
+  --dialog-title-font-size: var(--text-l);
+}
+
+html[data-theme='light'] {
+}
+
+html[data-theme='dark'] {
+}
+
+body {
+  margin: 0;
+  background: var(--background-color);
+  color: var(--text-color);
+}

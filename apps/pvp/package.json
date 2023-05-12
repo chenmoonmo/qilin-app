@@ -1,5 +1,5 @@
 {
-  "name": "@qilin/app",
+  "name": "@qilin/pvp",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@qilin/component": "workspace:*",
+    "@qilin/utils": "workspace:*",
+    "@qilin/wagmi-provider": "workspace:*",
     "@types/node": "18.16.3",
     "@types/react": "18.2.5",
     "@types/react-dom": "18.2.3",
@@ -18,9 +24,6 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "5.0.4",
-    "wagmi": "^0.12.13",
-    "@qilin/component": "workspace:*",
-    "@qilin/utils": "workspace:*",
-    "@qilin/wagmi-provider": "workspace:*"
+    "wagmi": "^0.12.13"
   }
 }
