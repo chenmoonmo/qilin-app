@@ -1,8 +1,12 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Button } from '@qilin/component';
-// import { Inter } from 'next/font/google';
+import { Button, Dialog } from '@qilin/component';
+import { PlusIcon } from '@radix-ui/react-icons';
+import { useSetAtom } from 'jotai';
 import { useAccount } from 'wagmi';
 
+import { NFTIDAtom } from '@/atoms';
+import { CreateRoomDialog, NFTMMainDialog } from '@/components';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
@@ -47,6 +51,9 @@ const NFTContainer = styled.ul`
 
 const Home: NextPageWithLayout = () => {
   const { address, isConnecting, isDisconnected } = useAccount();
+
+  const setNFTID = useSetAtom(NFTIDAtom);
+
   console.log(address, isConnecting, isDisconnected);
 
   const nfts = [
@@ -73,22 +80,35 @@ const Home: NextPageWithLayout = () => {
       endTime: '2021-10-10 12:00:00',
     },
   ];
-
-  const hanldeOpenNft = () => {};
-
+  
   return (
     <StyledMain>
       <HomeInfo>
         <div>My Betting Room</div>
-        <Button>Create a Betting Room</Button>
+        <CreateRoomDialog>
+          <Dialog.Trigger asChild>
+            <Button>
+              <PlusIcon
+                css={css`
+                  margin-right: 6px;
+                `}
+              />
+              Create a Betting Room
+            </Button>
+          </Dialog.Trigger>
+        </CreateRoomDialog>
       </HomeInfo>
-      <NFTContainer>
-        {nfts.map(nft => (
-          <li key={nft.id} onClick={hanldeOpenNft}>
-            <iframe src={`/nft/${nft.id}`} />
-          </li>
-        ))}
-      </NFTContainer>
+      <NFTMMainDialog>
+        <NFTContainer>
+          {nfts.map(nft => (
+            <Dialog.Trigger key={nft.id} asChild>
+              <li onClick={() => setNFTID(nft.id)}>
+                <iframe src={`/nft/${nft.id}`} />
+              </li>
+            </Dialog.Trigger>
+          ))}
+        </NFTContainer>
+      </NFTMMainDialog>
     </StyledMain>
   );
 };

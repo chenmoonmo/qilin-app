@@ -11,8 +11,8 @@
 
   /* Dialog */
   --dialog-overlay-color: rgba(0, 0, 0, 0.7);
-  --dialog-background-color: #2a2d35;
-  --dialog-radius: 9px;
+  --dialog-background-color: #242730;
+  --dialog-radius: 24px;
   --dialog-border-color: #363a45;
   --dialog-title-color: var(--text-color);
   --dialog-title-font-size: var(--text-l);
@@ -28,4 +28,8 @@ body {
   margin: 0;
   background: var(--background-color);
   color: var(--text-color);
+}
+
+* {
+  box-sizing: border-box;
 }

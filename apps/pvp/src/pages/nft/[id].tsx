@@ -1,101 +1,68 @@
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
+import { Button } from '@qilin/component';
+import { PlusIcon } from '@radix-ui/react-icons';
+import { useRouter } from 'next/router';
+import type { FC, HtmlHTMLAttributes } from 'react';
 
-const PairMiniCard = styled.div`
-  display: none;
-  flex-direction: column;
-  height: 100%;
-`;
+import { DefaultAvatar } from '@/components';
+import {
+  EndTime,
+  MainCard,
+  NFTMain,
+  PairInfo,
+  PairMiniCard,
+  Positioninfo,
+  Profit,
+  RoomCard,
+  RoomHeader,
+  RoomID,
+  RoomSeats,
+  RoomSeatsMap,
+  SytledSeatItem,
+  UserName,
+  FormContainer,
+  PositionNote,
+  StakePrice,
+  OpponentContainer,
+  OpponentItem,
+  PostionRate,
+} from '@/styles/nft';
 
-const PairInfo = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 12px;
-  color: #9699a3;
+type SeatItemProps = {
+  userName: string;
+  position: number;
+  onClick: () => void;
+} & HtmlHTMLAttributes<HTMLDivElement>;
 
-  > div:nth-of-type(1) {
-    display: flex;
-    align-items: center;
-    font-style: normal;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 12px;
-    color: #ffffff;
-    &::after {
-      content: 'own';
-      display: block;
-      padding: 1px 2px;
-      margin-left: 8px;
-      border-radius: 2px;
-      font-weight: 400;
-      font-size: 8px;
-      line-height: 10px;
-      background: #2e71ff;
-    }
-  }
-`;
+const SeatItem: FC<SeatItemProps> = ({
+  userName,
+  position,
+  onClick,
+  ...props
+}) => {
+  return (
+    <SytledSeatItem onClick={onClick} {...props}>
+      {userName ? (
+        <>
+          <DefaultAvatar />
+          <UserName>{userName}</UserName>
+          <Positioninfo>
+            <div>{position}</div>
+            <div>1.9</div>
+          </Positioninfo>
+        </>
+      ) : (
+        <PlusIcon />
+      )}
+    </SytledSeatItem>
+  );
+};
 
-const Profit = styled.div`
-  margin-top: 6px;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 12px;
-  &[data-type='long'] {
-    color: #44c27f;
-  }
-  &[data-type='short'] {
-    color: #e15c48;
-  }
-`;
+const Detail = () => {
+  const router = useRouter();
+  const id = router.query.id;
+  // const { id } = params;
 
-const MainCard = styled.div`
-  flex: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 24px;
-  line-height: 12px;
-  color: #44c27f;
-`;
-
-const RoomID = styled.div`
-  align-self: flex-end;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 12px;
-  color: #9699a3;
-`;
-
-const EndTime = styled.div`
-  height: 12px;
-  align-self: flex-end;
-  margin-top: 6px;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 12px;
-  color: #ffffff;
-`;
-
-const NFTMain = styled.main`
-  @media screen and (max-width: 400px) {
-    height: 100vh;
-    box-sizing: border-box;
-    padding: 22px;
-    ${PairMiniCard} {
-      display: flex;
-    }
-  }
-`;
-
-export default function Detail() {
   return (
     <NFTMain>
       {/* mini nft card */}
@@ -109,6 +76,84 @@ export default function Detail() {
         <RoomID>Room ID：12345</RoomID>
         <EndTime>2023-05-02 18:21:00 UTC</EndTime>
       </PairMiniCard>
+      <RoomCard>
+        {/* 座位 */}
+        <RoomSeats>
+          <RoomHeader>
+            <div>
+              BTC / USDC<span>123.46 USDC</span>
+              <EndTime>2023-05-02 18:21:00 UTC</EndTime>
+            </div>
+            <Button
+              css={css`
+                font-weight: 400;
+                align-self: flex-start;
+              `}
+            >
+              Whitelist
+            </Button>
+          </RoomHeader>
+          <RoomSeatsMap>
+            <div>Total margin:1000 USDC</div>
+            <div>Room ID :61223</div>
+            <SeatItem
+              data-id="1"
+              data-position="short"
+              userName="111"
+              position={2000}
+            ></SeatItem>
+            <SeatItem data-id="2"></SeatItem>
+            <SeatItem data-id="3"></SeatItem>
+            <SeatItem data-id="4"></SeatItem>
+            <SeatItem data-id="5"></SeatItem>
+            <SeatItem data-id="6"></SeatItem>
+          </RoomSeatsMap>
+          <div
+            css={css`
+              display: flex;
+              width: 100%;
+              margin-top: 110px;
+              justify-content: center;
+            `}
+          >
+            <Button
+              css={css`
+                box-sizing: border-box;
+                width: 150px;
+                height: 40px;
+                justify-content: center;
+              `}
+            >
+              Opening
+            </Button>
+          </div>
+        </RoomSeats>
+        {/* 开仓表单 */}
+        <FormContainer>
+          <StakePrice>Stake Price:48.000000 USDC</StakePrice>
+          <OpponentContainer>
+            <OpponentItem>
+              <div>690 LP</div>
+              <div>690 USDC</div>
+              <PostionRate></PostionRate>
+            </OpponentItem>
+            <OpponentItem>
+              <div>690 LP</div>
+              <div>690 USDC</div>
+              <PostionRate></PostionRate>
+            </OpponentItem>
+          </OpponentContainer>
+          <PositionNote>
+            After confirmation, host opens game with same opening price.
+            <br />
+            Note：Once confirming, you cannot make any changes.
+          </PositionNote>
+        </FormContainer>
+        {/* ranking */}
+        <div></div>
+      </RoomCard>
     </NFTMain>
   );
-}
+};
+
+export default Detail;
