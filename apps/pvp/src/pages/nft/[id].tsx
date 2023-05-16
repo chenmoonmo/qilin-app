@@ -224,6 +224,7 @@ const Detail = () => {
             <tbody></tbody>
           </table>
         </RankingTable>
+        
       </RoomCard>
     </NFTMain>
   );
