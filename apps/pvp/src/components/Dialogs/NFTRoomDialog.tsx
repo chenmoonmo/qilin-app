@@ -20,13 +20,21 @@ const NFTContainer = styled.iframe`
   height: 100%;
 `;
 
-export const NFTMMainDialog: FC<{ children: ReactNode }> = ({ children }) => {
+type NFTMMainDialogType = {
+  defaultOpen?: boolean;
+  children: ReactNode;
+};
+
+export const NFTMMainDialog: FC<NFTMMainDialogType> = ({
+  defaultOpen,
+  children,
+}) => {
   const NFTID = useAtomValue(NFTIDAtom);
 
   console.log(NFTID);
 
   return (
-    <Dialog.Root>
+    <Dialog.Root defaultOpen={defaultOpen}>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content

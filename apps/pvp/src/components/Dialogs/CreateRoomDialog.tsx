@@ -10,9 +10,17 @@ const CreateRoomCloseBtn = styled.button`
   cursor: pointer;
 `;
 
-export const CreateRoomDialog: FC<{ children: ReactNode }> = ({ children }) => {
+type CreateRoomDialogType = {
+  defaultOpen?: boolean;
+  children: ReactNode;
+};
+
+export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
+  defaultOpen,
+  children,
+}) => {
   return (
-    <Dialog.Root>
+    <Dialog.Root defaultOpen={defaultOpen}>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content>

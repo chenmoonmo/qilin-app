@@ -16,6 +16,10 @@
   --dialog-border-color: #363a45;
   --dialog-title-color: var(--text-color);
   --dialog-title-font-size: var(--text-l);
+
+  /* tooltip */
+  --tooltip-content-background-color: var(--background-color);
+  --tooltip-content-border-color: #585d6c;
 }
 
 html[data-theme='light'] {

@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { Button } from '@qilin/component';
 
 export const PairMiniCard = styled.div`
   display: none;
@@ -87,7 +88,9 @@ export const EndTime = styled.div`
 export const RoomCard = styled.div`
   display: grid;
   grid-template-columns: 840px 353px;
-  grid-template-rows: 552px auto;
+  grid-template-rows: 552px atuo;
+  max-width: 1200px;
+  margin: auto;
 `;
 
 export const RoomSeats = styled.div`
@@ -210,9 +213,9 @@ export const RoomSeatsMap = styled.div`
 `;
 
 export const NFTMain = styled.main`
+  height: 100vh;
   background: #242730;
   @media screen and (max-width: 400px) {
-    height: 100vh;
     box-sizing: border-box;
     padding: 22px;
     ${PairMiniCard} {
@@ -239,18 +242,37 @@ export const StakePrice = styled.div`
   font-weight: 400;
   font-size: 10px;
   line-height: 15px;
+  zoom: 0.84;
 `;
 
 export const PostionRate = styled.div`
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 74px;
   height: 74px;
   border: 3px solid #44c27f;
   border-radius: 50%;
   background: #1f2127;
-  transform: translate(-50%, -50%);
+  background: radial-gradient(rgba(68, 194, 127, 0.4) 28px, #1f2127 9px),
+    #1f2127;
+  transform: translate(-50%, -58%);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 8px;
+  line-height: 12px;
+  > div:nth-of-type(1) {
+    margin-bottom: 5px;
+    font-family: 'Impact';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 12px;
+  }
 `;
 
 export const OpponentItem = styled.div`
@@ -267,7 +289,10 @@ export const OpponentItem = styled.div`
     ${PostionRate} {
       left: unset;
       right: 0;
-      transform: translate(50%, -50%);
+      transform: translate(50%, -58%);
+      border-color: #e15c48;
+      background: radial-gradient(rgba(225, 92, 72, 0.4) 28px, #1f2127 9px),
+        #1f2127;
     }
   }
   > div:nth-of-type(1) {
@@ -294,7 +319,75 @@ export const OpponentContainer = styled.div`
   margin-top: 6px;
 `;
 
-export const PositionInfo = styled.div``;
+export const FormLabel = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 12px;
+  color: #9699a3;
+  span {
+    color: #ffffff;
+  }
+`;
+
+export const EstimateResults = styled.div`
+  padding: 14px;
+  margin-top: 18px;
+  border: 1px dashed #363a45;
+  border-radius: 6px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 12px;
+  color: #9699a3;
+  > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    & + div {
+      margin-top: 16px;
+    }
+  }
+`;
+
+export const SubmitContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 18px 0 0 -16px;
+`;
+
+export const SubmitButton = styled(Button)`
+  flex: 1;
+  margin-left: 16px;
+  padding: 14px 0;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 12px;
+`;
+
+export const RankingTable = styled.div`
+  flex-grow: 1;
+  grid-column: 1 / span 2;
+  border-top: 1px solid #363a45;
+  h1 {
+    padding: 18px 24px;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 12px;
+  }
+  table {
+    width: 100%;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 12px;
+  }
+`;
 
 export const PositionNote = styled.div`
   margin-top: 14px;

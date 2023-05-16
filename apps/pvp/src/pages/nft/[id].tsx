@@ -1,31 +1,38 @@
 import { css } from '@emotion/react';
-import { Button } from '@qilin/component';
+import { Button, Tooltip } from '@qilin/component';
 import { PlusIcon } from '@radix-ui/react-icons';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import type { FC, HtmlHTMLAttributes } from 'react';
 
-import { DefaultAvatar } from '@/components';
+// import { useAccount } from 'wagmi';
+import { DefaultAvatar, FQASvg, TokenAmountInput } from '@/components';
+import { LeverageRadio } from '@/components';
 import {
   EndTime,
+  EstimateResults,
+  FormContainer,
+  FormLabel,
   MainCard,
   NFTMain,
+  OpponentContainer,
+  OpponentItem,
   PairInfo,
   PairMiniCard,
   Positioninfo,
+  PositionNote,
+  PostionRate,
   Profit,
+  RankingTable,
   RoomCard,
   RoomHeader,
   RoomID,
   RoomSeats,
   RoomSeatsMap,
+  StakePrice,
+  SubmitButton,
+  SubmitContainer,
   SytledSeatItem,
   UserName,
-  FormContainer,
-  PositionNote,
-  StakePrice,
-  OpponentContainer,
-  OpponentItem,
-  PostionRate,
 } from '@/styles/nft';
 
 type SeatItemProps = {
@@ -59,8 +66,10 @@ const SeatItem: FC<SeatItemProps> = ({
 };
 
 const Detail = () => {
-  const router = useRouter();
-  const id = router.query.id;
+  // const { address, isConnecting, isDisconnected } = useAccount();
+
+  // const router = useRouter();
+  // const id = router.query.id;
   // const { id } = params;
 
   return (
@@ -135,14 +144,61 @@ const Detail = () => {
             <OpponentItem>
               <div>690 LP</div>
               <div>690 USDC</div>
-              <PostionRate></PostionRate>
+              <PostionRate>
+                <div>69%</div>
+                <div>Long</div>
+              </PostionRate>
             </OpponentItem>
             <OpponentItem>
               <div>690 LP</div>
               <div>690 USDC</div>
-              <PostionRate></PostionRate>
+              <PostionRate>
+                <div>31%</div>
+                <div>Short</div>
+              </PostionRate>
             </OpponentItem>
           </OpponentContainer>
+          <FormLabel
+            css={css`
+              margin-top: 10px;
+            `}
+          >
+            Leverage
+          </FormLabel>
+          <LeverageRadio />
+          <FormLabel
+            css={css`
+              margin-top: 23px;
+            `}
+          >
+            Balance
+            <span>0 USDC</span>
+          </FormLabel>
+          <TokenAmountInput maxShow symbol="ETH" />
+          <TokenAmountInput
+            css={css`
+              margin-top: 10px;
+            `}
+            symbol="USDC"
+          />
+          <EstimateResults>
+            <div>
+              <Tooltip text="1111111" icon={<FQASvg />}>
+                <span>LP price</span>
+              </Tooltip>
+              <span>- USDC</span>
+            </div>
+            <div>
+              <Tooltip text="1111111" icon={<FQASvg />}>
+                <span>Value</span>
+              </Tooltip>
+              <span>- USDC</span>
+            </div>
+          </EstimateResults>
+          <SubmitContainer>
+            <SubmitButton backgroundColor="#44C27F">Long</SubmitButton>
+            <SubmitButton backgroundColor="#E15C48">Short</SubmitButton>
+          </SubmitContainer>
           <PositionNote>
             After confirmation, host opens game with same opening price.
             <br />
@@ -150,7 +206,24 @@ const Detail = () => {
           </PositionNote>
         </FormContainer>
         {/* ranking */}
-        <div></div>
+        <RankingTable>
+          <h1>Ranking</h1>
+          {/* 抽离 tbale 组件 */}
+          <table>
+            <thead>
+              <tr>
+                <th>Ranking</th>
+                <th>Address</th>
+                <th>Margin(USDC)</th>
+                <th>Direction</th>
+                <th>Open price(USDC)</th>
+                <th>Value(USDC)</th>
+                <th>Est.PNL(USDC)</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </RankingTable>
       </RoomCard>
     </NFTMain>
   );

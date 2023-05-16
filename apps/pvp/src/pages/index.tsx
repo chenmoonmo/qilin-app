@@ -3,6 +3,8 @@ import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { useSetAtom } from 'jotai';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
 
 import { NFTIDAtom } from '@/atoms';
@@ -51,8 +53,14 @@ const NFTContainer = styled.ul`
 
 const Home: NextPageWithLayout = () => {
   const { address, isConnecting, isDisconnected } = useAccount();
+  const router = useRouter();
+  const id = router.query.id as string;
 
   const setNFTID = useSetAtom(NFTIDAtom);
+
+  useEffect(() => {
+    id && setNFTID(id);
+  }, [id, setNFTID]);
 
   console.log(address, isConnecting, isDisconnected);
 
@@ -80,7 +88,7 @@ const Home: NextPageWithLayout = () => {
       endTime: '2021-10-10 12:00:00',
     },
   ];
-  
+
   return (
     <StyledMain>
       <HomeInfo>
@@ -98,7 +106,7 @@ const Home: NextPageWithLayout = () => {
           </Dialog.Trigger>
         </CreateRoomDialog>
       </HomeInfo>
-      <NFTMMainDialog>
+      <NFTMMainDialog defaultOpen={!!id}>
         <NFTContainer>
           {nfts.map(nft => (
             <Dialog.Trigger key={nft.id} asChild>
