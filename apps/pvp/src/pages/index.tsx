@@ -8,7 +8,11 @@ import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
 
 import { NFTIDAtom } from '@/atoms';
-import { CreateRoomDialog, NFTMMainDialog } from '@/components';
+import {
+  CreateRoomDialog,
+  NFTMMainDialog,
+  WhilteListDialog,
+} from '@/components';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
@@ -117,6 +121,7 @@ const Home: NextPageWithLayout = () => {
           ))}
         </NFTContainer>
       </NFTMMainDialog>
+      <WhilteListDialog />
     </StyledMain>
   );
 };

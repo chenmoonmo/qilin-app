@@ -1,6 +1,8 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import * as RadixDialog from '@radix-ui/react-dialog';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { forwardRef } from 'react';
 
 const overlayShow = keyframes`
    from {
@@ -26,10 +28,16 @@ const Root = RadixDialog.Root;
 const Trigger = RadixDialog.Trigger;
 const Portal = RadixDialog.Portal;
 const Close = RadixDialog.Close;
-const Overlay = styled(RadixDialog.Overlay)`
+const Overlay = styled.div`
   background-color: var(--dialog-overlay-color);
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
   animation: ${overlayShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
 `;
 
@@ -64,6 +72,25 @@ const Description = styled(RadixDialog.Description)`
   line-height: 1.5;
 `;
 
+const StyledCloseIcon = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+`;
+
+const CloseIcon = forwardRef<any>((props, ref) => {
+  return (
+    <RadixDialog.Close asChild ref={ref} {...props}>
+      <StyledCloseIcon>
+        <Cross2Icon />
+      </StyledCloseIcon>
+    </RadixDialog.Close>
+  );
+});
+
+CloseIcon.displayName = 'CloseIcon';
+
 export const Dialog = {
   Root,
   Trigger,
@@ -73,4 +100,5 @@ export const Dialog = {
   Title,
   Description,
   Close,
+  CloseIcon
 };

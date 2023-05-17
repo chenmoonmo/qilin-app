@@ -10,7 +10,8 @@ type ButtonPropsType = {
 
 const StyledBotton = styled.button<{ backgroundColor?: string }>`
   --background: ${props => props.backgroundColor ?? '#2e71ff'};
-  display: inline-flex;
+  box-sizing: border-box;
+  display: inline-flex;;
   align-items: center;
   justify-content: center;
   padding: 6px 10px;

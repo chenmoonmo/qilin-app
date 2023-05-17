@@ -1,0 +1,13 @@
+:root {
+  --rs-bg-overlay: var(--background-color);
+  --rs-state-focus-shadow: none;
+  --rs-input-focus-border: var(--border-colo);
+  ----rs-text-primary: #fff;
+  --rs-picker-value: ##fff;
+}
+
+.rs-picker-date-menu {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: all !important;
+}

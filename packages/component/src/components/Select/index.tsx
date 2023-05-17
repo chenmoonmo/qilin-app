@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
-import * as RadixSelect from '@radix-ui/react-select';
-import type { ButtonHTMLAttributes, FC } from 'react';
 import * as Popover from '@radix-ui/react-popover';
+import * as RadixSelect from '@radix-ui/react-select';
+import { ButtonHTMLAttributes, FC, useState } from 'react';
+import * as ScrollArea from '@radix-ui/react-scroll-area';
 
 type SelectPropsType = {
   selections: { text: string; value: string }[];
@@ -95,22 +96,13 @@ export const Select: FC<SelectPropsType> = ({
   );
 };
 
-type SelectTokenWithTokenPropsType = {
-  selections: {
-    address: string;
-    symbol: string;
-    balance: string;
-    icon?: string;
-  }[];
-  value: string;
-  onChange: (value: string) => void;
-} & ButtonHTMLAttributes<HTMLButtonElement>;
-
 const SelectTokenTriger = Trigger.withComponent(Popover.Trigger);
 
 const SelectTokenValue = styled(RadixSelect.Value)``;
 
 const SelectTokenContent = styled(Popover.Content)`
+  display: flex;
+  flex-direction: column;
   width: 259px;
   height: 213px;
   padding: 10px 0;
@@ -134,28 +126,99 @@ const TokenSearch = styled.div`
   border-radius: 8px;
 `;
 
+const TokenContainer = styled(ScrollArea.Root)`
+  /* height: 100px; */
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  --scrollbar-size: 5px;
+`;
+
+const TokenContainerViewport = styled(ScrollArea.Viewport)`
+  width: 100%;
+  height: 100%;
+`;
+
+const TokenContainerScrollbar = styled(ScrollArea.Scrollbar)`
+  display: flex;
+  /* ensures no selection */
+  user-select: none;
+  /* disable browser handling of all panning and zooming gestures on touch devices */
+  touch-action: none;
+  padding: 2px;
+  background: #373737;
+  transition: background 160ms ease-out;
+  &:hover {
+    background: #373737;
+  }
+  &[data-orientation='vertical'] {
+    width: var(--scrollbar-size);
+  }
+`;
+
+const ScrollAreaThumb = styled(ScrollArea.Thumb)`
+  flex: 1;
+  background: #a3a3a3;
+  border-radius: var(--scrollbar-size);
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    min-width: 44px;
+    min-height: 44px;
+  }
+`;
+
 const TokenSelectionItem = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 8px;
   cursor: pointer;
   &:hover,
-  &[data-state='checked'] {
+  &[data-active='true'] {
     background-color: #363a45;
   }
+  /* &[data-active='true'] {
+    position: sticky;
+    top: 0;
+  } */
 `;
 
 const TokenInfo = styled.div``;
 
+type SelectTokenWithTokenPropsType = {
+  selections: {
+    address: string;
+    symbol: string;
+    balance: string;
+    icon?: string;
+  }[];
+  value: string;
+  onChange: (value: string) => void;
+  search: string;
+  onSearchChange: (search: string) => void;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
+
 export const SelectToken: FC<SelectTokenWithTokenPropsType> = ({
-  // value,
-  // onChange,
+  selections,
+  value,
+  onChange,
+  search,
+  onSearchChange,
   ...props
 }) => {
+  const activeTokenSymbol = selections.find(
+    token => token.address === value
+  )?.symbol;
   return (
     <Popover.Root>
       <SelectTokenTriger {...props}>
-        value
+        <span>{activeTokenSymbol}</span>
         <svg
           width="11"
           height="7"
@@ -168,41 +231,61 @@ export const SelectToken: FC<SelectTokenWithTokenPropsType> = ({
             fill="white"
           />
         </svg>
-        {/* </Popover.Icon> */}
         <Popover.Portal>
           <SelectTokenContent sideOffset={-4}>
-            <TokenSearch>
-              <svg
-                width="14"
-                height="15"
-                viewBox="0 0 14 15"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <mask
-                  id="mask0_351_951"
-                  maskUnits="userSpaceOnUse"
-                  x="0"
-                  y="0"
+            <>
+              <TokenSearch>
+                <svg
                   width="14"
                   height="15"
+                  viewBox="0 0 14 15"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M14 0H0V15H14V0Z" fill="white" />
-                </mask>
-                <g mask="url(#mask0_351_951)">
-                  <path
-                    d="M13.7311 13.481L10.6553 10.2883C11.5594 9.16497 12.0524 7.76468 12.0524 6.28185C12.0524 4.61199 11.4247 3.04167 10.2873 1.85859C9.14999 0.675226 7.63749 0.0263672 6.02619 0.0263672C4.41489 0.0263672 2.90478 0.677969 1.76506 1.85859C0.625075 3.0392 0 4.60952 0 6.28185C0 7.95419 0.627717 9.52203 1.76506 10.7051C2.9024 11.8885 4.41991 12.5373 6.02857 12.5373C7.25019 12.5373 8.41659 12.163 9.40731 11.4639L12.5406 14.7165C12.7041 14.8862 12.9205 14.9737 13.1345 14.9737C13.3485 14.9737 13.5649 14.8887 13.7284 14.7165C14.0605 14.3745 14.0605 13.8205 13.7311 13.481ZM8.97668 9.58676C8.94075 9.61418 8.90693 9.64407 8.87575 9.67671L8.84934 9.70413C8.08952 10.3807 7.10356 10.7874 6.02857 10.7874C3.63342 10.7874 1.68554 8.7654 1.68554 6.27911C1.68554 3.79282 3.63342 1.77083 6.02857 1.77083C8.42373 1.77083 10.3716 3.79282 10.3716 6.27911C10.3716 7.58752 9.83292 8.7632 8.97668 9.58676Z"
-                    fill="#9699A3"
-                  />
-                </g>
-              </svg>
-
-              <input placeholder="Search name or paste address" type="text" />
-            </TokenSearch>
-            <TokenSelectionItem>
-              <TokenInfo>111</TokenInfo>
-              <div>1111</div>
-            </TokenSelectionItem>
+                  <mask
+                    id="mask0_351_951"
+                    maskUnits="userSpaceOnUse"
+                    x="0"
+                    y="0"
+                    width="14"
+                    height="15"
+                  >
+                    <path d="M14 0H0V15H14V0Z" fill="white" />
+                  </mask>
+                  <g mask="url(#mask0_351_951)">
+                    <path
+                      d="M13.7311 13.481L10.6553 10.2883C11.5594 9.16497 12.0524 7.76468 12.0524 6.28185C12.0524 4.61199 11.4247 3.04167 10.2873 1.85859C9.14999 0.675226 7.63749 0.0263672 6.02619 0.0263672C4.41489 0.0263672 2.90478 0.677969 1.76506 1.85859C0.625075 3.0392 0 4.60952 0 6.28185C0 7.95419 0.627717 9.52203 1.76506 10.7051C2.9024 11.8885 4.41991 12.5373 6.02857 12.5373C7.25019 12.5373 8.41659 12.163 9.40731 11.4639L12.5406 14.7165C12.7041 14.8862 12.9205 14.9737 13.1345 14.9737C13.3485 14.9737 13.5649 14.8887 13.7284 14.7165C14.0605 14.3745 14.0605 13.8205 13.7311 13.481ZM8.97668 9.58676C8.94075 9.61418 8.90693 9.64407 8.87575 9.67671L8.84934 9.70413C8.08952 10.3807 7.10356 10.7874 6.02857 10.7874C3.63342 10.7874 1.68554 8.7654 1.68554 6.27911C1.68554 3.79282 3.63342 1.77083 6.02857 1.77083C8.42373 1.77083 10.3716 3.79282 10.3716 6.27911C10.3716 7.58752 9.83292 8.7632 8.97668 9.58676Z"
+                      fill="#9699A3"
+                    />
+                  </g>
+                </svg>
+                <input
+                  placeholder="Search name or paste address"
+                  type="text"
+                  value={search}
+                  onChange={e => onSearchChange(e.target.value)}
+                />
+              </TokenSearch>
+              <TokenContainer>
+                <TokenContainerViewport>
+                  <div>
+                    {selections.map(token => (
+                      <TokenSelectionItem
+                        key={token.address}
+                        data-active={value === token.address}
+                        onClick={() => onChange(token.address)}
+                      >
+                        <TokenInfo>{token.symbol}</TokenInfo>
+                        <div>{token.balance}</div>
+                      </TokenSelectionItem>
+                    ))}
+                  </div>
+                </TokenContainerViewport>
+                <TokenContainerScrollbar orientation="vertical">
+                  <ScrollAreaThumb />
+                </TokenContainerScrollbar>
+              </TokenContainer>
+            </>
           </SelectTokenContent>
         </Popover.Portal>
       </SelectTokenTriger>

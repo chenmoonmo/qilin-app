@@ -1,11 +1,21 @@
 import { css } from '@emotion/react';
-import { Button, Tooltip } from '@qilin/component';
+import { Button, Dialog, Tooltip } from '@qilin/component';
 import { PlusIcon } from '@radix-ui/react-icons';
 // import { useRouter } from 'next/router';
-import type { FC, HtmlHTMLAttributes } from 'react';
+import type { HtmlHTMLAttributes } from 'react';
+import { forwardRef } from 'react';
 
 // import { useAccount } from 'wagmi';
-import { DefaultAvatar, FQASvg, TokenAmountInput } from '@/components';
+import {
+  ClosePostionDialog,
+  DefaultAvatar,
+  FQASvg,
+  OpenPositionDialog,
+  OpenRoomDialog,
+  OpponentInfo,
+  TokenAmountInput,
+  WhilteListDialog,
+} from '@/components';
 import { LeverageRadio } from '@/components';
 import {
   EndTime,
@@ -14,13 +24,10 @@ import {
   FormLabel,
   MainCard,
   NFTMain,
-  OpponentContainer,
-  OpponentItem,
   PairInfo,
   PairMiniCard,
   Positioninfo,
   PositionNote,
-  PostionRate,
   Profit,
   RankingTable,
   RoomCard,
@@ -28,7 +35,6 @@ import {
   RoomID,
   RoomSeats,
   RoomSeatsMap,
-  StakePrice,
   SubmitButton,
   SubmitContainer,
   SytledSeatItem,
@@ -41,29 +47,28 @@ type SeatItemProps = {
   onClick: () => void;
 } & HtmlHTMLAttributes<HTMLDivElement>;
 
-const SeatItem: FC<SeatItemProps> = ({
-  userName,
-  position,
-  onClick,
-  ...props
-}) => {
-  return (
-    <SytledSeatItem onClick={onClick} {...props}>
-      {userName ? (
-        <>
-          <DefaultAvatar />
-          <UserName>{userName}</UserName>
-          <Positioninfo>
-            <div>{position}</div>
-            <div>1.9</div>
-          </Positioninfo>
-        </>
-      ) : (
-        <PlusIcon />
-      )}
-    </SytledSeatItem>
-  );
-};
+const SeatItem = forwardRef<SeatItemProps, any>(
+  ({ userName, position, onClick, ...props }, ref) => {
+    return (
+      <SytledSeatItem onClick={onClick} {...props} ref={ref}>
+        {userName ? (
+          <>
+            <DefaultAvatar />
+            <UserName>{userName}</UserName>
+            <Positioninfo>
+              <div>{position}</div>
+              <div>1.9</div>
+            </Positioninfo>
+          </>
+        ) : (
+          <PlusIcon />
+        )}
+      </SytledSeatItem>
+    );
+  }
+);
+
+SeatItem.displayName = 'SeatItem';
 
 const Detail = () => {
   // const { address, isConnecting, isDisconnected } = useAccount();
@@ -88,35 +93,47 @@ const Detail = () => {
       <RoomCard>
         {/* 座位 */}
         <RoomSeats>
-          <RoomHeader>
-            <div>
-              BTC / USDC<span>123.46 USDC</span>
-              <EndTime>2023-05-02 18:21:00 UTC</EndTime>
-            </div>
-            <Button
-              css={css`
-                font-weight: 400;
-                align-self: flex-start;
-              `}
-            >
-              Whitelist
-            </Button>
-          </RoomHeader>
-          <RoomSeatsMap>
-            <div>Total margin:1000 USDC</div>
-            <div>Room ID :61223</div>
-            <SeatItem
-              data-id="1"
-              data-position="short"
-              userName="111"
-              position={2000}
-            ></SeatItem>
-            <SeatItem data-id="2"></SeatItem>
-            <SeatItem data-id="3"></SeatItem>
-            <SeatItem data-id="4"></SeatItem>
-            <SeatItem data-id="5"></SeatItem>
-            <SeatItem data-id="6"></SeatItem>
-          </RoomSeatsMap>
+          <WhilteListDialog type="add">
+            <>
+              <RoomHeader>
+                <div>
+                  BTC / USDC<span>123.46 USDC</span>
+                  <EndTime>2023-05-02 18:21:00 UTC</EndTime>
+                </div>
+                <Dialog.Trigger asChild>
+                  <Button
+                    css={css`
+                      font-weight: 400;
+                      align-self: flex-start;
+                    `}
+                  >
+                    Whitelist
+                  </Button>
+                </Dialog.Trigger>
+              </RoomHeader>
+              <RoomSeatsMap>
+                <div>Total margin:1000 USDC</div>
+                <div>Room ID :61223</div>
+                <Dialog.Trigger asChild>
+                  <SeatItem
+                    data-id="1"
+                    data-position="short"
+                    userName="111"
+                    position={2000}
+                  />
+                </Dialog.Trigger>
+                <Dialog.Trigger asChild>
+                  <SeatItem data-id="2" />
+                </Dialog.Trigger>
+
+                <SeatItem data-id="3" />
+                <SeatItem data-id="4" />
+                <SeatItem data-id="5" />
+                <SeatItem data-id="6" />
+              </RoomSeatsMap>
+            </>
+          </WhilteListDialog>
+
           <div
             css={css`
               display: flex;
@@ -125,39 +142,23 @@ const Detail = () => {
               justify-content: center;
             `}
           >
-            <Button
-              css={css`
-                box-sizing: border-box;
-                width: 150px;
-                height: 40px;
-                justify-content: center;
-              `}
-            >
-              Opening
-            </Button>
+            <OpenRoomDialog>
+              <Button
+                css={css`
+                  box-sizing: border-box;
+                  width: 150px;
+                  height: 40px;
+                  justify-content: center;
+                `}
+              >
+                Opening
+              </Button>
+            </OpenRoomDialog>
           </div>
         </RoomSeats>
         {/* 开仓表单 */}
         <FormContainer>
-          <StakePrice>Stake Price:48.000000 USDC</StakePrice>
-          <OpponentContainer>
-            <OpponentItem>
-              <div>690 LP</div>
-              <div>690 USDC</div>
-              <PostionRate>
-                <div>69%</div>
-                <div>Long</div>
-              </PostionRate>
-            </OpponentItem>
-            <OpponentItem>
-              <div>690 LP</div>
-              <div>690 USDC</div>
-              <PostionRate>
-                <div>31%</div>
-                <div>Short</div>
-              </PostionRate>
-            </OpponentItem>
-          </OpponentContainer>
+          <OpponentInfo />
           <FormLabel
             css={css`
               margin-top: 10px;
@@ -195,10 +196,17 @@ const Detail = () => {
               <span>- USDC</span>
             </div>
           </EstimateResults>
-          <SubmitContainer>
-            <SubmitButton backgroundColor="#44C27F">Long</SubmitButton>
-            <SubmitButton backgroundColor="#E15C48">Short</SubmitButton>
-          </SubmitContainer>
+          <OpenPositionDialog>
+            <SubmitContainer>
+              <Dialog.Trigger asChild>
+                <SubmitButton backgroundColor="#44C27F">Long</SubmitButton>
+              </Dialog.Trigger>
+              <Dialog.Trigger asChild>
+                <SubmitButton backgroundColor="#E15C48">Short</SubmitButton>
+              </Dialog.Trigger>
+            </SubmitContainer>
+          </OpenPositionDialog>
+
           <PositionNote>
             After confirmation, host opens game with same opening price.
             <br />
@@ -224,7 +232,8 @@ const Detail = () => {
             <tbody></tbody>
           </table>
         </RankingTable>
-        
+        {/* TODO: 绑定 trigger */}
+        <ClosePostionDialog />
       </RoomCard>
     </NFTMain>
   );

@@ -1,15 +1,8 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Select, SelectToken } from '@qilin/component';
-import { Cross2Icon } from '@radix-ui/react-icons';
+import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
-
-const CreateRoomCloseBtn = styled.button`
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  cursor: pointer;
-`;
 
 type CreateRoomDialogType = {
   defaultOpen?: boolean;
@@ -65,12 +58,16 @@ const WhielistItem = styled.div`
   }
 `;
 
+export const creatRoomOpenAtom = atom(false);
+
 export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
   defaultOpen,
   children,
 }) => {
+  const [open, setOpen] = useAtom(creatRoomOpenAtom);
+
   return (
-    <Dialog.Root defaultOpen={defaultOpen}>
+    <Dialog.Root defaultOpen={defaultOpen} open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content>
@@ -95,11 +92,11 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
                 selections={[
                   {
                     address: '1111',
-                    symbol: 'usdt',
+                    symbol: 'USDT',
                     balance: '0',
                   },
                 ]}
-                // value="1"
+                value="1111"
                 onChange={() => {}}
                 css={css`
                   width: 264px;
@@ -113,11 +110,36 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
                 selections={[
                   {
                     address: '1111',
-                    symbol: 'usdt',
+                    symbol: 'USDT',
+                    balance: '0',
+                  },
+                  {
+                    address: '2222',
+                    symbol: 'UDT',
+                    balance: '0',
+                  },
+                  {
+                    address: '3333',
+                    symbol: 'UT',
+                    balance: '0',
+                  },
+                  {
+                    address: '3332',
+                    symbol: 'U3',
+                    balance: '0',
+                  },
+                  {
+                    address: '3432',
+                    symbol: 'U33',
+                    balance: '0',
+                  },
+                  {
+                    address: '322',
+                    symbol: 'U33',
                     balance: '0',
                   },
                 ]}
-                value="1"
+                value="1111"
                 onChange={() => {}}
                 css={css`
                   width: 264px;
@@ -152,8 +174,9 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
             </WhielistContainer>
             <Button
               css={css`
+                box-sizing: border-box;
                 display: flex;
-                width: 380px;
+                width: 100%;
                 height: 40px;
                 margin: 10px auto 0;
               `}
@@ -161,11 +184,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
               Create Room & Mint NFT
             </Button>
           </FormContainer>
-          <Dialog.Close asChild>
-            <CreateRoomCloseBtn>
-              <Cross2Icon />
-            </CreateRoomCloseBtn>
-          </Dialog.Close>
+          <Dialog.CloseIcon />
         </Dialog.Content>
       </Dialog.Portal>
       {children}
