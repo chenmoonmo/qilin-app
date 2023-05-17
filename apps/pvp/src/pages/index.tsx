@@ -13,6 +13,7 @@ import {
   NFTMMainDialog,
   WhilteListDialog,
 } from '@/components';
+import { CONTRACTS } from '@/constant';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
@@ -56,6 +57,7 @@ const NFTContainer = styled.ul`
 `;
 
 const Home: NextPageWithLayout = () => {
+  console.log(CONTRACTS);
   const { address, isConnecting, isDisconnected } = useAccount();
   const router = useRouter();
   const id = router.query.id as string;

@@ -4,6 +4,7 @@ import { PlusIcon } from '@radix-ui/react-icons';
 // import { useRouter } from 'next/router';
 import type { HtmlHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
+import { useContractWrite } from 'wagmi';
 
 // import { useAccount } from 'wagmi';
 import {
@@ -17,6 +18,8 @@ import {
   WhilteListDialog,
 } from '@/components';
 import { LeverageRadio } from '@/components';
+import { CONTRACTS } from '@/constant';
+import RouterABI from '@/constant/abis/Router.json';
 import {
   EndTime,
   EstimateResults,
@@ -76,6 +79,13 @@ const Detail = () => {
   // const router = useRouter();
   // const id = router.query.id;
   // const { id } = params;
+
+  const { write: writeOpen } = useContractWrite({
+    address: CONTRACTS.RouterAddress,
+    abi: RouterABI.abi,
+    functionName: 'open',
+    mode: 'recklesslyUnprepared',
+  });
 
   return (
     <NFTMain>
