@@ -1,8 +1,11 @@
+import { CONTRACTS } from '@/constant';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Select, SelectToken } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
+import { usePrepareContractWrite } from 'wagmi';
+import Factory from '@/constant/abis/Factory.json'
 
 type CreateRoomDialogType = {
   defaultOpen?: boolean;
@@ -65,6 +68,21 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
   children,
 }) => {
   const [open, setOpen] = useAtom(creatRoomOpenAtom);
+
+  const {config}  = usePrepareContractWrite({
+    address: CONTRACTS.FactoryAddress,
+    abi: Factory.abi,
+    functionName: 'CreatePool',
+    args: [
+      //pool,
+      //payToken,
+      //oracle,
+      //reverse,
+      //typ,
+      //id
+    ]
+  })
+  
 
   return (
     <Dialog.Root defaultOpen={defaultOpen} open={open} onOpenChange={setOpen}>

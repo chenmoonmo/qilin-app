@@ -79,6 +79,9 @@ importers:
       '@qilin/component':
         specifier: workspace:*
         version: link:../../packages/component
+      '@qilin/hooks':
+        specifier: workspace:*
+        version: link:../../packages/hooks
       '@qilin/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -106,6 +109,9 @@ importers:
       eslint-config-next:
         specifier: 13.4.0
         version: 13.4.0(eslint@8.39.0)(typescript@5.0.4)
+      ethers:
+        specifier: ^5
+        version: 5.7.2
       jotai:
         specifier: ^2.1.0
         version: 2.1.0(react@18.2.0)

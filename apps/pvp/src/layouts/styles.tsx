@@ -2,6 +2,8 @@ import styled from '@emotion/styled';
 import Link from 'next/link';
 
 export const Header = styled.header`
+  position: sticky;
+  top: 0;
   display: flex;
   justify-content: space-between;
   padding: 20px;
@@ -14,8 +16,13 @@ export const MenuItem = styled(Link)`
   font-weight: 500;
   font-size: var(--text-xl);
   line-height: 24px;
-  margin-left: 86px;
+  margin-left: 40px;
+  color: #9699a3;
   cursor: pointer;
+  &:hover,
+  &[data-active='true'] {
+    color: #fff;
+  }
 `;
 
 export const ChainInfo = styled.div`

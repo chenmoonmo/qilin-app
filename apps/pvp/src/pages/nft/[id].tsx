@@ -6,7 +6,6 @@ import type { HtmlHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
 import { useContractWrite } from 'wagmi';
 
-// import { useAccount } from 'wagmi';
 import {
   ClosePostionDialog,
   DefaultAvatar,
@@ -20,6 +19,7 @@ import {
 import { LeverageRadio } from '@/components';
 import { CONTRACTS } from '@/constant';
 import RouterABI from '@/constant/abis/Router.json';
+import { useTokenInfo } from '@/hooks';
 import {
   EndTime,
   EstimateResults,
@@ -79,6 +79,11 @@ const Detail = () => {
   // const router = useRouter();
   // const id = router.query.id;
   // const { id } = params;
+
+  useTokenInfo({ 
+    address: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
+    approveAddress: CONTRACTS.RouterAddress
+   });
 
   const { write: writeOpen } = useContractWrite({
     address: CONTRACTS.RouterAddress,

@@ -2,8 +2,11 @@
   --rs-bg-overlay: var(--background-color);
   --rs-state-focus-shadow: none;
   --rs-input-focus-border: var(--border-colo);
-  ----rs-text-primary: #fff;
+  --rs-text-primary: #fff;
   --rs-picker-value: ##fff;
+  --rs-calendar-time-unit-bg: var(--background-color);
+  --rs-border-primary: var(--border-color);
+  --rs-input-focus-border: var(--active-border-color);
 }
 
 .rs-picker-date-menu {

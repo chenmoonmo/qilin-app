@@ -4,6 +4,7 @@ import './index.css';
 import styled from '@emotion/styled';
 import type { FC } from 'react';
 import RsuiteDatePicker from 'rsuite/DatePicker';
+import Icon from '../Icons';
 
 export const DatePicker = styled(RsuiteDatePicker)`
   --rs-input-bg: var(--background-color);
@@ -17,4 +18,5 @@ export const DatePicker = styled(RsuiteDatePicker)`
 
 DatePicker.defaultProps = {
   format: 'yyyy-MM-dd HH:mm',
+  caretAs: Icon.ArrowIcon
 };

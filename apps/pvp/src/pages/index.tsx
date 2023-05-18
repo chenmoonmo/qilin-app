@@ -17,6 +17,7 @@ import { CONTRACTS } from '@/constant';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
+import { useRoom } from '@/hooks';
 
 const StyledMain = styled.main`
   max-width: 1440px;
@@ -57,10 +58,11 @@ const NFTContainer = styled.ul`
 `;
 
 const Home: NextPageWithLayout = () => {
-  console.log(CONTRACTS);
-  const { address, isConnecting, isDisconnected } = useAccount();
   const router = useRouter();
   const id = router.query.id as string;
+
+  const { address, isConnecting, isDisconnected } = useAccount();
+  const {} = useRoom();
 
   const setNFTID = useSetAtom(NFTIDAtom);
 

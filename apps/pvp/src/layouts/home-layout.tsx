@@ -10,12 +10,14 @@ import { useSwitchNetwork } from 'wagmi';
 import { Logo, MetaMaskIcon } from '@/components';
 
 import { ChainInfo, Header, MenuItem } from './styles';
+import { useRouter } from 'next/router';
 
 type HomeLayoutType = {
   children: ReactNode;
 };
 
 const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
+  const router = useRouter();
   const { connect, connectors } = useConnect();
   const { chain, chains } = useNetwork();
   const { address, isConnected } = useAccount();
@@ -54,8 +56,12 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
             align-items: center;
           `}
         >
-          <Logo />
-          <MenuItem href="/">Trade Betting</MenuItem>
+          <Logo css={css`
+            margin-right: 70px;
+          `} />
+          <MenuItem href="/" data-active={router.pathname === '/'}>Trade Betting</MenuItem>
+          {/* TODO: 白名单显示 */}
+          <MenuItem href="/referrals" data-active={router.pathname === '/referrals'}>Referrals</MenuItem>
         </div>
         <div
           css={css`
