@@ -1,7 +1,7 @@
 import type { Address } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite } from 'wagmi';
 import { erc20ABI, useBalance, useContractRead } from 'wagmi';
-import { BigNumber} from 'ethers'
+import { BigNumber } from 'ethers';
 
 export const useTokenInfo = ({
   address,
@@ -10,8 +10,6 @@ export const useTokenInfo = ({
   address: Address;
   approveAddress?: Address;
 }) => {
-  console.log(address);
-
   const { data: allowance, refetch: refetchAllowance } = useContractRead({
     address,
     abi: erc20ABI,
@@ -35,17 +33,17 @@ export const useTokenInfo = ({
     functionName: 'approve',
     args: [
       approveAddress!,
-      BigNumber.from('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      ),
     ],
   });
-  
+
   const { write } = useContractWrite(config);
 
   const approve = () => {
     write?.();
   };
-
-  console.log(allowance, data);
 
   return {
     ...data,

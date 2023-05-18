@@ -20,8 +20,6 @@ export const useTokenInfo = ({ address }: { address: `0x${string}` }) => {
     enabled: false
   });
 
-  console.log(allowance, data);
-
   return {
     ...data,
     allowance,

@@ -3,6 +3,7 @@ import { useAccount, useContractRead, useContractReads } from 'wagmi';
 
 import Player from '@/constant/abis/Player.json';
 import { useMemo } from 'react';
+import { BigNumber } from 'ethers';
 
 export const useRoom = () => {
   const { address, isConnecting, isDisconnected } = useAccount();
@@ -17,11 +18,13 @@ export const useRoom = () => {
     functionName: 'index',
   });
 
+  console.log({ index });
+
   const contracts: any = useMemo(() => {
     if (isIndexLoading || !index) return [];
     const arr = [];
     // FIXME:
-    for (let i = 0; i < (index as number); i++) {
+    for (let i = 0; i < (index as BigNumber).toNumber(); i++) {
       arr.push({
         ...playerContract,
         args: [address, i],

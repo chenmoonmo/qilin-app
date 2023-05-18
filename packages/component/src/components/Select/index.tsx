@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import * as Popover from '@radix-ui/react-popover';
 import * as RadixSelect from '@radix-ui/react-select';
-import { ButtonHTMLAttributes, FC, useState } from 'react';
+import { ButtonHTMLAttributes, FC, ReactNode, useMemo, useState } from 'react';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 
 type SelectPropsType = {
@@ -58,7 +58,6 @@ export const Select: FC<SelectPropsType> = ({
   onChange,
   ...props
 }) => {
-  console.log(value);
   return (
     <RadixSelect.Root value={value} onValueChange={onChange}>
       <Trigger {...props}>
@@ -96,7 +95,14 @@ export const Select: FC<SelectPropsType> = ({
   );
 };
 
-const SelectTokenTriger = Trigger.withComponent(Popover.Trigger);
+const SelectTokenTriger = styled(Trigger.withComponent(Popover.Trigger))`
+  > span {
+    height: 12px;
+  }
+  &[data-state='open'] {
+    border-color: var(--active-border-color);
+  }
+`;
 
 const SelectTokenValue = styled(RadixSelect.Value)``;
 
@@ -124,6 +130,9 @@ const TokenSearch = styled.div`
   border: 0.5px solid #363943;
   background: #2c2f38;
   border-radius: 8px;
+  /* &:focus-within {
+      border-color: var(--active-border-color);
+    } */
 `;
 
 const TokenContainer = styled(ScrollArea.Root)`
@@ -177,48 +186,64 @@ const ScrollAreaThumb = styled(ScrollArea.Thumb)`
 const TokenSelectionItem = styled.div`
   display: flex;
   justify-content: space-between;
-  padding: 8px;
+  padding: 10px;
   cursor: pointer;
   &:hover,
   &[data-active='true'] {
     background-color: #363a45;
   }
-  /* &[data-active='true'] {
-    position: sticky;
-    top: 0;
-  } */
 `;
 
-const TokenInfo = styled.div``;
+const NoSelection = styled.div`
+  padding-top: 40px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  color: #9699a3;
+  text-align: center;
+`;
 
-type SelectTokenWithTokenPropsType = {
-  selections: {
-    address: string;
-    symbol: string;
-    balance: string;
-    icon?: string;
-  }[];
-  value: string;
-  onChange: (value: string) => void;
-  search: string;
-  onSearchChange: (search: string) => void;
+NoSelection.defaultProps = {
+  children: 'No results found.',
+};
+
+type SelectTokenWithTokenPropsType<T extends {} = any> = {
+  selections: T[];
+  value: string | undefined;
+  onChange?: (selection: T) => void;
+  search?: string;
+  onSearchChange?: (search: string) => void;
+  renderItem?: (selection: T) => ReactNode;
+  valueKey?: keyof T;
+  textKey?: keyof T;
+  filter?: (selection: T) => boolean;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const SelectToken: FC<SelectTokenWithTokenPropsType> = ({
+  renderItem = selection => <div> {selection[textKey]}</div>,
   selections,
   value,
   onChange,
   search,
   onSearchChange,
+  valueKey = 'value',
+  textKey = 'text',
+  filter = () => true,
   ...props
 }) => {
-  const activeTokenSymbol = selections.find(
-    token => token.address === value
-  )?.symbol;
+  const activeSelection = selections.find(
+    selection => selection[valueKey] === value
+  )?.[textKey];
+
+  const filtedSelection = useMemo(() => {
+    return selections.filter(filter);
+  }, [selections, filter]);
+
   return (
     <Popover.Root>
       <SelectTokenTriger {...props}>
-        <span>{activeTokenSymbol}</span>
+        <span>{activeSelection}</span>
         <svg
           width="11"
           height="7"
@@ -232,7 +257,7 @@ export const SelectToken: FC<SelectTokenWithTokenPropsType> = ({
           />
         </svg>
         <Popover.Portal>
-          <SelectTokenContent sideOffset={-4}>
+          <SelectTokenContent sideOffset={0}>
             <>
               <TokenSearch>
                 <svg
@@ -263,24 +288,27 @@ export const SelectToken: FC<SelectTokenWithTokenPropsType> = ({
                   placeholder="Search name or paste address"
                   type="text"
                   value={search}
-                  onChange={e => onSearchChange(e.target.value)}
+                  onChange={e => onSearchChange?.(e.target.value)}
                 />
               </TokenSearch>
               <TokenContainer>
-                <TokenContainerViewport>
-                  <div>
-                    {selections.map(token => (
-                      <TokenSelectionItem
-                        key={token.address}
-                        data-active={value === token.address}
-                        onClick={() => onChange(token.address)}
-                      >
-                        <TokenInfo>{token.symbol}</TokenInfo>
-                        <div>{token.balance}</div>
-                      </TokenSelectionItem>
-                    ))}
-                  </div>
-                </TokenContainerViewport>
+                {filtedSelection.length > 0 ? (
+                  <TokenContainerViewport>
+                    <div>
+                      {filtedSelection.map(selection => (
+                        <TokenSelectionItem
+                          key={selection[valueKey]}
+                          data-active={value === selection[valueKey]}
+                          onClick={() => onChange?.(selection)}
+                        >
+                          {renderItem(selection)}
+                        </TokenSelectionItem>
+                      ))}
+                    </div>
+                  </TokenContainerViewport>
+                ) : (
+                  <NoSelection />
+                )}
                 <TokenContainerScrollbar orientation="vertical">
                   <ScrollAreaThumb />
                 </TokenContainerScrollbar>

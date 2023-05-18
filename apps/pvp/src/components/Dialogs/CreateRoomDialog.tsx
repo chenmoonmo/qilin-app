@@ -3,9 +3,12 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Select, SelectToken } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
-import type { FC, ReactNode } from 'react';
-import { usePrepareContractWrite } from 'wagmi';
-import Factory from '@/constant/abis/Factory.json'
+import { useState, type FC, type ReactNode, useMemo, useCallback } from 'react';
+import { useChainId, useNetwork, usePrepareContractWrite } from 'wagmi';
+import Factory from '@/constant/abis/Factory.json';
+import { PAIRS, PAY_TOKENS } from '@/constant';
+import { useCreateRoom } from '@/hooks';
+import { isAddress } from 'ethers/lib/utils.js';
 
 type CreateRoomDialogType = {
   defaultOpen?: boolean;
@@ -55,6 +58,9 @@ const WhielistItem = styled.div`
   border: 1px solid #363a45;
   border-radius: 6px;
   margin-top: 10px;
+  &:focus-within {
+    border-color: var(--border-active-color);
+  }
   input {
     width: 100%;
     padding: 10px;
@@ -67,22 +73,42 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
   defaultOpen,
   children,
 }) => {
+  const chainId = useChainId();
+  const {
+    canCreateRoom,
+    canSendCreate,
+    form,
+    setForm,
+    createRoom,
+    players,
+    setPlayers,
+  } = useCreateRoom();
+  const [searchInfo, setSearchInfo] = useState<string>('');
+  const [marginSearchInfo, setMarginSearchInfo] = useState<string>('');
+
   const [open, setOpen] = useAtom(creatRoomOpenAtom);
 
-  const {config}  = usePrepareContractWrite({
-    address: CONTRACTS.FactoryAddress,
-    abi: Factory.abi,
-    functionName: 'CreatePool',
-    args: [
-      //pool,
-      //payToken,
-      //oracle,
-      //reverse,
-      //typ,
-      //id
-    ]
-  })
-  
+  const pairFilter = useCallback(
+    (item: any) => {
+      if (!searchInfo) return true;
+      return (
+        item.name.includes(searchInfo.toUpperCase()) ||
+        (isAddress(searchInfo) && item.oracleAddress.includes(searchInfo))
+      );
+    },
+    [searchInfo]
+  );
+
+  const marginFilter = useCallback(
+    (item: any) => {
+      if (!marginSearchInfo) return true;
+      return (
+        item.symbol.includes(marginSearchInfo.toUpperCase()) ||
+        (isAddress(marginSearchInfo) && item.address.includes(marginSearchInfo))
+      );
+    },
+    [marginSearchInfo]
+  );
 
   return (
     <Dialog.Root defaultOpen={defaultOpen} open={open} onOpenChange={setOpen}>
@@ -107,62 +133,45 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
             <FromItem>
               <label>Select Pair</label>
               <SelectToken
-                selections={[
-                  {
-                    address: '1111',
-                    symbol: 'USDT',
-                    balance: '0',
-                  },
-                ]}
-                value="1111"
-                onChange={() => {}}
                 css={css`
                   width: 264px;
                   margin-left: 31px;
                 `}
+                selections={PAIRS?.[chainId as keyof typeof PAIRS]}
+                valueKey="oracleAddress"
+                textKey="name"
+                value={form.oracle}
+                onChange={selection =>
+                  setForm(preForm => ({
+                    ...preForm,
+                    oracle: selection.oracleAddress,
+                  }))
+                }
+                search={searchInfo}
+                onSearchChange={setSearchInfo}
+                filter={pairFilter}
               />
             </FromItem>
             <FromItem>
               <label>Margin</label>
               <SelectToken
-                selections={[
-                  {
-                    address: '1111',
-                    symbol: 'USDT',
-                    balance: '0',
-                  },
-                  {
-                    address: '2222',
-                    symbol: 'UDT',
-                    balance: '0',
-                  },
-                  {
-                    address: '3333',
-                    symbol: 'UT',
-                    balance: '0',
-                  },
-                  {
-                    address: '3332',
-                    symbol: 'U3',
-                    balance: '0',
-                  },
-                  {
-                    address: '3432',
-                    symbol: 'U33',
-                    balance: '0',
-                  },
-                  {
-                    address: '322',
-                    symbol: 'U33',
-                    balance: '0',
-                  },
-                ]}
-                value="1111"
-                onChange={() => {}}
                 css={css`
                   width: 264px;
                   margin-left: 31px;
                 `}
+                valueKey="address"
+                textKey="symbol"
+                selections={PAY_TOKENS?.[chainId as keyof typeof PAY_TOKENS]}
+                filter={marginFilter}
+                value={form.payToken}
+                onChange={selection =>
+                  setForm(preForm => ({
+                    ...preForm,
+                    payToken: selection.address,
+                  }))
+                }
+                search={marginSearchInfo}
+                onSearchChange={setMarginSearchInfo}
               />
             </FromItem>
             <FromItem>
@@ -171,24 +180,20 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
             </FromItem>
             <WhielistContainer>
               <label>Whitelist</label>
-              <WhielistItem>
-                <input type="text" />
-              </WhielistItem>
-              <WhielistItem>
-                <input type="text" />
-              </WhielistItem>
-              <WhielistItem>
-                <input type="text" />
-              </WhielistItem>
-              <WhielistItem>
-                <input type="text" />
-              </WhielistItem>
-              <WhielistItem>
-                <input type="text" />
-              </WhielistItem>
-              <WhielistItem>
-                <input type="text" />
-              </WhielistItem>
+              {players.map((player, index) => (
+                <WhielistItem key={index}>
+                  <input
+                    type="text"
+                    value={player}
+                    onChange={e =>
+                      setPlayers(prePlayers => {
+                        prePlayers[index] = e.target.value;
+                        return [...prePlayers];
+                      })
+                    }
+                  />
+                </WhielistItem>
+              ))}
             </WhielistContainer>
             <Button
               css={css`
@@ -198,6 +203,8 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
                 height: 40px;
                 margin: 10px auto 0;
               `}
+              disabled={!canSendCreate}
+              onClick={createRoom}
             >
               Create Room & Mint NFT
             </Button>

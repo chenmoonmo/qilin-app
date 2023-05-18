@@ -17,7 +17,7 @@ import { CONTRACTS } from '@/constant';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
-import { useRoom } from '@/hooks';
+import { useCreateRoom, useRoom } from '@/hooks';
 
 const StyledMain = styled.main`
   max-width: 1440px;
@@ -27,11 +27,13 @@ const StyledMain = styled.main`
 const HomeInfo = styled.div`
   display: flex;
   justify-content: space-between;
+
+  margin-bottom: 27px;
   > div:nth-of-type(1) {
     font-style: normal;
     font-weight: 600;
     font-size: 16px;
-    line-height: 12px;
+    line-height: 32px;
   }
 `;
 
@@ -60,6 +62,8 @@ const NFTContainer = styled.ul`
 const Home: NextPageWithLayout = () => {
   const router = useRouter();
   const id = router.query.id as string;
+
+  const { canCreateRoom } = useCreateRoom();
 
   const { address, isConnecting, isDisconnected } = useAccount();
   const {} = useRoom();
@@ -103,7 +107,7 @@ const Home: NextPageWithLayout = () => {
         <div>My Betting Room</div>
         <CreateRoomDialog>
           <Dialog.Trigger asChild>
-            <Button>
+            <Button disabled={!canCreateRoom}>
               <PlusIcon
                 css={css`
                   margin-right: 6px;
