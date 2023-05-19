@@ -5,19 +5,18 @@ import { PlusIcon } from '@radix-ui/react-icons';
 import { useSetAtom } from 'jotai';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useAccount } from 'wagmi';
 
 import { NFTIDAtom } from '@/atoms';
 import {
   CreateRoomDialog,
   NFTMMainDialog,
   WhilteListDialog,
+  NFTMainDialogOpenAtom,
 } from '@/components';
-import { CONTRACTS } from '@/constant';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
-import { useCreateRoom, useRoom } from '@/hooks';
+import { useCreateRoom, useGetPlayerNFTIds } from '@/hooks';
 
 const StyledMain = styled.main`
   max-width: 1440px;
@@ -65,41 +64,19 @@ const Home: NextPageWithLayout = () => {
 
   const { canCreateRoom } = useCreateRoom();
 
-  const { address, isConnecting, isDisconnected } = useAccount();
-  const {} = useRoom();
+  // 玩家拥有的 player nft（可以进入的房间）
+  const playerNFTIds = useGetPlayerNFTIds();
+
+  const setNFTDialogOpen = useSetAtom(NFTMainDialogOpenAtom);
 
   const setNFTID = useSetAtom(NFTIDAtom);
 
   useEffect(() => {
-    id && setNFTID(id);
-  }, [id, setNFTID]);
-
-  console.log(address, isConnecting, isDisconnected);
-
-  const nfts = [
-    {
-      pairName: 'BTC / USDC',
-      isOwn: false,
-      // 方向
-      direction: 'long',
-      id: '1',
-      // 盈亏
-      profit: '0.1',
-      // 结束时间
-      endTime: '2021-10-10 12:00:00',
-    },
-    {
-      pairName: 'BTC / USDC',
-      isOwn: true,
-      // 方向
-      direction: 'short',
-      id: '2',
-      // 盈亏
-      profit: '0.1',
-      // 结束时间
-      endTime: '2021-10-10 12:00:00',
-    },
-  ];
+    if (id && playerNFTIds.includes(+id)) {
+      setNFTID(+id);
+      setNFTDialogOpen(true);
+    }
+  }, [id, playerNFTIds, setNFTID]);
 
   return (
     <StyledMain>
@@ -118,12 +95,12 @@ const Home: NextPageWithLayout = () => {
           </Dialog.Trigger>
         </CreateRoomDialog>
       </HomeInfo>
-      <NFTMMainDialog defaultOpen={!!id}>
+      <NFTMMainDialog>
         <NFTContainer>
-          {nfts.map(nft => (
-            <Dialog.Trigger key={nft.id} asChild>
-              <li onClick={() => setNFTID(nft.id)}>
-                <iframe src={`/nft/${nft.id}`} />
+          {playerNFTIds.map(id => (
+            <Dialog.Trigger key={id} asChild>
+              <li onClick={() => setNFTID(id)}>
+                <iframe src={`/nft/${id}`} />
               </li>
             </Dialog.Trigger>
           ))}

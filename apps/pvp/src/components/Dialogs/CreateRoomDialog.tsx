@@ -83,9 +83,10 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
     players,
     setPlayers,
   } = useCreateRoom();
+
   const [searchInfo, setSearchInfo] = useState<string>('');
   const [marginSearchInfo, setMarginSearchInfo] = useState<string>('');
-
+  
   const [open, setOpen] = useAtom(creatRoomOpenAtom);
 
   const pairFilter = useCallback(

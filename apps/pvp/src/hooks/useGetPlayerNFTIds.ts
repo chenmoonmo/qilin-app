@@ -5,8 +5,8 @@ import Player from '@/constant/abis/Player.json';
 import { useMemo } from 'react';
 import { BigNumber } from 'ethers';
 
-export const useRoom = () => {
-  const { address, isConnecting, isDisconnected } = useAccount();
+export const useGetPlayerNFTIds = () => {
+  const { address } = useAccount();
 
   const playerContract = {
     address: CONTRACTS.PlayerAddress,
@@ -18,15 +18,13 @@ export const useRoom = () => {
     functionName: 'index',
   });
 
-  console.log({ index });
-
   const contracts: any = useMemo(() => {
     if (isIndexLoading || !index) return [];
     const arr = [];
-    // FIXME:
-    for (let i = 0; i < (index as BigNumber).toNumber(); i++) {
+    for (let i = 0; i <= (index as BigNumber).toNumber(); i++) {
       arr.push({
         ...playerContract,
+        functionName: 'balanceOf',
         args: [address, i],
       });
     }
@@ -35,9 +33,16 @@ export const useRoom = () => {
 
   const { data } = useContractReads({
     contracts,
-    enabled: isIndexLoading,
+    enabled: contracts.length > 0,
   });
 
-  //   TODO: 判断拥有权
-  return {};
+  const playerNFTIds = useMemo<number[]>(() => {
+    if (!data) return [];
+    const ids = contracts.map((item: any) => item.args[1]);
+    return ids.filter((item: any, index: number) => {
+      return data[index] && (data[index] as BigNumber).gt(0);
+    });
+  }, [contracts, data]);
+
+  return playerNFTIds;
 };

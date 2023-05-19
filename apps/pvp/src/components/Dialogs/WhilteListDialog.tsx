@@ -55,7 +55,7 @@ const WhilteListInput = styled.div`
 
 type WhilteListDialogPropsType = {
   children?: ReactNode;
-  roomId: string;
+  roomId: number;
   type?: 'aftercreate' | 'add';
 };
 

@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Dialog } from '@qilin/component';
 import { Cross2Icon } from '@radix-ui/react-icons';
-import { useAtomValue } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import type { FC, ReactNode } from 'react';
 
 import { NFTIDAtom } from '@/atoms';
@@ -21,20 +21,17 @@ const NFTContainer = styled.iframe`
 `;
 
 type NFTMMainDialogType = {
-  defaultOpen?: boolean;
   children: ReactNode;
 };
 
-export const NFTMMainDialog: FC<NFTMMainDialogType> = ({
-  defaultOpen,
-  children,
-}) => {
-  const NFTID = useAtomValue(NFTIDAtom);
+export const NFTMainDialogOpenAtom = atom(false);
 
-  console.log(NFTID);
+export const NFTMMainDialog: FC<NFTMMainDialogType> = ({ children }) => {
+  const NFTID = useAtomValue(NFTIDAtom);
+  const [open, setOpen] = useAtom(NFTMainDialogOpenAtom);
 
   return (
-    <Dialog.Root defaultOpen={defaultOpen}>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content

@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import { Button, Dialog, Tooltip } from '@qilin/component';
 import { PlusIcon } from '@radix-ui/react-icons';
-// import { useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import type { HtmlHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
 import { useContractWrite } from 'wagmi';
@@ -43,6 +43,7 @@ import {
   SytledSeatItem,
   UserName,
 } from '@/styles/nft';
+import { usePoolInfo } from '@/hooks/usePoolInfo';
 
 type SeatItemProps = {
   userName: string;
@@ -76,21 +77,10 @@ SeatItem.displayName = 'SeatItem';
 const Detail = () => {
   // const { address, isConnecting, isDisconnected } = useAccount();
 
-  // const router = useRouter();
-  // const id = router.query.id;
-  // const { id } = params;
+  const router = useRouter();
+  const id = +(router.query.id as string);
 
-  useTokenInfo({ 
-    address: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
-    approveAddress: CONTRACTS.RouterAddress
-   });
-
-  const { write: writeOpen } = useContractWrite({
-    address: CONTRACTS.RouterAddress,
-    abi: RouterABI.abi,
-    functionName: 'open',
-    mode: 'recklesslyUnprepared',
-  });
+  usePoolInfo(id);
 
   return (
     <NFTMain>
@@ -108,7 +98,7 @@ const Detail = () => {
       <RoomCard>
         {/* 座位 */}
         <RoomSeats>
-          <WhilteListDialog type="add">
+          <WhilteListDialog type="add" roomId={id}>
             <>
               <RoomHeader>
                 <div>

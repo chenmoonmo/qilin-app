@@ -1,4 +1,4 @@
 import {atom} from 'jotai'
 
 
-export const NFTIDAtom = atom<string | null>(null)
+export const NFTIDAtom = atom<number | null>(null)

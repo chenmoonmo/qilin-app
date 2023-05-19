@@ -8,8 +8,9 @@ import {
 
 import Dealer from '@/constant/abis/Dealer.json';
 import Factory from '@/constant/abis/Factory.json';
-import { atom, useAtom } from 'jotai';
+import { atom, useAtom, useAtomValue } from 'jotai';
 import { isAddress } from 'ethers/lib/utils.js';
+import { useMemo } from 'react';
 
 const DealerContract = {
   address: CONTRACTS.DealerAddress,
@@ -36,7 +37,7 @@ export const useCreateRoom = () => {
   const { address } = useAccount();
   const [form, setForm] = useAtom(createPoolFormAtom);
   const [players, setPlayers] = useAtom(playersAtom);
-  const canSendCreate = useAtom(canSendCreateAtom);
+  const canSendCreate = useAtomValue(canSendCreateAtom);
 
   const { data: dealerToId, isLoading: isDealerToIdLoading } = useContractRead({
     ...DealerContract,
@@ -59,7 +60,22 @@ export const useCreateRoom = () => {
     enabled: !!(canCreateRoom && form.payToken && form.oracle),
   });
 
-  const { write: createRoom } = useContractWrite(config);
+  const { writeAsync: createRoomWrite } = useContractWrite(config);
+
+  const { config: setPlayersConfig } = usePrepareContractWrite({
+    ...DealerContract,
+    functionName: 'setPlayers',
+    args: [dealerToId, 6, players.filter(address => isAddress(address))],
+  });
+
+  const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
+
+  const createRoom = useMemo(() => {
+    return async () => {
+      await createRoomWrite?.();
+      await setPlayersWrite?.();
+    };
+  }, [createRoomWrite, setPlayersWrite]);
 
   return {
     canCreateRoom,

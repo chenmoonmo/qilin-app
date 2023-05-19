@@ -1,4 +1,4 @@
 export * from './useTokenInfo'
-export * from './useRoom'
+export * from './useGetPlayerNFTIds'
 export * from './useSearchToken'
 export * from './useCreateRoom'
