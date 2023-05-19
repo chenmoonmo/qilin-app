@@ -3,11 +3,11 @@ const graphqlApi =
 
 const developmentENV = {
   Graphql_Api: '/graphqlApi',
-  Dealer_Contract_Address: '0xf3B925FdB49aCad6B962D6a89ff10AB741f2Ac7c',
-  Player_Contract_Address: '0x4137D11A40E68D15A93aEDAA856B1850d2224876',
+  Dealer_Contract_Address: '0x2e2457dC8A4Ba1afBFE798D78769834C0999705A',
+  Player_Contract_Address: '0x38B789FB68a1Cba6479f9D70162F0a3cB5188DBA',
   Price_Contract_Address: '0x79a02a903B929bC3413bFFc2Fbb7836F9ff8B180',
-  Factory_Contract_Address: '0x930936CF4069261D747fdb330a3A9b08086CE6Aa',
-  Router_Contract_Address: '0xc3F11aD86cCe19AaC266B6432c13Fb7058F45A05',
+  Factory_Contract_Address: '0xd66D65C46027fD0eA3a830f0Dd890a3E9086eb51',
+  Router_Contract_Address: '0x427Ad9c62c05449474cD3Ba985b280ED22cda059',
 };
 
 const productionENV = {};

@@ -103,6 +103,9 @@ importers:
       '@types/react-dom':
         specifier: 18.2.3
         version: 18.2.3
+      date-fns:
+        specifier: ^2.30.0
+        version: 2.30.0
       eslint:
         specifier: 8.39.0
         version: 8.39.0

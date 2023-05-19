@@ -16,17 +16,18 @@ import { useContractWrite, usePrepareContractWrite } from 'wagmi';
 import { CONTRACTS } from '@/constant';
 
 const Index: NextPageWithLayout = () => {
+  
   const { config } = usePrepareContractWrite({
     address: CONTRACTS.DealerAddress,
     abi: Dealer.abi,
     functionName: 'mint',
-    // TODO: 请求默克尔根
+    // TODO: 请求默克尔根 和 获得最新的可mint id
     args: [1, []],
   });
 
   const { write, status } = useContractWrite(config);
-  
-  console.log(status)
+
+  console.log(status);
 
   return (
     <Main>

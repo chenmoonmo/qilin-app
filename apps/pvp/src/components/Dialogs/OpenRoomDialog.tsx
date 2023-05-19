@@ -4,6 +4,7 @@ import { Button, DatePicker, Dialog } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
 import { useState } from 'react';
+import { addHours, getHours, getMinutes, isBefore } from 'date-fns';
 
 const EndTimeContainer = styled.div`
   display: flex;
@@ -35,8 +36,8 @@ export const openRoomOpenAtom = atom(false);
 export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({ children }) => {
   const [open, setOpen] = useAtom(openRoomOpenAtom);
 
-  // TODO: 默认时间 当前时间 + 3小时
-  const [endTime, setEndTime] = useState(new Date());
+  // 默认时间 当前时间 + 3小时
+  const [endTime, setEndTime] = useState(addHours(new Date(), 3));
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -45,7 +46,6 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({ children }) => {
         <Dialog.Content>
           <Dialog.Title>Open</Dialog.Title>
           <Dialog.CloseIcon />
-          {/* TODO: shouldDisableDate */}
           {/* date-fns */}
           <EndTimeContainer>
             <span>End Time</span>
@@ -58,6 +58,15 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({ children }) => {
                 border-radius: 6px;
               `}
               value={endTime}
+              shouldDisableDate={date => {
+                return isBefore(date, new Date());
+              }}
+              shouldDisableHour={(hour, date) => {
+                return hour < getHours(new Date());
+              }}
+              shouldDisableMinute={(minute, date) => {
+                return minute < getMinutes(new Date());
+              }}
               onChange={setEndTime}
             />
           </EndTimeContainer>

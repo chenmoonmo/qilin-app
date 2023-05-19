@@ -22,7 +22,7 @@ const createPoolFormAtom = atom({
   oracle: undefined,
 });
 
-const playersAtom = atom(new Array(8).fill(''));
+const playersAtom = atom(new Array(5).fill(''));
 
 const canSendCreateAtom = atom(get => {
   const form = get(createPoolFormAtom);
@@ -39,6 +39,7 @@ export const useCreateRoom = () => {
   const [players, setPlayers] = useAtom(playersAtom);
   const canSendCreate = useAtomValue(canSendCreateAtom);
 
+  // 玩家拥有的 dealer ID
   const { data: dealerToId, isLoading: isDealerToIdLoading } = useContractRead({
     ...DealerContract,
     functionName: 'dealerToId',
@@ -60,20 +61,25 @@ export const useCreateRoom = () => {
     enabled: !!(canCreateRoom && form.payToken && form.oracle),
   });
 
-  const { writeAsync: createRoomWrite } = useContractWrite(config);
+  const { write: createRoomWrite } = useContractWrite(config);
 
   const { config: setPlayersConfig } = usePrepareContractWrite({
     ...DealerContract,
     functionName: 'setPlayers',
-    args: [dealerToId, 6, players.filter(address => isAddress(address))],
+    args: [
+      dealerToId,
+      6,
+      [address, ...players.filter(address => isAddress(address))],
+    ],
   });
 
-  const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
+  const { write: setPlayersWrite } = useContractWrite(setPlayersConfig);
 
+  // TODO: setPlayers 默认填充用户address
   const createRoom = useMemo(() => {
     return async () => {
-      await createRoomWrite?.();
-      await setPlayersWrite?.();
+      createRoomWrite?.();
+      setPlayersWrite?.();
     };
   }, [createRoomWrite, setPlayersWrite]);
 

@@ -3,16 +3,16 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Select, SelectToken } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
-import { useState, type FC, type ReactNode, useMemo, useCallback } from 'react';
-import { useChainId, useNetwork, usePrepareContractWrite } from 'wagmi';
-import Factory from '@/constant/abis/Factory.json';
+import { useState, type FC, type ReactNode, useCallback } from 'react';
+import { useChainId } from 'wagmi';
 import { PAIRS, PAY_TOKENS } from '@/constant';
 import { useCreateRoom } from '@/hooks';
 import { isAddress } from 'ethers/lib/utils.js';
 
 type CreateRoomDialogType = {
-  defaultOpen?: boolean;
-  children: ReactNode;
+  children?: ReactNode;
+  onClose?: () => void;
+  onSucceess?: () => void;
 };
 
 const FormContainer = styled.div`
@@ -69,10 +69,7 @@ const WhielistItem = styled.div`
 
 export const creatRoomOpenAtom = atom(false);
 
-export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
-  defaultOpen,
-  children,
-}) => {
+export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
   const chainId = useChainId();
   const {
     canCreateRoom,
@@ -86,7 +83,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
 
   const [searchInfo, setSearchInfo] = useState<string>('');
   const [marginSearchInfo, setMarginSearchInfo] = useState<string>('');
-  
+
   const [open, setOpen] = useAtom(creatRoomOpenAtom);
 
   const pairFilter = useCallback(
@@ -112,7 +109,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
   );
 
   return (
-    <Dialog.Root defaultOpen={defaultOpen} open={open} onOpenChange={setOpen}>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content>

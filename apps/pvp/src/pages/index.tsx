@@ -67,6 +67,11 @@ const Home: NextPageWithLayout = () => {
   // 玩家拥有的 player nft（可以进入的房间）
   const playerNFTIds = useGetPlayerNFTIds();
 
+  console.log({
+    canCreateRoom,
+    playerNFTIds,
+  });
+
   const setNFTDialogOpen = useSetAtom(NFTMainDialogOpenAtom);
 
   const setNFTID = useSetAtom(NFTIDAtom);
