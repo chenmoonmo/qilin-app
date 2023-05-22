@@ -1,8 +1,9 @@
 const graphqlApi =
-  'https://api.thegraph.com/subgraphs/name/tiannalu1229/pvp-new--test02';
+  'https://thegraph.com/explorer/subgraph/tiannalu1229/pvp-new-test03';
 
 const developmentENV = {
-  Graphql_Api: '/graphqlApi',
+  // Graphql_Api: '/graphqlApi',
+  Graphql_Api: 'https://api.thegraph.com/subgraphs/name/tiannalu1229/pvp-new-test03',
   Dealer_Contract_Address: '0xf395766bc6B174cBd537fCabD8e27360Db8fFc29',
   Player_Contract_Address: '0x10265273bfBd3943FbfB075509EF44F3B40E835E',
   Price_Contract_Address: '0x79a02a903B929bC3413bFFc2Fbb7836F9ff8B180',
@@ -20,14 +21,14 @@ const env = isDevelopment ? developmentENV : productionENV;
 const nextConfig = {
   reactStrictMode: false,
   transpilePackages: ['@qilin/wagmi-provider'],
-  async rewrites() {
-    return [
-      {
-        source: `${env.Graphql_Api}/:path*`,
-        destination: `${graphqlApi}/:path*`,
-      },
-    ];
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: `${env.Graphql_Api}/:path*`,
+  //       destination: `${graphqlApi}/:path*`,
+  //     },
+  //   ];
+  // },
   env,
 };
 

@@ -25,17 +25,18 @@ export const PairInfo = styled.div`
     font-size: 16px;
     line-height: 12px;
     color: #ffffff;
-    &::after {
-      content: 'own';
-      display: block;
-      padding: 1px 2px;
-      margin-left: 8px;
-      border-radius: 2px;
-      font-weight: 400;
-      font-size: 8px;
-      line-height: 10px;
-      background: #2e71ff;
-    }
+  }
+
+  &[data-owner='true'] > div:nth-of-type(1)::after {
+    content: 'own';
+    display: block;
+    padding: 1px 2px;
+    margin-left: 8px;
+    border-radius: 2px;
+    font-weight: 400;
+    font-size: 8px;
+    line-height: 10px;
+    background: #2e71ff;
   }
 `;
 

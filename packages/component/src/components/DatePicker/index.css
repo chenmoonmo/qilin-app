@@ -14,3 +14,7 @@
   z-index: 10000;
   pointer-events: all !important;
 }
+
+.rs-picker-toggle-value::after {
+  content: ' UTC';
+}

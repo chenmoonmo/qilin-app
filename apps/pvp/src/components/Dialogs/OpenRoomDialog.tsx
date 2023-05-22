@@ -5,6 +5,10 @@ import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
 import { useState } from 'react';
 import { addHours, getHours, getMinutes, isBefore } from 'date-fns';
+import * as dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 const EndTimeContainer = styled.div`
   display: flex;
@@ -37,7 +41,7 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({ children }) => {
   const [open, setOpen] = useAtom(openRoomOpenAtom);
 
   // 默认时间 当前时间 + 3小时
-  const [endTime, setEndTime] = useState(addHours(new Date(), 3));
+  const [endTime, setEndTime] = useState(addHours(dayjs.utc().toDate(), 3));
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -58,6 +62,7 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({ children }) => {
                 border-radius: 6px;
               `}
               value={endTime}
+              format="yyyy-MM-dd HH:mm"
               shouldDisableDate={date => {
                 return isBefore(date, new Date());
               }}

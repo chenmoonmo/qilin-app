@@ -89,18 +89,31 @@ const OpponentContainer = styled.div`
   margin-top: 6px;
 `;
 
-type OpponentInfoPropsType = {} & AllHTMLAttributes<HTMLDivElement>;
+type OpponentInfoPropsType = {
+  marginTokenSymbol?: string;
+  stakePrice?: number;
+  longPrecent?: number;
+  shortPrecent?: number;
+} & AllHTMLAttributes<HTMLDivElement>;
 
-export const OpponentInfo: FC<OpponentInfoPropsType> = props => {
+export const OpponentInfo: FC<OpponentInfoPropsType> = ({
+  longPrecent,
+  shortPrecent,
+  marginTokenSymbol,
+  stakePrice,
+  ...props
+}) => {
   return (
     <div {...props}>
-      <StakePrice>Stake Price:48.000000 USDC</StakePrice>
+      <StakePrice>
+        Stake Price: {stakePrice} {marginTokenSymbol}
+      </StakePrice>
       <OpponentContainer>
         <OpponentItem>
           <div>690 LP</div>
           <div>690 USDC</div>
           <PostionRate>
-            <div>69%</div>
+            <div>{longPrecent}%</div>
             <div>Long</div>
           </PostionRate>
         </OpponentItem>
@@ -108,7 +121,7 @@ export const OpponentInfo: FC<OpponentInfoPropsType> = props => {
           <div>690 LP</div>
           <div>690 USDC</div>
           <PostionRate>
-            <div>31%</div>
+            <div>{longPrecent}%</div>
             <div>Short</div>
           </PostionRate>
         </OpponentItem>

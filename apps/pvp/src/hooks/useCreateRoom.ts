@@ -35,26 +35,35 @@ const canSendCreateAtom = atom(get => {
   );
 });
 
+export const useDealerId = () => {
+  const { address } = useAccount();
+  // 玩家拥有的 dealer ID
+  const { data, isLoading } = useContractRead({
+    ...DealerContract,
+    functionName: 'dealerToId',
+    args: [address],
+  });
+  return {
+    dealerId: data as BigNumber,
+    isLoading,
+  };
+};
+
 export const useCreateRoom = () => {
   const { address } = useAccount();
   const [form, setForm] = useAtom(createPoolFormAtom);
   const [players, setPlayers] = useAtom(playersAtom);
   const canSendCreate = useAtomValue(canSendCreateAtom);
 
-  // 玩家拥有的 dealer ID
-  const { data: dealerToId, isLoading: isDealerToIdLoading } = useContractRead({
-    ...DealerContract,
-    functionName: 'dealerToId',
-    args: [address],
-  });
+  const { dealerId, isLoading: isDealerToIdLoading } = useDealerId();
 
   //  是否可以创建房间
   const { data: canCreateRoom } = useContractRead({
     ...DealerContract,
     functionName: 'getDealerStatus',
-    args: [dealerToId],
+    args: [dealerId],
     enabled:
-      !!dealerToId && !isDealerToIdLoading && (dealerToId as BigNumber).gt(0),
+      !!dealerId && !isDealerToIdLoading && (dealerId as BigNumber).gt(0),
   });
 
   // 创建房间
@@ -62,7 +71,7 @@ export const useCreateRoom = () => {
     address: CONTRACTS.FactoryAddress,
     abi: Factory.abi,
     functionName: 'createPool',
-    args: [dealerToId, form.payToken, form.targetToken, form.oracle, false, 1],
+    args: [dealerId, form.payToken, form.targetToken, form.oracle, false, 1],
     enabled: !!(
       canCreateRoom &&
       form.payToken &&
@@ -78,7 +87,7 @@ export const useCreateRoom = () => {
     ...DealerContract,
     functionName: 'setPlayers',
     args: [
-      dealerToId,
+      dealerId,
       6,
       [address, ...players.filter(address => isAddress(address))],
     ],

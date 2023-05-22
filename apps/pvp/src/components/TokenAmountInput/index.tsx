@@ -3,10 +3,13 @@ import type { FC, HtmlHTMLAttributes } from 'react';
 
 type TokenAmountInputContainerPropsType = {
   maxShow?: boolean;
-} & HtmlHTMLAttributes<HTMLDivElement>;
+} & Omit<HtmlHTMLAttributes<HTMLDivElement>, 'onChange'>;
 
 type TokenAmountInputPropsType = TokenAmountInputContainerPropsType & {
-  symbol: string;
+  value?: string;
+  disabled?: boolean;
+  symbol?: string;
+  onChange?: (value: string) => void;
   onMaxClick?: () => void;
 };
 
@@ -64,13 +67,22 @@ const TokenAmountInputRoot = styled.div<TokenAmountInputContainerPropsType>`
 `;
 
 export const TokenAmountInput: FC<TokenAmountInputPropsType> = ({
+  value,
+  onChange,
+  disabled,
   symbol,
   onMaxClick,
   ...props
 }) => {
   return (
     <TokenAmountInputRoot {...props}>
-      <input id={symbol} type="text" />
+      <input
+        id={symbol}
+        type="text"
+        disabled={disabled}
+        value={value}
+        onChange={e => onChange?.(e.target.value)}
+      />
       <MaxButton onClick={onMaxClick}>MAX</MaxButton>
       <label htmlFor={symbol}>{symbol}</label>
     </TokenAmountInputRoot>

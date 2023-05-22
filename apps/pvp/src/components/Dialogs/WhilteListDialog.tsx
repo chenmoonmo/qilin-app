@@ -1,3 +1,4 @@
+import { useAddPlayers } from '@/hooks';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
@@ -80,6 +81,11 @@ export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
     );
   }, [type]);
 
+  const { addPlayers, seatsAddressValid, playerSeats, setSeats } =
+    useAddPlayers({
+      id: roomId,
+    });
+
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
@@ -93,30 +99,24 @@ export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
             <span>https：//ahjkasdjk...12312412</span>
           </LinkToCopy>
           <FromLabel>Whitelist</FromLabel>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
-          <WhilteListInput>
-            <input></input>
-          </WhilteListInput>
+          {playerSeats.map((item, index) => {
+            return (
+              <WhilteListInput key={index}>
+                <input
+                  value={item}
+                  onChange={e => {
+                    setSeats(pre => {
+                      return [
+                        ...pre.slice(0, index),
+                        e.target.value,
+                        ...pre.slice(index + 1),
+                      ];
+                    });
+                  }}
+                />
+              </WhilteListInput>
+            );
+          })}
           <Button
             css={css`
               margin-top: 20px;
@@ -124,6 +124,8 @@ export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
               width: 100%;
               height: 40px;
             `}
+            disabled={!seatsAddressValid}
+            onClick={addPlayers}
           >
             Confirm
           </Button>

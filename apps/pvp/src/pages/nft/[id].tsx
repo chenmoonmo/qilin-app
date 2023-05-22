@@ -4,7 +4,7 @@ import { PlusIcon } from '@radix-ui/react-icons';
 import { useRouter } from 'next/router';
 import type { HtmlHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
-import { useContractWrite } from 'wagmi';
+import { Address, useAccount, useBalance } from 'wagmi';
 
 import {
   ClosePostionDialog,
@@ -17,9 +17,6 @@ import {
   WhilteListDialog,
 } from '@/components';
 import { LeverageRadio } from '@/components';
-import { CONTRACTS } from '@/constant';
-import RouterABI from '@/constant/abis/Router.json';
-import { useTokenInfo } from '@/hooks';
 import {
   EndTime,
   EstimateResults,
@@ -44,6 +41,7 @@ import {
   UserName,
 } from '@/styles/nft';
 import { usePoolInfo } from '@/hooks/usePoolInfo';
+import { useDealerId, useAddPlayers, useSubmitPositon } from '@/hooks';
 
 type SeatItemProps = {
   userName: string;
@@ -75,24 +73,88 @@ const SeatItem = forwardRef<SeatItemProps, any>(
 SeatItem.displayName = 'SeatItem';
 
 const Detail = () => {
-  // const { address, isConnecting, isDisconnected } = useAccount();
-
   const router = useRouter();
+  // player nft id
   const id = +(router.query.id as string);
 
-  usePoolInfo(id);
+  const { address } = useAccount();
+
+  const { enableAdd } = useAddPlayers({ id });
+
+  //用户的 dearlerId
+  const { dealerId } = useDealerId();
+
+  const { createDealerId, poolAddress, poolInfo } = usePoolInfo(id);
+
+  // 是否是房主
+  const isOwner = createDealerId?.eq(dealerId);
+
+  // 房主是否开盘
+  const isOpend = +(poolInfo?.deadline ?? 0) > 0;
+
+  const canBeOpen = isOwner && !isOpend;
+
+  // stakePrice 未开盘前为 1
+  const stakePrice = isOpend ? +(poolInfo?.token_price ?? 0) : 1;
+
+  // // 获取 stake price
+  // const { data } = useContractRead({
+  //   address: poolAddress as Address,
+  //   abi: Pool.abi,
+  //   functionName: 'getPrice',
+  //   enabled: !!poolAddress,
+  // });
+  // console.log('getPrice', data);
+
+  const { data: token0Info } = useBalance({
+    address,
+    token: poolInfo?.token0 as Address,
+    enabled: !!poolInfo?.token0,
+  });
+
+  const { data: token1Info } = useBalance({
+    address,
+    token: poolInfo?.token1 as Address,
+    enabled: !!poolInfo?.token1,
+  });
+
+  const { data: marginTokenInfo } = useBalance({
+    address,
+    token: poolInfo?.pay_token as Address,
+    enabled: !!poolInfo?.pay_token,
+  });
+
+  const { stakeAmount, enableSubmit, form, setForm } = useSubmitPositon({
+    stakePrice,
+    marginTokenInfo,
+  });
+
+  const handleMaxMargin = () => {
+    setForm({
+      ...form,
+      marginAmount: marginTokenInfo?.formatted ?? '0',
+    });
+  };
+
+  console.log({
+    enableSubmit,
+    poolInfo,
+    token0Info,
+    token1Info,
+  });
 
   return (
     <NFTMain>
       {/* mini nft card */}
+      {/* TODO: 小卡片状态显示 */}
       <PairMiniCard>
-        <PairInfo>
-          <div>BTC / USDC</div>
+        <PairInfo data-owner={isOwner}>
+          <div>{poolInfo?.trade_pair}</div>
           <div>Chainlink</div>
         </PairInfo>
         <Profit data-type="long">long</Profit>
         <MainCard>+ 20.4%</MainCard>
-        <RoomID>Room ID：12345</RoomID>
+        <RoomID>Room {poolInfo?.id}</RoomID>
         <EndTime>2023-05-02 18:21:00 UTC</EndTime>
       </PairMiniCard>
       <RoomCard>
@@ -102,11 +164,13 @@ const Detail = () => {
             <>
               <RoomHeader>
                 <div>
-                  BTC / USDC<span>123.46 USDC</span>
+                  {poolInfo?.trade_pair}
+                  <span>123.46 USDC</span>
                   <EndTime>2023-05-02 18:21:00 UTC</EndTime>
                 </div>
                 <Dialog.Trigger asChild>
                   <Button
+                    disabled={!enableAdd}
                     css={css`
                       font-weight: 400;
                       align-self: flex-start;
@@ -118,7 +182,7 @@ const Detail = () => {
               </RoomHeader>
               <RoomSeatsMap>
                 <div>Total margin:1000 USDC</div>
-                <div>Room ID :61223</div>
+                <div>Room ID :{poolInfo?.id}</div>
                 <Dialog.Trigger asChild>
                   <SeatItem
                     data-id="1"
@@ -130,7 +194,6 @@ const Detail = () => {
                 <Dialog.Trigger asChild>
                   <SeatItem data-id="2" />
                 </Dialog.Trigger>
-
                 <SeatItem data-id="3" />
                 <SeatItem data-id="4" />
                 <SeatItem data-id="5" />
@@ -155,6 +218,7 @@ const Detail = () => {
                   height: 40px;
                   justify-content: center;
                 `}
+                disabled={!canBeOpen}
               >
                 Opening
               </Button>
@@ -163,7 +227,11 @@ const Detail = () => {
         </RoomSeats>
         {/* 开仓表单 */}
         <FormContainer>
-          <OpponentInfo />
+          {/* 图标 */}
+          <OpponentInfo
+            stakePrice={stakePrice}
+            marginTokenSymbol={marginTokenInfo?.symbol}
+          />
           <FormLabel
             css={css`
               margin-top: 10px;
@@ -171,47 +239,73 @@ const Detail = () => {
           >
             Leverage
           </FormLabel>
-          <LeverageRadio />
+          <LeverageRadio
+            value={form.leverage}
+            onChange={leverage =>
+              setForm(preForm => {
+                return {
+                  ...preForm,
+                  leverage,
+                };
+              })
+            }
+          />
           <FormLabel
             css={css`
               margin-top: 23px;
             `}
           >
             Balance
-            <span>0 USDC</span>
+            <span>
+              {marginTokenInfo?.formatted} {marginTokenInfo?.symbol}
+            </span>
           </FormLabel>
-          <TokenAmountInput maxShow symbol="ETH" />
+          <TokenAmountInput
+            maxShow
+            value={form.marginAmount}
+            symbol={token0Info?.symbol}
+            onMaxClick={handleMaxMargin}
+            onChange={(marginAmount: string) => {
+              setForm(preForm => {
+                return {
+                  ...preForm,
+                  marginAmount,
+                };
+              });
+            }}
+          />
           <TokenAmountInput
             css={css`
               margin-top: 10px;
             `}
-            symbol="USDC"
+            value={stakeAmount}
+            disabled
+            symbol="Stake"
           />
           <EstimateResults>
             <div>
               <Tooltip text="1111111" icon={<FQASvg />}>
                 <span>LP price</span>
               </Tooltip>
-              <span>- USDC</span>
+              <span>- {marginTokenInfo?.symbol}</span>
             </div>
             <div>
               <Tooltip text="1111111" icon={<FQASvg />}>
                 <span>Value</span>
               </Tooltip>
-              <span>- USDC</span>
+              <span>- {marginTokenInfo?.symbol}</span>
             </div>
           </EstimateResults>
           <OpenPositionDialog>
             <SubmitContainer>
-              <Dialog.Trigger asChild>
+              <Dialog.Trigger asChild disabled={!enableSubmit}>
                 <SubmitButton backgroundColor="#44C27F">Long</SubmitButton>
               </Dialog.Trigger>
-              <Dialog.Trigger asChild>
+              <Dialog.Trigger asChild disabled={!enableSubmit}>
                 <SubmitButton backgroundColor="#E15C48">Short</SubmitButton>
               </Dialog.Trigger>
             </SubmitContainer>
           </OpenPositionDialog>
-
           <PositionNote>
             After confirmation, host opens game with same opening price.
             <br />

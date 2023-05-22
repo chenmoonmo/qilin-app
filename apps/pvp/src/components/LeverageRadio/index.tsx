@@ -3,6 +3,7 @@ import * as RadioGroup from '@radix-ui/react-radio-group';
 import type { FC } from 'react';
 
 type LeverageRadioType = {
+  value?: string;
   leverages?: string[];
   onChange?: (value: string) => void;
 };
@@ -33,11 +34,12 @@ const Item = styled(RadioGroup.Item)`
 `;
 
 export const LeverageRadio: FC<LeverageRadioType> = ({
+  value,
   leverages = ['2', '5', '10'],
   onChange,
 }) => {
   return (
-    <Root onValueChange={onChange} defaultValue="2">
+    <Root value={value} onValueChange={onChange} defaultValue={leverages[0]}>
       {leverages.map(value => (
         <Item key={value} value={value}>
           {value}x
