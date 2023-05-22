@@ -1,13 +1,14 @@
-import { CONTRACTS } from '@/constant';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Select, SelectToken } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
-import { useState, type FC, type ReactNode, useCallback } from 'react';
-import { useChainId } from 'wagmi';
+import { useState, type FC, type ReactNode, useCallback, useMemo } from 'react';
+import { useChainId, useToken } from 'wagmi';
 import { PAIRS, PAY_TOKENS } from '@/constant';
 import { useCreateRoom } from '@/hooks';
 import { isAddress } from 'ethers/lib/utils.js';
+
+import uniqBy from 'lodash/uniqBy';
 
 type CreateRoomDialogType = {
   children?: ReactNode;
@@ -69,6 +70,11 @@ const WhielistItem = styled.div`
 
 export const creatRoomOpenAtom = atom(false);
 
+export const lastMarginSelectionAtom = atom<{
+  symbol: string;
+  address: string;
+} | null>(null);
+
 export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
   const chainId = useChainId();
   const {
@@ -83,6 +89,10 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
 
   const [searchInfo, setSearchInfo] = useState<string>('');
   const [marginSearchInfo, setMarginSearchInfo] = useState<string>('');
+
+  const [lastMarginSelection, setLastMarginSelection] = useAtom(
+    lastMarginSelectionAtom
+  );
 
   const [open, setOpen] = useAtom(creatRoomOpenAtom);
 
@@ -107,6 +117,25 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
     },
     [marginSearchInfo]
   );
+
+  const { data, isSuccess } = useToken({
+    address: marginSearchInfo as `0x${string}`,
+    enabled: isAddress(marginSearchInfo),
+  });
+
+
+  const payTokens = useMemo(() => {
+    return uniqBy(
+      PAY_TOKENS?.[chainId as keyof typeof PAY_TOKENS]
+        .concat(
+          data && isSuccess
+            ? [{ symbol: data.symbol, address: marginSearchInfo }]
+            : []
+        )
+        .concat(lastMarginSelection ? [lastMarginSelection] : []),
+      'address'
+    );
+  }, [data]);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -143,6 +172,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
                   setForm(preForm => ({
                     ...preForm,
                     oracle: selection.oracleAddress,
+                    targetToken: selection.tokenAddress
                   }))
                 }
                 search={searchInfo}
@@ -159,15 +189,16 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
                 `}
                 valueKey="address"
                 textKey="symbol"
-                selections={PAY_TOKENS?.[chainId as keyof typeof PAY_TOKENS]}
+                selections={payTokens}
                 filter={marginFilter}
                 value={form.payToken}
-                onChange={selection =>
+                onChange={selection => {
+                  setLastMarginSelection(selection);
                   setForm(preForm => ({
                     ...preForm,
                     payToken: selection.address,
-                  }))
-                }
+                  }));
+                }}
                 search={marginSearchInfo}
                 onSearchChange={setMarginSearchInfo}
               />

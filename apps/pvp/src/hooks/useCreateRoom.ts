@@ -11,6 +11,7 @@ import Factory from '@/constant/abis/Factory.json';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { isAddress } from 'ethers/lib/utils.js';
 import { useMemo } from 'react';
+import { BigNumber } from 'ethers';
 
 const DealerContract = {
   address: CONTRACTS.DealerAddress,
@@ -20,6 +21,7 @@ const DealerContract = {
 const createPoolFormAtom = atom({
   payToken: undefined,
   oracle: undefined,
+  targetToken: undefined,
 });
 
 const playersAtom = atom(new Array(5).fill(''));
@@ -28,7 +30,7 @@ const canSendCreateAtom = atom(get => {
   const form = get(createPoolFormAtom);
   const players = get(playersAtom);
   return (
-    !!(form.oracle && form.payToken) &&
+    !!(form.oracle && form.payToken && form.targetToken) &&
     players.every(address => address === '' || isAddress(address))
   );
 });
@@ -46,22 +48,31 @@ export const useCreateRoom = () => {
     args: [address],
   });
 
+  //  是否可以创建房间
   const { data: canCreateRoom } = useContractRead({
     ...DealerContract,
     functionName: 'getDealerStatus',
     args: [dealerToId],
-    enabled: !!dealerToId && !isDealerToIdLoading,
+    enabled:
+      !!dealerToId && !isDealerToIdLoading && (dealerToId as BigNumber).gt(0),
   });
 
+  // 创建房间
   const { config } = usePrepareContractWrite({
     address: CONTRACTS.FactoryAddress,
     abi: Factory.abi,
     functionName: 'createPool',
-    args: [dealerToId, form.payToken, form.oracle, false, 1],
-    enabled: !!(canCreateRoom && form.payToken && form.oracle),
+    args: [dealerToId, form.payToken, form.targetToken, form.oracle, false, 1],
+    enabled: !!(
+      canCreateRoom &&
+      form.payToken &&
+      form.oracle &&
+      form.targetToken
+    ),
   });
 
-  const { write: createRoomWrite } = useContractWrite(config);
+  // 设置玩家 mint nft2
+  const { writeAsync: createRoomWrite } = useContractWrite(config);
 
   const { config: setPlayersConfig } = usePrepareContractWrite({
     ...DealerContract,
@@ -71,15 +82,16 @@ export const useCreateRoom = () => {
       6,
       [address, ...players.filter(address => isAddress(address))],
     ],
+    enabled: !!canCreateRoom,
   });
 
-  const { write: setPlayersWrite } = useContractWrite(setPlayersConfig);
+  const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
 
   // TODO: setPlayers 默认填充用户address
   const createRoom = useMemo(() => {
     return async () => {
-      createRoomWrite?.();
-      setPlayersWrite?.();
+      await createRoomWrite?.();
+      await setPlayersWrite?.();
     };
   }, [createRoomWrite, setPlayersWrite]);
 

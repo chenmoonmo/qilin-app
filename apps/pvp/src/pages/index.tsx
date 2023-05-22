@@ -17,6 +17,7 @@ import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
 import { useCreateRoom, useGetPlayerNFTIds } from '@/hooks';
+import { useProvider } from 'wagmi';
 
 const StyledMain = styled.main`
   max-width: 1440px;
@@ -61,6 +62,12 @@ const NFTContainer = styled.ul`
 const Home: NextPageWithLayout = () => {
   const router = useRouter();
   const id = router.query.id as string;
+
+  const provider = useProvider();
+  
+  provider.getBlockNumber().then(res=>{
+    provider.getBlock(res).then(res=>console.log(res))
+  })
 
   const { canCreateRoom } = useCreateRoom();
 

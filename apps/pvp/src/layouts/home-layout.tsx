@@ -61,7 +61,7 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
           `} />
           <MenuItem href="/" data-active={router.pathname === '/'}>Trade Betting</MenuItem>
           {/* TODO: 白名单显示 */}
-          <MenuItem href="/referrals" data-active={router.pathname === '/referrals'}>Referrals</MenuItem>
+          <MenuItem href="/mint" data-active={router.pathname === '/mint'}>Mint</MenuItem>
         </div>
         <div
           css={css`
