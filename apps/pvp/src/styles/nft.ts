@@ -63,7 +63,14 @@ export const MainCard = styled.div`
   font-weight: 500;
   font-size: 24px;
   line-height: 12px;
-  color: #44c27f;
+  /* color: #44c27f; */
+  color: #9699a3;
+  &[data-type='long'] {
+    color: #44c27f;
+  }
+  &[data-type='short'] {
+    color: #e15c48;
+  }
 `;
 
 export const RoomID = styled.div`
@@ -89,7 +96,7 @@ export const EndTime = styled.div`
 export const RoomCard = styled.div`
   display: grid;
   grid-template-columns: 840px 353px;
-  grid-template-rows: 552px atuo;
+  grid-template-rows: 552px auto;
   max-width: 1200px;
   margin: auto;
 `;
@@ -175,13 +182,16 @@ export const SytledSeatItem = styled.div`
   }
 
   &[data-position='short'] {
+    border-color: #e15c48;
+    ${Positioninfo} >div:nth-of-type(1) {
+      color: #e15c48;
+    }
+  }
+  &[data-position='long'] {
     border-color: #44c27f;
     ${Positioninfo} >div:nth-of-type(1) {
       color: #44c27f;
     }
-  }
-  &[data-position='long'] {
-    border-color: #e15c48;
   }
 `;
 

@@ -24,8 +24,14 @@ const seatsAddressValidAtom = atom(get => {
 });
 
 export const useAddPlayers = ({ id }: { id: number }) => {
+  // 玩家地址表单
+  const [playerSeats, setSeats] = useAtom(playerSeatsAtom);
+  // 输入是否为地址
+  const seatsAddressValid = useAtomValue(seatsAddressValidAtom);
+
   const { dealerId } = useDealerId();
 
+  // 已经添加的席位
   const { data, refetch } = useContractRead({
     address: CONTRACTS.PlayerAddress,
     abi: Player.abi,
@@ -34,10 +40,7 @@ export const useAddPlayers = ({ id }: { id: number }) => {
   });
 
   // 剩下可添加的位置
-  const restSeats = 6 - (data as BigNumber).toNumber();
-
-  const [playerSeats, setSeats] = useAtom(playerSeatsAtom);
-  const seatsAddressValid = useAtomValue(seatsAddressValidAtom);
+  const restSeats = data ? 6 - (data as BigNumber).toNumber() : 0;
 
   const { config, isError } = usePrepareContractWrite({
     address: CONTRACTS.DealerAddress,
@@ -45,12 +48,17 @@ export const useAddPlayers = ({ id }: { id: number }) => {
     functionName: 'addPlayers',
     args: [dealerId, playerSeats.filter(address => address !== '')],
     enabled: seatsAddressValid,
-    onSuccess: () => {
-      refetch();
-    },
   });
 
-  const { write: addPlayers } = useContractWrite(config);
+  const { writeAsync } = useContractWrite(config);
+
+  const addPlayers = async () => {
+    try {
+      const res = await writeAsync?.();
+      await res?.wait();
+      refetch();
+    } catch {}
+  };
 
   useEffect(() => {
     setSeats(new Array(restSeats).fill(''));

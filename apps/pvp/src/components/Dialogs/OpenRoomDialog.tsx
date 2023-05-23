@@ -4,9 +4,17 @@ import { Button, DatePicker, Dialog } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
 import { useState } from 'react';
-import { addHours, getHours, getMinutes, isBefore } from 'date-fns';
+import {
+  addHours,
+  getHours,
+  getMinutes,
+  isBefore,
+  millisecondsToSeconds,
+} from 'date-fns';
 import * as dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { Address } from 'wagmi';
+import { useOpenPosition } from '@/hooks';
 
 dayjs.extend(utc);
 
@@ -33,15 +41,24 @@ const Note = styled.div`
 
 type OpenRoomDIalogPropsType = {
   children: ReactNode;
+  poolAddress: Address;
 };
 
 export const openRoomOpenAtom = atom(false);
 
-export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({ children }) => {
+export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({
+  poolAddress,
+  children,
+}) => {
   const [open, setOpen] = useAtom(openRoomOpenAtom);
 
   // 默认时间 当前时间 + 3小时
-  const [endTime, setEndTime] = useState(addHours(dayjs.utc().toDate(), 3));
+  const [endTime, setEndTime] = useState(addHours(new Date(), 1));
+
+  const openPosition = useOpenPosition({
+    poolAddress,
+    endTime: millisecondsToSeconds(+endTime),
+  });
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -81,6 +98,7 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({ children }) => {
               height: 40px;
               margin-top: 94px;
             `}
+            onClick={openPosition}
           >
             Confirm
           </Button>

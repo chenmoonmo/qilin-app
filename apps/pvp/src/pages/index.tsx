@@ -63,12 +63,6 @@ const Home: NextPageWithLayout = () => {
   const router = useRouter();
   const id = router.query.id as string;
 
-  const provider = useProvider();
-  
-  provider.getBlockNumber().then(res=>{
-    provider.getBlock(res).then(res=>console.log(res))
-  })
-
   const { canCreateRoom } = useCreateRoom();
 
   // 玩家拥有的 player nft（可以进入的房间）

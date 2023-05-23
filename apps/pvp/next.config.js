@@ -4,11 +4,11 @@ const graphqlApi =
 const developmentENV = {
   // Graphql_Api: '/graphqlApi',
   Graphql_Api: 'https://api.thegraph.com/subgraphs/name/tiannalu1229/pvp-new-test03',
-  Dealer_Contract_Address: '0xf395766bc6B174cBd537fCabD8e27360Db8fFc29',
-  Player_Contract_Address: '0x10265273bfBd3943FbfB075509EF44F3B40E835E',
-  Price_Contract_Address: '0x79a02a903B929bC3413bFFc2Fbb7836F9ff8B180',
-  Factory_Contract_Address: '0x05E5FB107B36686dc010656c863FFEC2d702DA51',
-  Router_Contract_Address: '0x6409C310e65296e31ccd131D6fe64A48902b0fB5',
+  Dealer_Contract_Address: '0x489DFa4D861Aba7a9A71F4C139F5d40247f93fa0',
+  Player_Contract_Address: '0x00a9ccC4d302fbf6b42Cff168cd147eE5b6B7825',
+  Price_Contract_Address: '0x844fdf16BA0F002a55B0FB30cbcD42B71cE3a16d',
+  Factory_Contract_Address: '0x44691517841343B10eb04ca92089e210E8D7EDCA',
+  Router_Contract_Address: '0x9aA62BbAfCb38AE01f0e7c0fFe3BF2b89458f602',
 };
 
 const productionENV = {};

@@ -6,6 +6,7 @@ type TokenAmountInputContainerPropsType = {
 } & Omit<HtmlHTMLAttributes<HTMLDivElement>, 'onChange'>;
 
 type TokenAmountInputPropsType = TokenAmountInputContainerPropsType & {
+  placeholder?: string;
   value?: string;
   disabled?: boolean;
   symbol?: string;
@@ -67,6 +68,7 @@ const TokenAmountInputRoot = styled.div<TokenAmountInputContainerPropsType>`
 `;
 
 export const TokenAmountInput: FC<TokenAmountInputPropsType> = ({
+  placeholder,
   value,
   onChange,
   disabled,
@@ -81,6 +83,7 @@ export const TokenAmountInput: FC<TokenAmountInputPropsType> = ({
         type="text"
         disabled={disabled}
         value={value}
+        placeholder={placeholder}
         onChange={e => onChange?.(e.target.value)}
       />
       <MaxButton onClick={onMaxClick}>MAX</MaxButton>

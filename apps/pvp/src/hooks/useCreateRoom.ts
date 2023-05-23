@@ -99,7 +99,8 @@ export const useCreateRoom = () => {
   // TODO: setPlayers 默认填充用户address
   const createRoom = useMemo(() => {
     return async () => {
-      await createRoomWrite?.();
+      const res = await createRoomWrite?.();
+      await res?.wait();
       await setPlayersWrite?.();
     };
   }, [createRoomWrite, setPlayersWrite]);

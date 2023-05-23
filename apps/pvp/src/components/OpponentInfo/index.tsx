@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { AllHTMLAttributes, FC } from 'react';
+import { AllHTMLAttributes, FC, useMemo } from 'react';
 
 const StakePrice = styled.div`
   display: flex;
@@ -47,15 +47,16 @@ const PostionRate = styled.div`
 
 const OpponentItem = styled.div`
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   flex: 1;
-  padding: 5px 0 5px 50px;
+  padding: 5px 0;
   background-color: rgba(68, 194, 127, 0.4);
   border-radius: 100px;
 
   &:nth-of-type(2) {
     background: rgba(225, 92, 72, 0.4);
-    text-align: right;
-    padding: 5px 50px 5px 0;
     ${PostionRate} {
       left: unset;
       right: 0;
@@ -91,18 +92,31 @@ const OpponentContainer = styled.div`
 
 type OpponentInfoPropsType = {
   marginTokenSymbol?: string;
-  stakePrice?: number;
-  longPrecent?: number;
-  shortPrecent?: number;
+  stakePrice: number;
+  long?: number;
+  short?: number;
 } & AllHTMLAttributes<HTMLDivElement>;
 
 export const OpponentInfo: FC<OpponentInfoPropsType> = ({
-  longPrecent,
-  shortPrecent,
+  long = 0,
+  short = 0,
   marginTokenSymbol,
   stakePrice,
   ...props
 }) => {
+  const [longPrecent, shortPrecent] = useMemo(() => {
+    let longPrecent = (long / (long + short)) * 100;
+    let shortPrecent = (short / (long + short)) * 100;
+    // 排除NaN
+    if (isNaN(longPrecent)) {
+      longPrecent = 0;
+    }
+    if (isNaN(shortPrecent)) {
+      shortPrecent = 0;
+    }
+    return [longPrecent, shortPrecent];
+  }, [long, short]);
+
   return (
     <div {...props}>
       <StakePrice>
@@ -110,18 +124,18 @@ export const OpponentInfo: FC<OpponentInfoPropsType> = ({
       </StakePrice>
       <OpponentContainer>
         <OpponentItem>
-          <div>690 LP</div>
-          <div>690 USDC</div>
+          <div>{long} LP</div>
+          <div>{long * stakePrice} USDC</div>
           <PostionRate>
-            <div>{longPrecent}%</div>
+            <div>{longPrecent.toFixed(2)}%</div>
             <div>Long</div>
           </PostionRate>
         </OpponentItem>
         <OpponentItem>
-          <div>690 LP</div>
-          <div>690 USDC</div>
+          <div>{short} LP</div>
+          <div>{short * stakePrice} USDC</div>
           <PostionRate>
-            <div>{longPrecent}%</div>
+            <div>{shortPrecent.toFixed(2)}%</div>
             <div>Short</div>
           </PostionRate>
         </OpponentItem>

@@ -27,7 +27,7 @@ const Index: NextPageWithLayout = () => {
   const { address } = useAccount();
 
   // 玩家拥有的 dealer ID
-  const { data: dealerId } = useContractRead({
+  const { data: dealerId, refetch } = useContractRead({
     address: CONTRACTS.DealerAddress,
     abi: Dealer.abi,
     functionName: 'dealerToId',
@@ -43,7 +43,13 @@ const Index: NextPageWithLayout = () => {
     enabled: (dealerId as BigNumber)?.eq(0),
   });
 
-  const { write } = useContractWrite(config);
+  const { writeAsync } = useContractWrite(config);
+
+  const mint = async () => {
+    const res = await writeAsync?.();
+    await res?.wait();
+    refetch();
+  };
 
   return (
     <Main>
@@ -60,7 +66,7 @@ const Index: NextPageWithLayout = () => {
                 height: 40px;
               `}
               disabled={(dealerId as BigNumber)?.gt(0)}
-              onClick={write}
+              onClick={mint}
             >
               Mint NFT
             </Button>

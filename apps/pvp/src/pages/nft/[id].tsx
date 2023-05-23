@@ -41,7 +41,13 @@ import {
   UserName,
 } from '@/styles/nft';
 import { usePoolInfo } from '@/hooks/usePoolInfo';
-import { useDealerId, useAddPlayers, useSubmitPositon } from '@/hooks';
+import {
+  useDealerId,
+  useAddPlayers,
+  useSubmitPositon,
+  useWaitPositions,
+} from '@/hooks';
+import { ethers, utils } from 'ethers';
 
 type SeatItemProps = {
   userName: string;
@@ -59,7 +65,8 @@ const SeatItem = forwardRef<SeatItemProps, any>(
             <UserName>{userName}</UserName>
             <Positioninfo>
               <div>{position}</div>
-              <div>1.9</div>
+              {/*TODO: est pnl */}
+              {/* <div>1.9</div> */}
             </Positioninfo>
           </>
         ) : (
@@ -84,10 +91,20 @@ const Detail = () => {
   //用户的 dearlerId
   const { dealerId } = useDealerId();
 
-  const { createDealerId, poolAddress, poolInfo } = usePoolInfo(id);
+  // 获取池子信息
+  const { createDealerId, poolAddress, poolInfo, positions } = usePoolInfo(id);
+
+  // 已经 submit 的 仓位
+  const { waitPositions, mergePosition, isSubmited } = useWaitPositions({
+    poolAddress,
+    id,
+    marginTokenDecimal: poolInfo?.pay_token_decimal,
+  });
+
+  console.log({ waitPositions, mergePosition });
 
   // 是否是房主
-  const isOwner = createDealerId?.eq(dealerId);
+  const isOwner = dealerId && createDealerId?.eq(dealerId);
 
   // 房主是否开盘
   const isOpend = +(poolInfo?.deadline ?? 0) > 0;
@@ -95,28 +112,7 @@ const Detail = () => {
   const canBeOpen = isOwner && !isOpend;
 
   // stakePrice 未开盘前为 1
-  const stakePrice = isOpend ? +(poolInfo?.token_price ?? 0) : 1;
-
-  // // 获取 stake price
-  // const { data } = useContractRead({
-  //   address: poolAddress as Address,
-  //   abi: Pool.abi,
-  //   functionName: 'getPrice',
-  //   enabled: !!poolAddress,
-  // });
-  // console.log('getPrice', data);
-
-  const { data: token0Info } = useBalance({
-    address,
-    token: poolInfo?.token0 as Address,
-    enabled: !!poolInfo?.token0,
-  });
-
-  const { data: token1Info } = useBalance({
-    address,
-    token: poolInfo?.token1 as Address,
-    enabled: !!poolInfo?.token1,
-  });
+  const stakePrice = poolInfo?.lp_price;
 
   const { data: marginTokenInfo } = useBalance({
     address,
@@ -124,9 +120,19 @@ const Detail = () => {
     enabled: !!poolInfo?.pay_token,
   });
 
-  const { stakeAmount, enableSubmit, form, setForm } = useSubmitPositon({
+  const {
+    submitPosition,
+    form,
+    setForm,
+    stakeAmount,
+    enableSubmit,
+    lpPrice,
+    value,
+  } = useSubmitPositon({
+    poolAddress,
     stakePrice,
     marginTokenInfo,
+    marginTokenAddress: poolInfo?.pay_token as Address,
   });
 
   const handleMaxMargin = () => {
@@ -139,8 +145,6 @@ const Detail = () => {
   console.log({
     enableSubmit,
     poolInfo,
-    token0Info,
-    token1Info,
   });
 
   return (
@@ -152,10 +156,11 @@ const Detail = () => {
           <div>{poolInfo?.trade_pair}</div>
           <div>Chainlink</div>
         </PairInfo>
-        <Profit data-type="long">long</Profit>
-        <MainCard>+ 20.4%</MainCard>
-        <RoomID>Room {poolInfo?.id}</RoomID>
-        <EndTime>2023-05-02 18:21:00 UTC</EndTime>
+        {/* <Profit data-type="long">long</Profit> */}
+        {/* <MainCard>+ 20.4%</MainCard> */}
+        <MainCard>To Be Open</MainCard>
+        <RoomID>Room {poolInfo?.id?.slice(-4)}</RoomID>
+        {isOpend && <EndTime>2023-05-02 18:21:00 UTC</EndTime>}
       </PairMiniCard>
       <RoomCard>
         {/* 座位 */}
@@ -165,12 +170,12 @@ const Detail = () => {
               <RoomHeader>
                 <div>
                   {poolInfo?.trade_pair}
-                  <span>123.46 USDC</span>
-                  <EndTime>2023-05-02 18:21:00 UTC</EndTime>
+                  <span>{poolInfo?.token_price} USDC</span>
+                  {isOpend && <EndTime>2023-05-02 18:21:00 UTC</EndTime>}
                 </div>
                 <Dialog.Trigger asChild>
                   <Button
-                    disabled={!enableAdd}
+                    disabled={!enableAdd || (!isOwner && !isOpend)}
                     css={css`
                       font-weight: 400;
                       align-self: flex-start;
@@ -181,23 +186,32 @@ const Detail = () => {
                 </Dialog.Trigger>
               </RoomHeader>
               <RoomSeatsMap>
-                <div>Total margin:1000 USDC</div>
-                <div>Room ID :{poolInfo?.id}</div>
-                <Dialog.Trigger asChild>
-                  <SeatItem
-                    data-id="1"
-                    data-position="short"
-                    userName="111"
-                    position={2000}
-                  />
-                </Dialog.Trigger>
-                <Dialog.Trigger asChild>
-                  <SeatItem data-id="2" />
-                </Dialog.Trigger>
-                <SeatItem data-id="3" />
-                <SeatItem data-id="4" />
-                <SeatItem data-id="5" />
-                <SeatItem data-id="6" />
+                <div>Total margin: 100 {marginTokenInfo?.symbol}</div>
+                <div>Room ID: {poolInfo?.id}</div>
+                {new Array(6).fill(0).map((_, index) => {
+                  const position = waitPositions?.[index];
+                  const userName = position?.user.slice(-4) ?? '';
+                  return (
+                    <Dialog.Trigger key={index} disabled={userName}>
+                      <SeatItem
+                        key={index}
+                        data-id={index + 1}
+                        data-position={
+                          position?.leverage
+                            ? position?.leverage > 0
+                              ? 'long'
+                              : 'short'
+                            : null
+                        }
+                        userName={`${userName}${position?.isMe ? '(I)' : ''}`}
+                        position={
+                          position?.marginAmount &&
+                          +position?.marginAmount * Math.abs(position?.leverage)
+                        }
+                      />
+                    </Dialog.Trigger>
+                  );
+                })}
               </RoomSeatsMap>
             </>
           </WhilteListDialog>
@@ -210,7 +224,7 @@ const Detail = () => {
               justify-content: center;
             `}
           >
-            <OpenRoomDialog>
+            <OpenRoomDialog poolAddress={poolAddress}>
               <Button
                 css={css`
                   box-sizing: border-box;
@@ -227,8 +241,10 @@ const Detail = () => {
         </RoomSeats>
         {/* 开仓表单 */}
         <FormContainer>
-          {/* 图标 */}
+          {/* 图表 */}
           <OpponentInfo
+            long={mergePosition?.long}
+            short={mergePosition?.short}
             stakePrice={stakePrice}
             marginTokenSymbol={marginTokenInfo?.symbol}
           />
@@ -262,10 +278,12 @@ const Detail = () => {
           </FormLabel>
           <TokenAmountInput
             maxShow
+            placeholder="Margin"
             value={form.marginAmount}
-            symbol={token0Info?.symbol}
+            symbol={marginTokenInfo?.symbol}
             onMaxClick={handleMaxMargin}
             onChange={(marginAmount: string) => {
+              // TODO: 格式化输入
               setForm(preForm => {
                 return {
                   ...preForm,
@@ -278,31 +296,74 @@ const Detail = () => {
             css={css`
               margin-top: 10px;
             `}
-            value={stakeAmount}
             disabled
+            placeholder="Stake Amount"
+            value={stakeAmount}
             symbol="Stake"
           />
           <EstimateResults>
             <div>
-              <Tooltip text="1111111" icon={<FQASvg />}>
-                <span>LP price</span>
+              <Tooltip text="Current Stake Price" icon={<FQASvg />}>
+                <span>Stake price</span>
               </Tooltip>
-              <span>- {marginTokenInfo?.symbol}</span>
+              <span>
+                {lpPrice} {marginTokenInfo?.symbol}
+              </span>
             </div>
             <div>
-              <Tooltip text="1111111" icon={<FQASvg />}>
+              <Tooltip
+                text={
+                  <>
+                    Value of current position. <br />
+                    Value = Current LP Price * LP Amount
+                  </>
+                }
+                icon={<FQASvg />}
+              >
                 <span>Value</span>
               </Tooltip>
-              <span>- {marginTokenInfo?.symbol}</span>
+              <span>
+                {value} {marginTokenInfo?.symbol}
+              </span>
             </div>
           </EstimateResults>
-          <OpenPositionDialog>
+          <OpenPositionDialog
+            poolInfo={poolInfo}
+            form={form}
+            lpPrice={lpPrice}
+            value={value}
+            onConfirm={submitPosition}
+          >
             <SubmitContainer>
-              <Dialog.Trigger asChild disabled={!enableSubmit}>
-                <SubmitButton backgroundColor="#44C27F">Long</SubmitButton>
+              <Dialog.Trigger asChild disabled={!enableSubmit || isSubmited}>
+                <SubmitButton
+                  backgroundColor="#44C27F"
+                  onClick={() => {
+                    setForm(preForm => {
+                      return {
+                        ...preForm,
+                        direction: 'long',
+                      };
+                    });
+                  }}
+                >
+                  Long
+                </SubmitButton>
               </Dialog.Trigger>
-              <Dialog.Trigger asChild disabled={!enableSubmit}>
-                <SubmitButton backgroundColor="#E15C48">Short</SubmitButton>
+              <Dialog.Trigger asChild disabled={!enableSubmit || isSubmited}>
+                <SubmitButton
+                  backgroundColor="#E15C48"
+                  onClick={() => {
+                    setForm(preForm => {
+                      return {
+                        ...preForm,
+                        direction: 'short',
+                      };
+                    });
+                  }}
+                >
+                  Short
+                </SubmitButton>
               </Dialog.Trigger>
             </SubmitContainer>
           </OpenPositionDialog>
@@ -321,14 +382,33 @@ const Detail = () => {
               <tr>
                 <th>Ranking</th>
                 <th>Address</th>
-                <th>Margin(USDC)</th>
+                <th>Margin({marginTokenInfo?.symbol})</th>
                 <th>Direction</th>
-                <th>Open price(USDC)</th>
-                <th>Value(USDC)</th>
-                <th>Est.PNL(USDC)</th>
+                <th>Open price({marginTokenInfo?.symbol})</th>
+                <th>Value({marginTokenInfo?.symbol})</th>
+                <th>Est.PNL({marginTokenInfo?.symbol})</th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              {positions?.map((position, index) => {
+                const margin = ethers.utils.formatUnits(
+                  position.margin,
+                  marginTokenInfo?.decimals
+                );
+                const direction = position.level > 0 ? 'long' : 'short';
+                const value = +margin * Math.abs(position.level) * stakePrice;
+                return (
+                  <tr key={index}>
+                    <td>{position.index}</td>
+                    <td>{position.user}</td>
+                    <td>{margin}</td>
+                    <td>{direction}</td>
+                    <td>{position.open_price}</td>
+                    <td>{value}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
           </table>
         </RankingTable>
         {/* TODO: 绑定 trigger */}
