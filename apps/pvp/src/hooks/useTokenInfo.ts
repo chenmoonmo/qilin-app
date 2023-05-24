@@ -1,7 +1,7 @@
+import { BigNumber } from 'ethers';
 import type { Address } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite } from 'wagmi';
 import { erc20ABI, useBalance, useContractRead } from 'wagmi';
-import { BigNumber } from 'ethers';
 
 export const useTokenInfo = ({
   address,
@@ -18,12 +18,7 @@ export const useTokenInfo = ({
     enabled: !!approveAddress,
   });
 
-  const {
-    data,
-    isError,
-    isLoading,
-    refetch: refetchBalance,
-  } = useBalance({
+  const { data, refetch: refetchBalance } = useBalance({
     address,
   });
 
@@ -50,5 +45,6 @@ export const useTokenInfo = ({
     allowance,
     refetchBalance,
     refetchAllowance,
+    approve
   };
 };

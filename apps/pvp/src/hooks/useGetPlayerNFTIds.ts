@@ -1,9 +1,9 @@
-import { CONTRACTS } from '@/constant';
+import type { BigNumber } from 'ethers';
+import { useMemo } from 'react';
 import { useAccount, useContractRead, useContractReads } from 'wagmi';
 
+import { CONTRACTS } from '@/constant';
 import Player from '@/constant/abis/Player.json';
-import { useMemo } from 'react';
-import { BigNumber } from 'ethers';
 
 export const useGetPlayerNFTIds = () => {
   const { address } = useAccount();

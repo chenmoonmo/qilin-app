@@ -1,7 +1,9 @@
-import { CONTRACTS } from '@/constant';
-import { Address, useContractWrite, usePrepareContractWrite } from 'wagmi';
-import Router from '@/constant/abis/Router.json';
 import { useCallback } from 'react';
+import type { Address} from 'wagmi';
+import { useContractWrite, usePrepareContractWrite } from 'wagmi';
+
+import { CONTRACTS } from '@/constant';
+import Router from '@/constant/abis/Router.json';
 
 type OpenPositionPropsType = {
   poolAddress: Address;

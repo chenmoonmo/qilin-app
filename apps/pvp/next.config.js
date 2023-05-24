@@ -13,7 +13,7 @@ const developmentENV = {
 
 const productionENV = {};
 
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NEXT_PUBLIC_DOMAIN_ENV === 'development';
 
 const env = isDevelopment ? developmentENV : productionENV;
 

@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import { formatAmount } from '@qilin/utils';
-import { AllHTMLAttributes, FC, useMemo } from 'react';
+import type { AllHTMLAttributes, FC} from 'react';
+import { useMemo } from 'react';
 
 const StakePrice = styled.div`
   display: flex;

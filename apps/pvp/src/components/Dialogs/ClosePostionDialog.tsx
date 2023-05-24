@@ -1,11 +1,12 @@
-import { useClosePostion } from '@/hooks';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
-import { Address } from 'wagmi';
+import type { Address } from 'wagmi';
+
+import { useClosePostion } from '@/hooks';
 
 const PostionInfoItem = styled.div`
   display: flex;

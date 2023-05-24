@@ -6,6 +6,7 @@
   "scripts": {
     "dev:pvp": "pnpm -F @qilin/pvp dev",
     "build:pvp": "pnpm -F @qilin/pvp build",
+    "buildDev:pvp": "pnpm -F @qilin/pvp build:dev",
     "start:pvp": "pnpm -F @qilin/pvp start",
     "prepare": "husky install"
   },

@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import type { BigNumber } from 'ethers';
 import { atom, createStore } from 'jotai';
 
 export * from './home';

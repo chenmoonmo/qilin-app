@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "NEXT_PUBLIC_DOMAIN_ENV=development next dev",
+    "build:dev": "NEXT_PUBLIC_DOMAIN_ENV=development next build",
+    "build": "NEXT_PUBLIC_DOMAIN_ENV=productionnext build",
     "start": "next start",
     "lint": "next lint"
   },

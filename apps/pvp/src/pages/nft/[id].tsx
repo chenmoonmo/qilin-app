@@ -1,10 +1,13 @@
 import { css } from '@emotion/react';
 import { Button, Dialog, Tooltip } from '@qilin/component';
+import { formatAmount, formatInput } from '@qilin/utils';
 import { PlusIcon } from '@radix-ui/react-icons';
+import dayjs from 'dayjs';
 import { useRouter } from 'next/router';
 import type { HtmlHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
-import { Address, useAccount, useBalance } from 'wagmi';
+import type { Address } from 'wagmi';
+import { useAccount, useBalance } from 'wagmi';
 
 import {
   ClosePostionDialog,
@@ -17,6 +20,8 @@ import {
   WhitelistDialog,
 } from '@/components';
 import { LeverageRadio } from '@/components';
+import { useAddPlayers, useDealerId, useSubmitPositon } from '@/hooks';
+import { usePoolInfo } from '@/hooks/usePoolInfo';
 import {
   EndTime,
   EstimateResults,
@@ -40,10 +45,6 @@ import {
   SytledSeatItem,
   UserName,
 } from '@/styles/nft';
-import { usePoolInfo } from '@/hooks/usePoolInfo';
-import { useDealerId, useAddPlayers, useSubmitPositon } from '@/hooks';
-import { formatAmount, formatInput } from '@qilin/utils';
-import dayjs from 'dayjs';
 
 type SeatItemProps = {
   userName: string;
@@ -163,9 +164,9 @@ const Detail = () => {
           {status === 'end' && <div>Ended</div>}
         </MainCard>
         <RoomID>Room {poolInfo?.id?.slice(-4)}</RoomID>
-        {isOpend && (
+        {isOpend && !!poolInfo?.deadline && (
           <EndTime>
-            {dayjs(poolInfo?.deadline * 1000)
+            {dayjs(+poolInfo.deadline * 1000)
               .tz('UTC')
               .format('YYYY-MM-DD HH:mm')}{' '}
             UTC
@@ -181,9 +182,9 @@ const Detail = () => {
                 <div>
                   {poolInfo?.trade_pair}
                   <span>{formatAmount(poolInfo?.token_price)} USDC</span>
-                  {isOpend && (
+                  {isOpend && !!poolInfo?.deadline && (
                     <EndTime>
-                      {dayjs(poolInfo?.deadline * 1000)
+                      {dayjs(+poolInfo?.deadline * 1000)
                         .tz('UTC')
                         .format('YYYY-MM-DD HH:mm')}{' '}
                       UTC
@@ -261,8 +262,8 @@ const Detail = () => {
         <FormContainer>
           {/* 图表 */}
           <OpponentInfo
-            long={+mergePositions?.long?.formattedLp}
-            short={+mergePositions?.short?.formattedLp}
+            long={+(mergePositions?.long?.formattedLp ?? 0)}
+            short={+(mergePositions?.short?.formattedLp ?? 0)}
             stakePrice={stakePrice}
             marginTokenSymbol={marginTokenInfo?.symbol}
           />

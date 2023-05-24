@@ -4,10 +4,10 @@ import { Button, Dialog, Tooltip } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
 
+import type { SubmitPositionForm } from '@/hooks/useSubmitPositon';
+
 import { FQASvg } from '../Icons';
 import { OpponentInfo } from '../OpponentInfo';
-import { PoolInfoType } from '@/hooks/usePoolInfo';
-import { SubmitPositionForm } from '@/hooks/useSubmitPositon';
 
 const OpenPositionInfo = styled.div`
   display: flex;
@@ -49,10 +49,10 @@ const OpenPositionInfo = styled.div`
 `;
 type OpenPositionDialogPropsType = {
   children?: ReactNode;
-  poolInfo?: PoolInfoType;
+  poolInfo?: any;
   form: SubmitPositionForm;
-  lpPrice: string;
-  value: string;
+  lpPrice?: string;
+  value?: string;
   onConfirm?: () => void;
 };
 
@@ -68,11 +68,10 @@ export const OpenPositionDialog: FC<OpenPositionDialogPropsType> = ({
 }) => {
   const [open, setOpen] = useAtom(openPositionDialogOpenAtom);
 
-  const handleSubmit =async () => {
+  const handleSubmit = async () => {
     await onConfirm?.();
     setOpen(false);
-  }
-
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>

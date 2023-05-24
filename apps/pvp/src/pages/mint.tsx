@@ -1,9 +1,17 @@
-import HomeLayout from '@/layouts/home-layout';
-import { NextPageWithLayout } from './_app';
+import { css } from '@emotion/react';
+import { Button } from '@qilin/component';
+import type { BigNumber } from 'ethers';
 import Image from 'next/image';
+import {
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from 'wagmi';
 
+import { CONTRACTS } from '@/constant';
 import Dealer from '@/constant/abis/Dealer.json';
-
+import HomeLayout from '@/layouts/home-layout';
 import {
   Main,
   MintContainer,
@@ -11,17 +19,8 @@ import {
   MintInfoBottom,
   NFTCard,
 } from '@/styles/mint';
-import { Button } from '@qilin/component';
-import { css } from '@emotion/react';
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi';
-import { CONTRACTS } from '@/constant';
 
-import { BigNumber } from 'ethers';
+import type { NextPageWithLayout } from './_app';
 
 const Index: NextPageWithLayout = () => {
   const { address } = useAccount();

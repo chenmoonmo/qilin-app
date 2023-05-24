@@ -9,15 +9,13 @@ import { useEffect } from 'react';
 import { NFTIDAtom } from '@/atoms';
 import {
   CreateRoomDialog,
-  NFTMMainDialog,
-  WhitelistDialog,
   NFTMainDialogOpenAtom,
+  NFTMMainDialog,
 } from '@/components';
+import { useCreateRoom, useGetPlayerNFTIds } from '@/hooks';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
-import { useCreateRoom, useGetPlayerNFTIds } from '@/hooks';
-import { useProvider } from 'wagmi';
 
 const StyledMain = styled.main`
   max-width: 1440px;
@@ -112,7 +110,6 @@ const Home: NextPageWithLayout = () => {
           ))}
         </NFTContainer>
       </NFTMMainDialog>
-      <WhitelistDialog />
     </StyledMain>
   );
 };

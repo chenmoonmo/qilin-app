@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { Button, Tooltip } from '@qilin/component';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import type { FC, ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useAccount, useConnect } from 'wagmi';
@@ -10,7 +11,6 @@ import { useSwitchNetwork } from 'wagmi';
 import { Logo, MetaMaskIcon } from '@/components';
 
 import { ChainInfo, Header, MenuItem } from './styles';
-import { useRouter } from 'next/router';
 
 type HomeLayoutType = {
   children: ReactNode;

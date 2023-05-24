@@ -1,15 +1,16 @@
-import { CONTRACTS } from '@/constant';
 import { BigNumber, ethers } from 'ethers';
-import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useEffect, useMemo } from 'react';
+import { atom, useAtom } from 'jotai';
+import { useMemo } from 'react';
+import type { Address } from 'wagmi';
 import {
-  Address,
   erc20ABI,
   useAccount,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
 } from 'wagmi';
+
+import { CONTRACTS } from '@/constant';
 import Router from '@/constant/abis/Router.json';
 
 type useSubmitPositonProps = {

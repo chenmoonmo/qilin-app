@@ -1,14 +1,14 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Select, SelectToken } from '@qilin/component';
+import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom } from 'jotai';
-import { useState, type FC, type ReactNode, useCallback, useMemo } from 'react';
+import uniqBy from 'lodash/uniqBy';
+import { type FC, type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useChainId, useToken } from 'wagmi';
+
 import { PAIRS, PAY_TOKENS } from '@/constant';
 import { useCreateRoom } from '@/hooks';
-import { isAddress } from 'ethers/lib/utils.js';
-
-import uniqBy from 'lodash/uniqBy';
 
 type CreateRoomDialogType = {
   children?: ReactNode;
@@ -77,15 +77,8 @@ export const lastMarginSelectionAtom = atom<{
 
 export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
   const chainId = useChainId();
-  const {
-    canCreateRoom,
-    canSendCreate,
-    form,
-    setForm,
-    createRoom,
-    players,
-    setPlayers,
-  } = useCreateRoom();
+  const { canSendCreate, form, setForm, createRoom, players, setPlayers } =
+    useCreateRoom();
 
   const [searchInfo, setSearchInfo] = useState<string>('');
   const [marginSearchInfo, setMarginSearchInfo] = useState<string>('');

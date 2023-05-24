@@ -1,17 +1,17 @@
-import { CONTRACTS } from '@/constant';
+import type { BigNumber } from 'ethers';
+import { isAddress } from 'ethers/lib/utils.js';
+import { atom, useAtom, useAtomValue } from 'jotai';
+import { useMemo } from 'react';
 import {
   useAccount,
   useContractRead,
-  usePrepareContractWrite,
   useContractWrite,
+  usePrepareContractWrite,
 } from 'wagmi';
 
+import { CONTRACTS } from '@/constant';
 import Dealer from '@/constant/abis/Dealer.json';
 import Factory from '@/constant/abis/Factory.json';
-import { atom, useAtom, useAtomValue } from 'jotai';
-import { isAddress } from 'ethers/lib/utils.js';
-import { useMemo } from 'react';
-import { BigNumber } from 'ethers';
 
 const DealerContract = {
   address: CONTRACTS.DealerAddress,

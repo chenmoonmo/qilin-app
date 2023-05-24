@@ -1,12 +1,11 @@
-import { Provider, useSetAtom } from 'jotai';
-import { CONTRACTS } from '@/constant';
-import Dealer from '@/constant/abis/Dealer.json';
+import { Provider } from 'jotai';
+import type { FC, ReactNode } from 'react';
 
-import { dealerIdAtom, golbalStore } from '@/atoms';
-
-import { useEffect, type FC, type ReactNode } from 'react';
-import { useAccount, useContractRead } from 'wagmi';
-import { BigNumber } from 'ethers';
+// import { CONTRACTS } from '@/constant';
+// import Dealer from '@/constant/abis/Dealer.json';
+import { golbalStore } from '@/atoms';
+// import { useAccount, useContractRead } from 'wagmi';
+// import { BigNumber } from 'ethers';
 type JotaiProviderPropsType = {
   children: ReactNode;
 };

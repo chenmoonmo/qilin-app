@@ -1,9 +1,10 @@
-import Pool from '@/constant/abis/Pool.json';
-import Player from '@/constant/abis/Player.json';
+import { BigNumber } from 'ethers';
+import type { Address} from 'wagmi';
+import { useContractRead, useContractReads } from 'wagmi';
+
 import { CONTRACTS } from '@/constant';
-import { Address, useAccount, useContractRead, useContractReads } from 'wagmi';
-import { BigNumber, ethers } from 'ethers';
-import { useMemo } from 'react';
+import Player from '@/constant/abis/Player.json';
+import Pool from '@/constant/abis/Pool.json';
 
 type WaitPositionsPropsType = {
   playerNFTId: number;

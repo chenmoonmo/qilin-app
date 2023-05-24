@@ -1,10 +1,11 @@
-import { useAddPlayers } from '@/hooks';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
 import { useMemo } from 'react';
+
+import { useAddPlayers } from '@/hooks';
 
 const Description = styled.div`
   margin-top: 9px;
@@ -68,8 +69,7 @@ export const WhitelistDialog: FC<WhitelistDialogPropsType> = ({
   roomId,
 }) => {
   const [open, setOpen] = useAtom(WhitelistOpenAtom);
-  const holeLink = location.origin;
-  const shortLink = holeLink;
+
   const title = useMemo(() => {
     return type === 'add' ? (
       <Dialog.Title>Share ID or link for friends to joins!</Dialog.Title>

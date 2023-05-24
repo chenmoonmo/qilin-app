@@ -1,6 +1,7 @@
 import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom, useAtomValue } from 'jotai';
-import { Address, useBalance } from 'wagmi';
+import type { Address} from 'wagmi';
+import { useBalance } from 'wagmi';
 
 type useSearchTokenProps = {
   type: 'pair' | 'margin';
@@ -13,6 +14,7 @@ const searchAtom = atom<string>('');
 const isTokenAddressAtom = atom(get => isAddress(get(searchAtom)));
 
 export const useSearchToken = (param: useSearchTokenProps) => {
+  console.log(param)
   const [searchInfo, setSearchInfo] = useAtom(searchAtom);
   const isTokenAddress = useAtomValue(isTokenAddressAtom);
 

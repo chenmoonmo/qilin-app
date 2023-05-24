@@ -1,17 +1,19 @@
-import { CONTRACTS } from '@/constant';
-import { Address, useAccount, useContractRead } from 'wagmi';
-import Player from '@/constant/abis/Player.json';
-import Dealer from '@/constant/abis/Dealer.json';
-import Pool from '@/constant/abis/Pool.json';
-
-import useSWR from 'swr';
-import { gql } from 'graphql-request';
-import { graphFetcher } from '@/hleper';
-import { BigNumber, ethers } from 'ethers';
-import { useWaitPositions } from './useWaitPositions';
-import { useNow } from './useNow';
 import { isAfter } from 'date-fns';
+import { BigNumber, ethers } from 'ethers';
+import { gql } from 'graphql-request';
 import { useMemo } from 'react';
+import useSWR from 'swr';
+import type { Address } from 'wagmi';
+import { useAccount, useContractRead } from 'wagmi';
+
+import { CONTRACTS } from '@/constant';
+import Dealer from '@/constant/abis/Dealer.json';
+import Player from '@/constant/abis/Player.json';
+import Pool from '@/constant/abis/Pool.json';
+import { graphFetcher } from '@/hleper';
+
+import { useNow } from './useNow';
+import { useWaitPositions } from './useWaitPositions';
 
 export type PoolInfoType = Record<'token0' | 'token1' | 'pay_token', Address> &
   Record<
@@ -51,6 +53,7 @@ type PoolGraph = {
     asset: string;
     level: number;
     lp: string;
+    type: 0 | 1 |  2 | 3
   }[];
 };
 
@@ -129,7 +132,9 @@ export const usePoolInfo = (playerNFTId: number) => {
   const isOpend = +(data?.poolInfo?.deadline ?? 0) > 0;
 
   const isEnd =
-    isOpend && isAfter(now, new Date(+data?.poolInfo?.deadline! * 1000));
+    isOpend &&
+    !!data?.poolInfo?.deadline &&
+    isAfter(now, new Date(+data?.poolInfo?.deadline * 1000));
 
   // 结束时的价格
   // TODO: 还取不到
@@ -159,9 +164,21 @@ export const usePoolInfo = (playerNFTId: number) => {
     (position: any) => position.user === address
   );
 
-  const mergePositions = useMemo(() => {
-    const marginTokenDecimal = data?.poolInfo.pay_token_decimal ?? 6;
+  type MergePositionItem = {
+    id: `${string}-${'long' | 'short'}`;
+    lp: string;
+    fake_lp: string;
+    asset: string;
+    open_lp: string;
+    open_price: string;
+    direction: 'long' | 'short';
+    formattedLp: string;
+  };
 
+  const mergePositions:
+    | { long: MergePositionItem; short: MergePositionItem }
+    | undefined = useMemo(() => {
+    const marginTokenDecimal = data?.poolInfo.pay_token_decimal ?? 6;
     if (!isOpend) {
       return waitPositions?.reduce(
         (pre, cur) => {
@@ -180,8 +197,8 @@ export const usePoolInfo = (playerNFTId: number) => {
           };
         },
         {
-          long: {},
-          short: {},
+          long: {} as MergePositionItem,
+          short: {} as MergePositionItem,
         }
       );
     } else {
@@ -202,12 +219,17 @@ export const usePoolInfo = (playerNFTId: number) => {
           };
         },
         {
-          long: {},
-          short: {},
+          long: {} as MergePositionItem,
+          short: {} as MergePositionItem,
         }
       );
     }
-  }, [data, isOpend, waitPositions]);
+  }, [
+    data?.mergePositions,
+    data?.poolInfo.pay_token_decimal,
+    isOpend,
+    waitPositions,
+  ]);
 
   const stakePrice = useMemo(() => {
     const stratPrice = 1;
@@ -219,19 +241,20 @@ export const usePoolInfo = (playerNFTId: number) => {
         : +ethers.utils.formatUnits(nowPrice as BigNumber);
 
       const openPrice = +ethers.utils.formatUnits(
-        mergePositions?.long?.open_price
+        BigNumber.from(mergePositions?.long?.open_price ?? 0)
       );
 
-      const longLp = (currentPrice / openPrice) * mergePositions?.long?.open_lp;
+      const longLp =
+        (currentPrice / openPrice) * +(mergePositions?.long?.open_lp ?? 0);
 
-      const shortLp = mergePositions?.short.open_lp;
+      const shortLp = +(mergePositions?.short.open_lp ?? 0);
 
       const fakeLp =
-        (currentPrice / openPrice) * mergePositions?.short?.open_lp;
+        (currentPrice / openPrice) * +(mergePositions?.short?.open_lp ?? 0);
 
       const totalLp = longLp + 2 * shortLp - fakeLp;
 
-      const totalMargin = data?.poolInfo.margin;
+      const totalMargin = +(data?.poolInfo?.margin ?? 0);
 
       return totalMargin / totalLp;
     }
@@ -329,6 +352,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           closePrice: undefined,
           marginSymbol: data?.poolInfo.pay_token_symbol,
           tradePair: data?.poolInfo.trade_pair,
+          type: 0
         };
       });
     }

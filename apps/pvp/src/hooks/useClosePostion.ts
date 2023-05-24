@@ -1,14 +1,13 @@
-import { CONTRACTS } from '@/constant';
+import type {
+  Address} from 'wagmi';
 import {
-  Address,
   useAccount,
-  useContractRead,
   useContractWrite,
   usePrepareContractWrite,
 } from 'wagmi';
 
+import { CONTRACTS } from '@/constant';
 import Router from '@/constant/abis/Router.json';
-import Pool from '@/constant/abis/Pool.json';
 
 type ClosePostionPropsType = {
   position: any;

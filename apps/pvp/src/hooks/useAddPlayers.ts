@@ -1,17 +1,18 @@
-import { CONTRACTS } from '@/constant';
-import Player from '@/constant/abis/Player.json';
-import Dealer from '@/constant/abis/Dealer.json';
-import { BigNumber } from 'ethers';
+import type { BigNumber } from 'ethers';
+import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 import {
-  Address,
   useContractRead,
   useContractWrite,
   usePrepareContractWrite,
 } from 'wagmi';
+
+import { CONTRACTS } from '@/constant';
+import Dealer from '@/constant/abis/Dealer.json';
+import Player from '@/constant/abis/Player.json';
+
 import { useDealerId } from './useCreateRoom';
-import { isAddress } from 'ethers/lib/utils.js';
 
 const playerSeatsAtom = atom<string[]>([]);
 
