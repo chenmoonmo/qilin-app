@@ -6,24 +6,28 @@ import { BigNumber, ethers } from 'ethers';
 import { useMemo } from 'react';
 
 type WaitPositionsPropsType = {
-  id: number;
+  playerNFTId: number;
   poolAddress: Address;
   marginTokenDecimal?: string;
 };
 
-export const useWaitPositions = ({
-  id,
-  poolAddress,
-  marginTokenDecimal,
-}: WaitPositionsPropsType) => {
-  const { address } = useAccount();
+type WaitPositionItem = {
+  asset: BigNumber;
+  level: number;
+  user: Address;
+  router: Address;
+};
 
+export const useWaitPositions = ({
+  playerNFTId,
+  poolAddress,
+}: WaitPositionsPropsType) => {
   // 已经添加的席位数量
-  const { data: seatAmount, refetch } = useContractRead({
+  const { data: seatAmount } = useContractRead({
     address: CONTRACTS.PlayerAddress,
     abi: Player.abi,
     functionName: 'idToAmount',
-    args: [id],
+    args: [playerNFTId],
   });
 
   const positonQuerys = new Array((seatAmount as BigNumber)?.toNumber())
@@ -41,49 +45,7 @@ export const useWaitPositions = ({
     contracts: positonQuerys,
   });
 
-  return useMemo(() => {
-    return {
-      waitPositions: waitPositions
-        ?.filter((position: any) => {
-          return position?.user && !BigNumber.from(position?.user).eq(0);
-        })
-        .map((position: any) => {
-          return {
-            isMe: position?.user === address,
-            user: position.user,
-            marginAmount: ethers.utils.formatUnits(
-              position.asset,
-              marginTokenDecimal
-            ),
-            leverage: position.level,
-          };
-        }),
-      // 多空双方统计
-      mergePosition: waitPositions
-        ?.filter((position: any) => {
-          return position?.user && !BigNumber.from(position?.user).eq(0);
-        })
-        .reduce(
-          (pre, cur: any) => {
-            const stakeAmount = +ethers.utils.formatUnits(
-              cur.asset.mul(Math.abs(cur.level)),
-              marginTokenDecimal
-            );
-            if (cur.level > 0) {
-              pre.long += stakeAmount;
-            } else {
-              pre.short += stakeAmount;
-            }
-            return pre;
-          },
-          {
-            long: 0,
-            short: 0,
-          }
-        ),
-      isSubmited: waitPositions?.some(
-        (position: any) => position.user === address
-      ),
-    };
-  }, [waitPositions, marginTokenDecimal, address]);
+  return (waitPositions as WaitPositionItem[])?.filter((position: any) => {
+    return position?.user && !BigNumber.from(position?.user).eq(0);
+  });
 };

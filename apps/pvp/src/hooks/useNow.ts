@@ -9,9 +9,10 @@ export const useNow = () => {
   useEffect(() => {
     provider.getBlockNumber().then(res => {
       provider.getBlock(res).then(res => {
-        setNow(new Date(res.timestamp * 1000));
+        setNow(new Date(res?.timestamp * 1000));
       });
     });
   }, []);
+
   return now;
 };

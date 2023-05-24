@@ -70,19 +70,25 @@ export const useSubmitPositon = ({
     args: [address!, CONTRACTS.RouterAddress],
   });
 
-  const { config, refetch } = usePrepareContractWrite({
+  // const { config, refetch } = usePrepareContractWrite({
+  //   address: CONTRACTS.RouterAddress,
+  //   abi: Router.abi,
+  //   functionName: 'submit',
+  //   args: [
+  //     poolAddress,
+  //     marginAmountToBN,
+  //     `${form.direction === 'short' ? '-' : ''}${form.leverage}`,
+  //   ],
+  //   enabled: !allowance?.lt(marginAmountToBN),
+  // });
+
+  // TODO: 测试这个
+  const { writeAsync: submit } = useContractWrite({
     address: CONTRACTS.RouterAddress,
     abi: Router.abi,
     functionName: 'submit',
-    args: [
-      poolAddress,
-      marginAmountToBN,
-      `${form.direction === 'short' ? '-' : ''}${form.leverage}`,
-    ],
-    enabled: !allowance?.lt(marginAmountToBN),
+    mode: 'recklesslyUnprepared',
   });
-
-  const { writeAsync: submit } = useContractWrite(config);
 
   const { config: approveConfig } = usePrepareContractWrite({
     address: marginTokenAddress,
@@ -100,9 +106,14 @@ export const useSubmitPositon = ({
         const res = await approve?.();
         await res?.wait();
         await refetchAllowance?.();
-        await refetch();
       }
-      const res = await submit?.();
+      const res = await submit?.({
+        recklesslySetUnpreparedArgs: [
+          poolAddress,
+          marginAmountToBN,
+          `${form.direction === 'short' ? '-' : ''}${form.leverage}`,
+        ],
+      });
       await res?.wait();
     } catch (e) {}
   };

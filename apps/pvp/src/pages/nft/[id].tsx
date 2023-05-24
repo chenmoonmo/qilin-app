@@ -41,13 +41,7 @@ import {
   UserName,
 } from '@/styles/nft';
 import { usePoolInfo } from '@/hooks/usePoolInfo';
-import {
-  useDealerId,
-  useAddPlayers,
-  useSubmitPositon,
-  useWaitPositions,
-} from '@/hooks';
-import { ethers, utils } from 'ethers';
+import { useDealerId, useAddPlayers, useSubmitPositon } from '@/hooks';
 
 type SeatItemProps = {
   userName: string;
@@ -92,16 +86,15 @@ const Detail = () => {
   const { dealerId } = useDealerId();
 
   // 获取池子信息
-  const { createDealerId, poolAddress, poolInfo, positions } = usePoolInfo(id);
-
-  // 已经 submit 的 仓位
-  const { waitPositions, mergePosition, isSubmited } = useWaitPositions({
+  const {
+    createDealerId,
     poolAddress,
-    id,
-    marginTokenDecimal: poolInfo?.pay_token_decimal,
-  });
-
-  console.log({ waitPositions, mergePosition });
+    poolInfo,
+    positions,
+    mergePositions,
+    isSubmited,
+    stakePrice,
+  } = usePoolInfo(id);
 
   // 是否是房主
   const isOwner = dealerId && createDealerId?.eq(dealerId);
@@ -110,9 +103,6 @@ const Detail = () => {
   const isOpend = +(poolInfo?.deadline ?? 0) > 0;
 
   const canBeOpen = isOwner && !isOpend;
-
-  // stakePrice 未开盘前为 1
-  const stakePrice = poolInfo?.lp_price;
 
   const { data: marginTokenInfo } = useBalance({
     address,
@@ -142,11 +132,6 @@ const Detail = () => {
     });
   };
 
-  console.log({
-    enableSubmit,
-    poolInfo,
-  });
-
   return (
     <NFTMain>
       {/* mini nft card */}
@@ -175,7 +160,9 @@ const Detail = () => {
                 </div>
                 <Dialog.Trigger asChild>
                   <Button
-                    disabled={!enableAdd || (!isOwner && !isOpend)}
+                    disabled={
+                      !enableAdd || (!isOwner && !isOpend) || isSubmited
+                    }
                     css={css`
                       font-weight: 400;
                       align-self: flex-start;
@@ -186,28 +173,25 @@ const Detail = () => {
                 </Dialog.Trigger>
               </RoomHeader>
               <RoomSeatsMap>
-                <div>Total margin: 100 {marginTokenInfo?.symbol}</div>
+                <div>
+                  Total margin: {poolInfo?.fomattedMargin}
+                  {marginTokenInfo?.symbol}
+                </div>
                 <div>Room ID: {poolInfo?.id}</div>
                 {new Array(6).fill(0).map((_, index) => {
-                  const position = waitPositions?.[index];
+                  const position = positions?.[index];
                   const userName = position?.user.slice(-4) ?? '';
                   return (
-                    <Dialog.Trigger key={index} disabled={userName}>
+                    <Dialog.Trigger
+                      key={index}
+                      disabled={!!userName || isSubmited}
+                    >
                       <SeatItem
                         key={index}
                         data-id={index + 1}
-                        data-position={
-                          position?.leverage
-                            ? position?.leverage > 0
-                              ? 'long'
-                              : 'short'
-                            : null
-                        }
+                        data-position={position?.direction}
                         userName={`${userName}${position?.isMe ? '(I)' : ''}`}
-                        position={
-                          position?.marginAmount &&
-                          +position?.marginAmount * Math.abs(position?.leverage)
-                        }
+                        position={position?.formattedLp}
                       />
                     </Dialog.Trigger>
                   );
@@ -243,8 +227,8 @@ const Detail = () => {
         <FormContainer>
           {/* 图表 */}
           <OpponentInfo
-            long={mergePosition?.long}
-            short={mergePosition?.short}
+            long={mergePositions?.long?.formattedLp}
+            short={mergePositions?.short?.formattedLp}
             stakePrice={stakePrice}
             marginTokenSymbol={marginTokenInfo?.symbol}
           />
@@ -391,20 +375,33 @@ const Detail = () => {
             </thead>
             <tbody>
               {positions?.map((position, index) => {
-                const margin = ethers.utils.formatUnits(
-                  position.margin,
-                  marginTokenInfo?.decimals
-                );
                 const direction = position.level > 0 ? 'long' : 'short';
-                const value = +margin * Math.abs(position.level) * stakePrice;
+                const value =
+                  +position.fomattedMargin *
+                  Math.abs(position.level) *
+                  stakePrice;
+                const shortAddress =
+                  position.user.slice(0, 6) + '...' + position.user.slice(-4);
                 return (
                   <tr key={index}>
                     <td>{position.index}</td>
-                    <td>{position.user}</td>
-                    <td>{margin}</td>
+                    <td>{`${shortAddress} ${position.isMe ? '(I)' : ''}`}</td>
+                    <td>{position.fomattedMargin}</td>
                     <td>{direction}</td>
                     <td>{position.open_price}</td>
                     <td>{value}</td>
+                    <td>
+                      111
+                      {position.isMe && (
+                        <Button
+                          css={css`
+                            margin-left: 11px;
+                          `}
+                        >
+                          Close
+                        </Button>
+                      )}
+                    </td>
                   </tr>
                 );
               })}

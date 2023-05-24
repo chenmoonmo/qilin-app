@@ -308,6 +308,23 @@ export const RankingTable = styled.div`
     font-weight: 400;
     font-size: 12px;
     line-height: 12px;
+    text-align: left;
+    th {
+      padding: 18px 0;
+      &:first-of-type {
+        padding-left: 24px;
+      }
+    }
+    td {
+      padding: 15px 0;
+      &:first-of-type {
+        padding-left: 24px;
+      }
+    }
+
+    tbody > tr:nth-of-type(odd) {
+      background: #363a45;
+    }
   }
 `;
 
