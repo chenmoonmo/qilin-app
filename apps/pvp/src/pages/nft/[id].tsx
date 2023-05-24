@@ -42,6 +42,7 @@ import {
 } from '@/styles/nft';
 import { usePoolInfo } from '@/hooks/usePoolInfo';
 import { useDealerId, useAddPlayers, useSubmitPositon } from '@/hooks';
+import { formatAmount, formatInput } from '@qilin/utils';
 
 type SeatItemProps = {
   userName: string;
@@ -50,7 +51,7 @@ type SeatItemProps = {
 } & HtmlHTMLAttributes<HTMLDivElement>;
 
 const SeatItem = forwardRef<SeatItemProps, any>(
-  ({ userName, position, onClick, ...props }, ref) => {
+  ({ userName, position, pnl, onClick, ...props }, ref) => {
     return (
       <SytledSeatItem onClick={onClick} {...props} ref={ref}>
         {userName ? (
@@ -58,9 +59,8 @@ const SeatItem = forwardRef<SeatItemProps, any>(
             <DefaultAvatar />
             <UserName>{userName}</UserName>
             <Positioninfo>
-              <div>{position}</div>
-              {/*TODO: est pnl */}
-              {/* <div>1.9</div> */}
+              <div>{formatAmount(position)}</div>
+              <div>{formatAmount(pnl)}</div>
             </Positioninfo>
           </>
         ) : (
@@ -94,6 +94,8 @@ const Detail = () => {
     mergePositions,
     isSubmited,
     stakePrice,
+    status,
+    myROE,
   } = usePoolInfo(id);
 
   // 是否是房主
@@ -141,9 +143,12 @@ const Detail = () => {
           <div>{poolInfo?.trade_pair}</div>
           <div>Chainlink</div>
         </PairInfo>
-        {/* <Profit data-type="long">long</Profit> */}
-        {/* <MainCard>+ 20.4%</MainCard> */}
-        <MainCard>To Be Open</MainCard>
+        <MainCard data-type={myROE > 0 ? 'long' : 'short'}>
+          <div>
+            {status === 'wait' ? 'To Be Open' : `${formatAmount(myROE, 2)}%`}
+          </div>
+          {status === 'end' && <div>Ended</div>}
+        </MainCard>
         <RoomID>Room {poolInfo?.id?.slice(-4)}</RoomID>
         {isOpend && <EndTime>2023-05-02 18:21:00 UTC</EndTime>}
       </PairMiniCard>
@@ -155,7 +160,7 @@ const Detail = () => {
               <RoomHeader>
                 <div>
                   {poolInfo?.trade_pair}
-                  <span>{poolInfo?.token_price} USDC</span>
+                  <span>{formatAmount(poolInfo?.token_price)} USDC</span>
                   {isOpend && <EndTime>2023-05-02 18:21:00 UTC</EndTime>}
                 </div>
                 <Dialog.Trigger asChild>
@@ -174,7 +179,7 @@ const Detail = () => {
               </RoomHeader>
               <RoomSeatsMap>
                 <div>
-                  Total margin: {poolInfo?.fomattedMargin}
+                  Total margin: {formatAmount(poolInfo?.fomattedMargin)}
                   {marginTokenInfo?.symbol}
                 </div>
                 <div>Room ID: {poolInfo?.id}</div>
@@ -192,6 +197,7 @@ const Detail = () => {
                         data-position={position?.direction}
                         userName={`${userName}${position?.isMe ? '(I)' : ''}`}
                         position={position?.formattedLp}
+                        pnl={position?.estPnl}
                       />
                     </Dialog.Trigger>
                   );
@@ -227,8 +233,8 @@ const Detail = () => {
         <FormContainer>
           {/* 图表 */}
           <OpponentInfo
-            long={mergePositions?.long?.formattedLp}
-            short={mergePositions?.short?.formattedLp}
+            long={+mergePositions?.long?.formattedLp}
+            short={+mergePositions?.short?.formattedLp}
             stakePrice={stakePrice}
             marginTokenSymbol={marginTokenInfo?.symbol}
           />
@@ -257,7 +263,8 @@ const Detail = () => {
           >
             Balance
             <span>
-              {marginTokenInfo?.formatted} {marginTokenInfo?.symbol}
+              {formatAmount(marginTokenInfo?.formatted)}{' '}
+              {marginTokenInfo?.symbol}
             </span>
           </FormLabel>
           <TokenAmountInput
@@ -271,7 +278,7 @@ const Detail = () => {
               setForm(preForm => {
                 return {
                   ...preForm,
-                  marginAmount,
+                  marginAmount: formatInput(marginAmount),
                 };
               });
             }}
@@ -282,7 +289,7 @@ const Detail = () => {
             `}
             disabled
             placeholder="Stake Amount"
-            value={stakeAmount}
+            value={stakeAmount ? formatAmount(stakeAmount) : stakeAmount}
             symbol="Stake"
           />
           <EstimateResults>
@@ -291,7 +298,7 @@ const Detail = () => {
                 <span>Stake price</span>
               </Tooltip>
               <span>
-                {lpPrice} {marginTokenInfo?.symbol}
+                {formatAmount(lpPrice)} {marginTokenInfo?.symbol}
               </span>
             </div>
             <div>
@@ -307,7 +314,7 @@ const Detail = () => {
                 <span>Value</span>
               </Tooltip>
               <span>
-                {value} {marginTokenInfo?.symbol}
+                {formatAmount(value)} {marginTokenInfo?.symbol}
               </span>
             </div>
           </EstimateResults>
@@ -368,6 +375,7 @@ const Detail = () => {
                 <th>Address</th>
                 <th>Margin({marginTokenInfo?.symbol})</th>
                 <th>Direction</th>
+                {/*TODO: 单位 */}
                 <th>Open price({marginTokenInfo?.symbol})</th>
                 <th>Value({marginTokenInfo?.symbol})</th>
                 <th>Est.PNL({marginTokenInfo?.symbol})</th>
@@ -375,31 +383,42 @@ const Detail = () => {
             </thead>
             <tbody>
               {positions?.map((position, index) => {
-                const direction = position.level > 0 ? 'long' : 'short';
-                const value =
-                  +position.fomattedMargin *
-                  Math.abs(position.level) *
-                  stakePrice;
+                const direction = position.level > 0 ? 'Long' : 'Short';
                 const shortAddress =
                   position.user.slice(0, 6) + '...' + position.user.slice(-4);
                 return (
                   <tr key={index}>
-                    <td>{position.index}</td>
+                    {/* Ranking */}
+                    <td>{position?.index}</td>
+                    {/* Address */}
                     <td>{`${shortAddress} ${position.isMe ? '(I)' : ''}`}</td>
-                    <td>{position.fomattedMargin}</td>
+                    {/* Margin */}
+                    <td>{formatAmount(position.fomattedMargin)}</td>
+                    {/* Direction */}
                     <td>{direction}</td>
-                    <td>{position.open_price}</td>
-                    <td>{value}</td>
+                    {/* Open price */}
+                    <td>{formatAmount(position.open_price)}</td>
+                    {/* Value */}
+                    <td>{formatAmount(position.currentValue)}</td>
+                    {/* Est.PNL */}
                     <td>
-                      111
+                      {formatAmount(position.estPnl)}(
+                      {formatAmount(position.ROE, 2)}%)
                       {position.isMe && (
-                        <Button
-                          css={css`
-                            margin-left: 11px;
-                          `}
+                        <ClosePostionDialog
+                          position={position}
+                          poolAddress={poolAddress}
                         >
-                          Close
-                        </Button>
+                          <Dialog.Trigger asChild>
+                            <Button
+                              css={css`
+                                margin-left: 11px;
+                              `}
+                            >
+                              Close
+                            </Button>
+                          </Dialog.Trigger>
+                        </ClosePostionDialog>
                       )}
                     </td>
                   </tr>
@@ -408,8 +427,6 @@ const Detail = () => {
             </tbody>
           </table>
         </RankingTable>
-        {/* TODO: 绑定 trigger */}
-        <ClosePostionDialog />
       </RoomCard>
     </NFTMain>
   );

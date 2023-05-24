@@ -57,19 +57,21 @@ export const Profit = styled.div`
 export const MainCard = styled.div`
   flex: auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   font-style: normal;
   font-weight: 500;
   font-size: 24px;
-  line-height: 12px;
-  /* color: #44c27f; */
   color: #9699a3;
   &[data-type='long'] {
     color: #44c27f;
   }
   &[data-type='short'] {
     color: #e15c48;
+  }
+  > div:nth-of-type(2) {
+    color: #9699a3;
   }
 `;
 
@@ -128,6 +130,9 @@ export const Positioninfo = styled.div`
   top: -9px;
   left: 50%;
   transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   > div:nth-of-type(1) {
     margin-bottom: 2px;
     color: #e15c48;

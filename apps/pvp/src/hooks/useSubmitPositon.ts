@@ -60,8 +60,8 @@ export const useSubmitPositon = ({
     );
   }, [form, marginTokenInfo]);
 
-  const lpPrice = form.marginAmount ? stakePrice.toString() : '-';
-  const value = stakeAmount ? stakeAmount : '-';
+  const lpPrice = form.marginAmount ? stakePrice.toString() : undefined;
+  const value = stakeAmount ? stakeAmount : undefined;
 
   const { data: allowance, refetch: refetchAllowance } = useContractRead({
     address: marginTokenAddress,

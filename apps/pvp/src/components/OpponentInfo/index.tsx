@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { formatAmount } from '@qilin/utils';
 import { AllHTMLAttributes, FC, useMemo } from 'react';
 
 const StakePrice = styled.div`
@@ -120,22 +121,22 @@ export const OpponentInfo: FC<OpponentInfoPropsType> = ({
   return (
     <div {...props}>
       <StakePrice>
-        Stake Price: {stakePrice} {marginTokenSymbol}
+        Stake Price: {formatAmount(stakePrice)} {marginTokenSymbol}
       </StakePrice>
       <OpponentContainer>
         <OpponentItem>
-          <div>{long} LP</div>
-          <div>{long * stakePrice} USDC</div>
+          <div>{formatAmount(long)} LP</div>
+          <div>{formatAmount(long * stakePrice)} USDC</div>
           <PostionRate>
-            <div>{longPrecent.toFixed(2)}%</div>
+            <div>{formatAmount(longPrecent, 2)}%</div>
             <div>Long</div>
           </PostionRate>
         </OpponentItem>
         <OpponentItem>
-          <div>{short} LP</div>
-          <div>{short * stakePrice} USDC</div>
+          <div>{formatAmount(short)} LP</div>
+          <div>{formatAmount(short * stakePrice)} USDC</div>
           <PostionRate>
-            <div>{shortPrecent.toFixed(2)}%</div>
+            <div>{formatAmount(shortPrecent, 2)}%</div>
             <div>Short</div>
           </PostionRate>
         </OpponentItem>

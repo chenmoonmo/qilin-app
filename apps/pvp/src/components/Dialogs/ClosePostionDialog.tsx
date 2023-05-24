@@ -1,8 +1,10 @@
+import { useClosePostion } from '@/hooks';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
+import { Address } from 'wagmi';
 
 const PostionInfoItem = styled.div`
   display: flex;
@@ -25,36 +27,58 @@ const PNLItem = styled(PostionInfoItem)`
   border-top: 1px solid #363a45;
 `;
 
-type ClosePostionDialogPropsType = {};
+type ClosePostionDialogPropsType = {
+  children?: ReactNode;
+  position: any;
+  // TODO: poolAddress 也不需要 明确下 position 的类型
+  poolAddress: Address;
+};
 
 export const closePostionDialogOpenAtom = atom(false);
 
-export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = () => {
+export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
+  children,
+  position,
+  poolAddress,
+}) => {
+  const { isNeedLiquidate, closePostion } = useClosePostion({
+    position,
+    poolAddress,
+  });
+
   const [open, setOpen] = useAtom(closePostionDialogOpenAtom);
+
+  const pnl = `${position.estPnl > 0 ? '+' : ''}${position.estPnl}`;
+
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content>
-          <Dialog.Title>Close Postion</Dialog.Title>
+          <Dialog.Title>
+            {isNeedLiquidate ? 'Liquidate' : 'Close Postion'}
+          </Dialog.Title>
           <Dialog.CloseIcon />
           <PostionInfoItem>
             <span>Symbol</span>
-            <span>ETH / USDC</span>
+            <span>{position.tradePair}</span>
           </PostionInfoItem>
           <PostionInfoItem>
             <span>Close Price</span>
-            <span>199.12 USDC</span>
+            {/* TODO: 单位 */}
+            <span>{position.closePrice} </span>
           </PostionInfoItem>
           <PostionInfoItem>
             <span>Margin</span>
-            <span>988.12 USDC</span>
+            <span>
+              {position.fomattedMargin} {position.marginSymbol}
+            </span>
           </PostionInfoItem>
           {/* TODO: 盈亏色值 */}
           <PNLItem>
             <span>Est.PNL</span>
             <span>
-              <strong>+456781.23</strong> USDC
+              <strong>{pnl}</strong> {position.marginSymbol}
             </span>
           </PNLItem>
           <Button
@@ -63,11 +87,13 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = () => {
               height: 40px;
               margin-top: 94px;
             `}
+            onClick={closePostion}
           >
             Confirm
           </Button>
         </Dialog.Content>
       </Dialog.Portal>
+      {children}
     </Dialog.Root>
   );
 };
