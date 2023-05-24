@@ -11,12 +11,16 @@ import {
   isBefore,
   millisecondsToSeconds,
 } from 'date-fns';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import tz from 'dayjs/plugin/timezone';
+
 import { Address } from 'wagmi';
 import { useOpenPosition } from '@/hooks';
 
 dayjs.extend(utc);
+dayjs.extend(tz);
+dayjs.tz.setDefault('UTC');
 
 const EndTimeContainer = styled.div`
   display: flex;
@@ -42,6 +46,7 @@ const Note = styled.div`
 type OpenRoomDIalogPropsType = {
   children: ReactNode;
   poolAddress: Address;
+  enabled: boolean;
 };
 
 export const openRoomOpenAtom = atom(false);
@@ -49,16 +54,29 @@ export const openRoomOpenAtom = atom(false);
 export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({
   poolAddress,
   children,
+  enabled,
 }) => {
   const [open, setOpen] = useAtom(openRoomOpenAtom);
 
   // 默认时间 当前时间 + 3小时
-  const [endTime, setEndTime] = useState(addHours(new Date(), 1));
+  const [endTime, setEndTime] = useState(() => {
+    const utcOffset = dayjs().utcOffset() / 60;
+    return addHours(new Date(), 3 - utcOffset);
+  });
+
+  const utcTime = dayjs(endTime).tz('UTC', true).toDate();
 
   const openPosition = useOpenPosition({
     poolAddress,
-    endTime: millisecondsToSeconds(+endTime),
+    endTime: millisecondsToSeconds(+utcTime),
+    enabled,
   });
+
+  // TODO: 合约调用提示
+  const handleOpen = async () => {
+    await openPosition?.();
+    setOpen(false);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -80,16 +98,7 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({
               `}
               value={endTime}
               format="yyyy-MM-dd HH:mm"
-              shouldDisableDate={date => {
-                return isBefore(date, new Date());
-              }}
-              shouldDisableHour={(hour, date) => {
-                return hour < getHours(new Date());
-              }}
-              shouldDisableMinute={(minute, date) => {
-                return minute < getMinutes(new Date());
-              }}
-              onChange={setEndTime}
+              onChange={date => setEndTime(date!)}
             />
           </EndTimeContainer>
           <Button
@@ -98,7 +107,7 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({
               height: 40px;
               margin-top: 94px;
             `}
-            onClick={openPosition}
+            onClick={handleOpen}
           >
             Confirm
           </Button>

@@ -14,7 +14,7 @@ import {
   OpenRoomDialog,
   OpponentInfo,
   TokenAmountInput,
-  WhilteListDialog,
+  WhitelistDialog,
 } from '@/components';
 import { LeverageRadio } from '@/components';
 import {
@@ -43,6 +43,7 @@ import {
 import { usePoolInfo } from '@/hooks/usePoolInfo';
 import { useDealerId, useAddPlayers, useSubmitPositon } from '@/hooks';
 import { formatAmount, formatInput } from '@qilin/utils';
+import dayjs from 'dayjs';
 
 type SeatItemProps = {
   userName: string;
@@ -60,7 +61,7 @@ const SeatItem = forwardRef<SeatItemProps, any>(
             <UserName>{userName}</UserName>
             <Positioninfo>
               <div>{formatAmount(position)}</div>
-              <div>{formatAmount(pnl)}</div>
+              <div>{pnl && formatAmount(pnl)}</div>
             </Positioninfo>
           </>
         ) : (
@@ -95,14 +96,13 @@ const Detail = () => {
     isSubmited,
     stakePrice,
     status,
-    myROE,
+    myPosition,
+    isOpend,
+    isEnd,
   } = usePoolInfo(id);
 
   // 是否是房主
   const isOwner = dealerId && createDealerId?.eq(dealerId);
-
-  // 房主是否开盘
-  const isOpend = +(poolInfo?.deadline ?? 0) > 0;
 
   const canBeOpen = isOwner && !isOpend;
 
@@ -143,31 +143,56 @@ const Detail = () => {
           <div>{poolInfo?.trade_pair}</div>
           <div>Chainlink</div>
         </PairInfo>
-        <MainCard data-type={myROE > 0 ? 'long' : 'short'}>
+        <Profit data-type={myPosition?.direction}>
+          {myPosition?.direction}
+        </Profit>
+        <MainCard
+          data-type={
+            myPosition?.ROE
+              ? myPosition?.ROE > 0
+                ? 'long'
+                : 'short'
+              : undefined
+          }
+        >
           <div>
-            {status === 'wait' ? 'To Be Open' : `${formatAmount(myROE, 2)}%`}
+            {status === 'wait'
+              ? 'To Be Open'
+              : `${formatAmount(myPosition?.ROE, 2)}%`}
           </div>
           {status === 'end' && <div>Ended</div>}
         </MainCard>
         <RoomID>Room {poolInfo?.id?.slice(-4)}</RoomID>
-        {isOpend && <EndTime>2023-05-02 18:21:00 UTC</EndTime>}
+        {isOpend && (
+          <EndTime>
+            {dayjs(poolInfo?.deadline * 1000)
+              .tz('UTC')
+              .format('YYYY-MM-DD HH:mm')}{' '}
+            UTC
+          </EndTime>
+        )}
       </PairMiniCard>
       <RoomCard>
         {/* 座位 */}
         <RoomSeats>
-          <WhilteListDialog type="add" roomId={id}>
+          <WhitelistDialog type="add" roomId={id}>
             <>
               <RoomHeader>
                 <div>
                   {poolInfo?.trade_pair}
                   <span>{formatAmount(poolInfo?.token_price)} USDC</span>
-                  {isOpend && <EndTime>2023-05-02 18:21:00 UTC</EndTime>}
+                  {isOpend && (
+                    <EndTime>
+                      {dayjs(poolInfo?.deadline * 1000)
+                        .tz('UTC')
+                        .format('YYYY-MM-DD HH:mm')}{' '}
+                      UTC
+                    </EndTime>
+                  )}
                 </div>
                 <Dialog.Trigger asChild>
                   <Button
-                    disabled={
-                      !enableAdd || (!isOwner && !isOpend) || isSubmited
-                    }
+                    disabled={!enableAdd || !isOwner || isOpend}
                     css={css`
                       font-weight: 400;
                       align-self: flex-start;
@@ -189,22 +214,22 @@ const Detail = () => {
                   return (
                     <Dialog.Trigger
                       key={index}
-                      disabled={!!userName || isSubmited}
+                      disabled={!!userName || !enableAdd || !isOwner || isOpend}
                     >
                       <SeatItem
                         key={index}
                         data-id={index + 1}
                         data-position={position?.direction}
                         userName={`${userName}${position?.isMe ? '(I)' : ''}`}
-                        position={position?.formattedLp}
-                        pnl={position?.estPnl}
+                        position={position?.fomattedMargin}
+                        pnl={isOpend && position?.estPnl}
                       />
                     </Dialog.Trigger>
                   );
                 })}
               </RoomSeatsMap>
             </>
-          </WhilteListDialog>
+          </WhitelistDialog>
 
           <div
             css={css`
@@ -214,7 +239,10 @@ const Detail = () => {
               justify-content: center;
             `}
           >
-            <OpenRoomDialog poolAddress={poolAddress}>
+            <OpenRoomDialog
+              poolAddress={poolAddress}
+              enabled={isOwner && !isOpend}
+            >
               <Button
                 css={css`
                   box-sizing: border-box;
@@ -389,7 +417,7 @@ const Detail = () => {
                 return (
                   <tr key={index}>
                     {/* Ranking */}
-                    <td>{position?.index}</td>
+                    <td>{index + 1}</td>
                     {/* Address */}
                     <td>{`${shortAddress} ${position.isMe ? '(I)' : ''}`}</td>
                     {/* Margin */}
@@ -397,28 +425,34 @@ const Detail = () => {
                     {/* Direction */}
                     <td>{direction}</td>
                     {/* Open price */}
-                    <td>{formatAmount(position.open_price)}</td>
+                    <td>{formatAmount(position.openPrice)}</td>
                     {/* Value */}
                     <td>{formatAmount(position.currentValue)}</td>
                     {/* Est.PNL */}
                     <td>
-                      {formatAmount(position.estPnl)}(
-                      {formatAmount(position.ROE, 2)}%)
-                      {position.isMe && (
-                        <ClosePostionDialog
-                          position={position}
-                          poolAddress={poolAddress}
-                        >
-                          <Dialog.Trigger asChild>
-                            <Button
-                              css={css`
-                                margin-left: 11px;
-                              `}
+                      {isOpend ? (
+                        <>
+                          {formatAmount(position.estPnl)}(
+                          {formatAmount(position.ROE, 2)}%)
+                          {position.isMe && isEnd && position.type === 1 && (
+                            <ClosePostionDialog
+                              position={position}
+                              poolAddress={poolAddress}
                             >
-                              Close
-                            </Button>
-                          </Dialog.Trigger>
-                        </ClosePostionDialog>
+                              <Dialog.Trigger asChild>
+                                <Button
+                                  css={css`
+                                    margin-left: 11px;
+                                  `}
+                                >
+                                  Close
+                                </Button>
+                              </Dialog.Trigger>
+                            </ClosePostionDialog>
+                          )}
+                        </>
+                      ) : (
+                        '-'
                       )}
                     </td>
                   </tr>

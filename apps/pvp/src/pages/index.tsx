@@ -10,7 +10,7 @@ import { NFTIDAtom } from '@/atoms';
 import {
   CreateRoomDialog,
   NFTMMainDialog,
-  WhilteListDialog,
+  WhitelistDialog,
   NFTMainDialogOpenAtom,
 } from '@/components';
 import HomeLayout from '@/layouts/home-layout';
@@ -112,7 +112,7 @@ const Home: NextPageWithLayout = () => {
           ))}
         </NFTContainer>
       </NFTMMainDialog>
-      <WhilteListDialog />
+      <WhitelistDialog />
     </StyledMain>
   );
 };

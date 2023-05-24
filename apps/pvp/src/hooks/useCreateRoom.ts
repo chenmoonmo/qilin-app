@@ -55,15 +55,14 @@ export const useCreateRoom = () => {
   const [players, setPlayers] = useAtom(playersAtom);
   const canSendCreate = useAtomValue(canSendCreateAtom);
 
-  const { dealerId, isLoading: isDealerToIdLoading } = useDealerId();
+  const { dealerId } = useDealerId();
 
   //  是否可以创建房间
-  const { data: canCreateRoom } = useContractRead({
+  const { data: canCreateRoom = false, refetch } = useContractRead({
     ...DealerContract,
     functionName: 'getDealerStatus',
-    args: [dealerId],
-    enabled:
-      !!dealerId && !isDealerToIdLoading && (dealerId as BigNumber).gt(0),
+    args: dealerId?.gt(0) ? [dealerId] : undefined,
+    enabled: dealerId && dealerId?.gt(0),
   });
 
   // 创建房间
@@ -91,7 +90,7 @@ export const useCreateRoom = () => {
       6,
       [address, ...players.filter(address => isAddress(address))],
     ],
-    enabled: !!canCreateRoom,
+    enabled: canCreateRoom as boolean,
   });
 
   const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
@@ -101,7 +100,9 @@ export const useCreateRoom = () => {
     return async () => {
       const res = await createRoomWrite?.();
       await res?.wait();
-      await setPlayersWrite?.();
+      const res2 = await setPlayersWrite?.();
+      await res2?.wait();
+      refetch();
     };
   }, [createRoomWrite, setPlayersWrite]);
 

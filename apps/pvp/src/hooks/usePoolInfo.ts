@@ -11,7 +11,7 @@ import { BigNumber, ethers } from 'ethers';
 import { useWaitPositions } from './useWaitPositions';
 import { useNow } from './useNow';
 import { isAfter } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 export type PoolInfoType = Record<'token0' | 'token1' | 'pay_token', Address> &
   Record<
@@ -73,7 +73,7 @@ export const usePoolInfo = (playerNFTId: number) => {
     enabled: !!createDealerId,
   });
 
-  const { data: price } = useContractRead({
+  const { data: nowPrice } = useContractRead({
     address: poolAddress as Address,
     abi: Pool.abi,
     functionName: 'getPrice',
@@ -128,9 +128,11 @@ export const usePoolInfo = (playerNFTId: number) => {
 
   const isOpend = +(data?.poolInfo?.deadline ?? 0) > 0;
 
-  const isEnd = isOpend && isAfter(now, new Date(+data?.poolInfo?.deadline!));
+  const isEnd =
+    isOpend && isAfter(now, new Date(+data?.poolInfo?.deadline! * 1000));
 
   // 结束时的价格
+  // TODO: 还取不到
   const { data: closePrice } = useContractRead({
     address: poolAddress as Address,
     abi: Pool.abi,
@@ -212,29 +214,44 @@ export const usePoolInfo = (playerNFTId: number) => {
     if (!isOpend) {
       return stratPrice;
     } else {
-      // const openPrice = +ethers.utils.formatUnits(
-      //   mergePositions?.long?.open_price
-      // );
-      // TODO: remove mock
-      const openPrice = 1827;
-      const nowPrice = +ethers.utils.formatUnits(price as BigNumber);
-      const longLp = (nowPrice / openPrice) * mergePositions?.long?.open_lp;
+      const currentPrice = isEnd
+        ? formattedClosePrice
+        : +ethers.utils.formatUnits(nowPrice as BigNumber);
+
+      const openPrice = +ethers.utils.formatUnits(
+        mergePositions?.long?.open_price
+      );
+
+      const longLp = (currentPrice / openPrice) * mergePositions?.long?.open_lp;
 
       const shortLp = mergePositions?.short.open_lp;
 
-      const fakeLp = (nowPrice / openPrice) * mergePositions?.short?.open_lp;
+      const fakeLp =
+        (currentPrice / openPrice) * mergePositions?.short?.open_lp;
 
       const totalLp = longLp + 2 * shortLp - fakeLp;
+
       const totalMargin = data?.poolInfo.margin;
 
       return totalMargin / totalLp;
     }
-  }, [mergePositions, isOpend, price, data?.poolInfo]);
+  }, [
+    data?.poolInfo,
+    mergePositions,
+    isOpend,
+    nowPrice,
+    formattedClosePrice,
+    isEnd,
+  ]);
 
   const positions = useMemo(() => {
     const marginTokenDecimal = data?.poolInfo.pay_token_decimal ?? 6;
     if (isOpend) {
       return data?.positions?.map(position => {
+        const currentPrice = isEnd
+          ? formattedClosePrice
+          : +ethers.utils.formatUnits(nowPrice as BigNumber);
+        const openPrice = +ethers.utils.formatUnits(position?.open_price);
         const direction = position.level > 0 ? 'long' : 'short';
         const fomattedMargin = +ethers.utils.formatUnits(
           position.margin,
@@ -246,11 +263,19 @@ export const usePoolInfo = (playerNFTId: number) => {
           +marginTokenDecimal
         );
         // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
-        const fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
+        let fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
+        if (direction === 'short') {
+          const fakeLp = (currentPrice / openPrice) * fotmattedStakeAmount;
+          fotmattedStakeAmount = 2 * fotmattedStakeAmount - fakeLp;
+        } else {
+          fotmattedStakeAmount =
+            (currentPrice / openPrice) * fotmattedStakeAmount;
+        }
         // 仓位价值：current Value = stake amount * stake price
         const currentValue = fotmattedStakeAmount * stakePrice;
         // 仓位收益：profit = current Value - Value
-        const estPnl = currentValue - fotmattedStakeAmount;
+        const estPnl = currentValue - fomattedMargin;
+
         // ROE = Est.pnl / Margin
         const ROE = (estPnl / fomattedMargin) * 100;
 
@@ -266,6 +291,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           estPnl,
           ROE,
           isMe,
+          openPrice,
           marginSymbol: data?.poolInfo.pay_token_symbol,
           tradePair: data?.poolInfo.trade_pair,
           closePrice: formattedClosePrice,
@@ -275,21 +301,18 @@ export const usePoolInfo = (playerNFTId: number) => {
       return waitPositions?.map(position => {
         const direction = position.level > 0 ? 'long' : 'short';
         const fomattedMargin = +ethers.utils.formatUnits(
-          position.asset.div(BigNumber.from(position.level).abs()),
-          marginTokenDecimal
-        );
-        const formattedLp = ethers.utils.formatUnits(
           position.asset,
           marginTokenDecimal
         );
+        const formattedLp = fomattedMargin;
         // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
         const fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
         // 仓位价值：current Value = stake amount * stake price
         const currentValue = fotmattedStakeAmount * stakePrice;
         // 仓位收益：profit = current Value - Value
-        const estPnl = currentValue - fotmattedStakeAmount;
+        const estPnl = undefined;
         // ROE = Est.pnl / Margin
-        const ROE = (estPnl / fomattedMargin) * 100;
+        const ROE = undefined;
 
         const isMe = BigNumber.from(position.user).eq(BigNumber.from(address));
         return {
@@ -302,7 +325,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           estPnl,
           ROE,
           isMe,
-          open_price: undefined,
+          openPrice: undefined,
           closePrice: undefined,
           marginSymbol: data?.poolInfo.pay_token_symbol,
           tradePair: data?.poolInfo.trade_pair,
@@ -313,14 +336,16 @@ export const usePoolInfo = (playerNFTId: number) => {
     data?.poolInfo,
     data?.positions,
     isOpend,
+    isEnd,
     waitPositions,
     stakePrice,
     formattedClosePrice,
+    address,
+    nowPrice,
   ]);
 
-  const myROE = useMemo(() => {
-    const myPosition = (positions as any[])?.find(position => position.isMe);
-    return myPosition?.ROE;
+  const myPosition = useMemo(() => {
+    return (positions as any[])?.find(position => position.isMe);
   }, [positions]);
 
   const status = useMemo(() => {
@@ -331,7 +356,6 @@ export const usePoolInfo = (playerNFTId: number) => {
     } else {
       return 'end';
     }
-    return 'wait';
   }, [isOpend, isEnd]);
 
   return {
@@ -346,6 +370,8 @@ export const usePoolInfo = (playerNFTId: number) => {
     isLoading,
     mutate,
     status,
-    myROE,
+    isOpend,
+    isEnd,
+    myPosition,
   };
 };

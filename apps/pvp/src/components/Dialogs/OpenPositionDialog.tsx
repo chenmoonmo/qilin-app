@@ -67,6 +67,13 @@ export const OpenPositionDialog: FC<OpenPositionDialogPropsType> = ({
   onConfirm,
 }) => {
   const [open, setOpen] = useAtom(openPositionDialogOpenAtom);
+
+  const handleSubmit =async () => {
+    await onConfirm?.();
+    setOpen(false);
+  }
+
+
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
@@ -127,7 +134,7 @@ export const OpenPositionDialog: FC<OpenPositionDialogPropsType> = ({
               height: 40px;
               margin-top: 37px;
             `}
-            onClick={onConfirm}
+            onClick={handleSubmit}
           >
             Comfirm
           </Button>

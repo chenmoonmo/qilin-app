@@ -2,6 +2,7 @@ import { useClosePostion } from '@/hooks';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
+import { formatAmount } from '@qilin/utils';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
 import { Address } from 'wagmi';
@@ -50,6 +51,11 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
 
   const pnl = `${position.estPnl > 0 ? '+' : ''}${position.estPnl}`;
 
+  const handleConfirm = async () => {
+    await closePostion?.();
+    setOpen(false);
+  };
+
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
@@ -78,7 +84,7 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
           <PNLItem>
             <span>Est.PNL</span>
             <span>
-              <strong>{pnl}</strong> {position.marginSymbol}
+              <strong>{formatAmount(pnl)}</strong> {position.marginSymbol}
             </span>
           </PNLItem>
           <Button
@@ -87,7 +93,7 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
               height: 40px;
               margin-top: 94px;
             `}
-            onClick={closePostion}
+            onClick={handleConfirm}
           >
             Confirm
           </Button>

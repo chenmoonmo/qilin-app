@@ -29,7 +29,7 @@ export const useGetPlayerNFTIds = () => {
       });
     }
     return arr;
-  }, [isIndexLoading, index]);
+  }, [isIndexLoading, index,address]);
 
   const { data } = useContractReads({
     contracts,
@@ -42,7 +42,7 @@ export const useGetPlayerNFTIds = () => {
     return ids.filter((item: any, index: number) => {
       return data[index] && (data[index] as BigNumber).gt(0);
     });
-  }, [contracts, data]);
+  }, [contracts, data,address]);
 
   return playerNFTIds;
 };

@@ -20,7 +20,8 @@ export const formatAmount = (
     const BN = BigNumber.clone(); //生成一个独立的BigNumber构造函数
     BN.config({ DECIMAL_PLACES: 4, ROUNDING_MODE: 1 }); //设置小数点、舍入模式
     number = new BN(num1).div(1).toNumber().toFixed(digits);
-  } else if (+num1 < 0.0001) {
+    return parseFloat(number).toString();
+  } else if (+num1 < 0.0001 && +num1 > 0) {
     const BN1 = BigNumber.clone(); //生成一个独立的BigNumber构造函数
     BN1.config({ EXPONENTIAL_AT: 1e9 });
     const numStr = new BN1(num1).toString();
@@ -38,6 +39,7 @@ export const formatAmount = (
       .div(1)
       .toNumber()
       .toFixed(digits || 6);
+    return parseFloat(number).toString();
   }
-  return parseFloat(number).toString();
+  return number;
 };

@@ -40,7 +40,7 @@ const FromLabel = styled.div`
   line-height: 12px;
 `;
 
-const WhilteListInput = styled.div`
+const WhitelistInput = styled.div`
   display: block;
   width: 100%;
   margin-top: 10px;
@@ -54,20 +54,20 @@ const WhilteListInput = styled.div`
   }
 `;
 
-type WhilteListDialogPropsType = {
+type WhitelistDialogPropsType = {
   children?: ReactNode;
   roomId: number;
   type?: 'aftercreate' | 'add';
 };
 
-export const whilteListOpenAtom = atom(false);
+export const WhitelistOpenAtom = atom(false);
 
-export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
+export const WhitelistDialog: FC<WhitelistDialogPropsType> = ({
   children,
   type = 'aftercreate',
   roomId,
 }) => {
-  const [open, setOpen] = useAtom(whilteListOpenAtom);
+  const [open, setOpen] = useAtom(WhitelistOpenAtom);
   const holeLink = location.origin;
   const shortLink = holeLink;
   const title = useMemo(() => {
@@ -86,6 +86,11 @@ export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
       id: roomId,
     });
 
+  const handleAdd = async () => {
+    await addPlayers();
+    setOpen(false);
+  };
+
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
@@ -101,7 +106,7 @@ export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
           <FromLabel>Whitelist</FromLabel>
           {playerSeats.map((item, index) => {
             return (
-              <WhilteListInput key={index}>
+              <WhitelistInput key={index}>
                 <input
                   value={item}
                   onChange={e => {
@@ -114,7 +119,7 @@ export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
                     });
                   }}
                 />
-              </WhilteListInput>
+              </WhitelistInput>
             );
           })}
           <Button
@@ -125,7 +130,7 @@ export const WhilteListDialog: FC<WhilteListDialogPropsType> = ({
               height: 40px;
             `}
             disabled={!seatsAddressValid}
-            onClick={addPlayers}
+            onClick={handleAdd}
           >
             Confirm
           </Button>

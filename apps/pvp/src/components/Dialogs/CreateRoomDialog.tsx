@@ -123,7 +123,6 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
     enabled: isAddress(marginSearchInfo),
   });
 
-
   const payTokens = useMemo(() => {
     return uniqBy(
       PAY_TOKENS?.[chainId as keyof typeof PAY_TOKENS]
@@ -136,6 +135,11 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
       'address'
     );
   }, [data]);
+
+  const handleCreateRoom = async () => {
+    await createRoom();
+    setOpen(false);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -172,7 +176,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
                   setForm(preForm => ({
                     ...preForm,
                     oracle: selection.oracleAddress,
-                    targetToken: selection.tokenAddress
+                    targetToken: selection.tokenAddress,
                   }))
                 }
                 search={searchInfo}
@@ -233,7 +237,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
                 margin: 10px auto 0;
               `}
               disabled={!canSendCreate}
-              onClick={createRoom}
+              onClick={handleCreateRoom}
             >
               Create Room & Mint NFT
             </Button>

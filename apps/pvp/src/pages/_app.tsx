@@ -1,4 +1,4 @@
-import JotaiProvider from '@/providers/JotaiProvider';
+// import JotaiProvider from '@/providers/JotaiProvider';
 import '@/styles/globals.css';
 
 import Web3Provider from '@qilin/wagmi-provider';
@@ -25,7 +25,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <Web3Provider defaultChains={[goerli]} connectorNames={['MetaMask']}>
-      <JotaiProvider>{getLayout(<Component {...pageProps} />)}</JotaiProvider>
+      {getLayout(<Component {...pageProps} />)}
     </Web3Provider>
   );
 }
