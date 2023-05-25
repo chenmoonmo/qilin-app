@@ -28,8 +28,7 @@ export type PoolInfoType = Record<'token0' | 'token1' | 'pay_token', Address> &
     | 'margin_ratio'
     | 'lp'
     | 'lp_price'
-    | 'deadline'
-    | 'fact_pnl',
+    | 'deadline',
     string
   > & {
     level: number[];
@@ -56,6 +55,7 @@ type PoolGraph = {
     asset: string;
     level: number;
     lp: string;
+    fact_pnl: string;
     type: 0 | 1 | 2 | 3;
   }[];
   players: [
