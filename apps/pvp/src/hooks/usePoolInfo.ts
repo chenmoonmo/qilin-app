@@ -30,7 +30,9 @@ export type PoolInfoType = Record<'token0' | 'token1' | 'pay_token', Address> &
     | 'lp_price'
     | 'deadline',
     string
-  >;
+  > & {
+    level: number[];
+  };
 
 type MergePositionsType = {
   id: `${string}-${'long' | 'short'}`;
@@ -122,6 +124,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           lp_price: +ethers.utils.formatEther(pools[0]?.lp_price),
           // deadline: deadline?.toString(),
           fomattedMargin,
+          level: pools[0]?.level.map(item => item.toString()),
         },
         positions,
         mergePositions,
@@ -397,5 +400,6 @@ export const usePoolInfo = (playerNFTId: number) => {
     isOpend,
     isEnd,
     myPosition,
+    refresh: mutate,
   };
 };

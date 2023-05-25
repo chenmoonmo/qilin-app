@@ -15,7 +15,10 @@ const Root = styled(RadioGroup.Root)`
 `;
 
 const Item = styled(RadioGroup.Item)`
-  padding: 10px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
   margin-left: 17px;
   flex: 1;
   background: #2c2f38;

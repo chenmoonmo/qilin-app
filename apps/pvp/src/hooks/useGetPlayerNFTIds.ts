@@ -13,7 +13,11 @@ export const useGetPlayerNFTIds = () => {
     abi: Player.abi,
   };
 
-  const { data: index, isLoading: isIndexLoading } = useContractRead({
+  const {
+    data: index,
+    isLoading: isIndexLoading,
+    refetch,
+  } = useContractRead({
     ...playerContract,
     functionName: 'index',
   });
@@ -29,7 +33,7 @@ export const useGetPlayerNFTIds = () => {
       });
     }
     return arr;
-  }, [isIndexLoading, index,address]);
+  }, [isIndexLoading, index, address]);
 
   const { data } = useContractReads({
     contracts,
@@ -42,7 +46,7 @@ export const useGetPlayerNFTIds = () => {
     return ids.filter((item: any, index: number) => {
       return data[index] && (data[index] as BigNumber).gt(0);
     });
-  }, [contracts, data,address]);
+  }, [contracts, data, address]);
 
-  return playerNFTIds;
+  return { playerNFTIds, refetch };
 };

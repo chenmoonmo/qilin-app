@@ -101,6 +101,7 @@ const Detail = () => {
     myPosition,
     isOpend,
     isEnd,
+    refresh,
   } = usePoolInfo(id);
 
   // 是否是房主
@@ -277,6 +278,7 @@ const Detail = () => {
           </FormLabel>
           <LeverageRadio
             value={form.leverage}
+            leverages={poolInfo?.level ?? []}
             onChange={leverage =>
               setForm(preForm => {
                 return {
@@ -353,7 +355,10 @@ const Detail = () => {
             form={form}
             lpPrice={lpPrice}
             value={value}
-            onConfirm={submitPosition}
+            onConfirm={async () => {
+              await submitPosition();
+              refresh();
+            }}
           >
             <SubmitContainer>
               <Dialog.Trigger asChild disabled={!enableSubmit || isSubmited}>

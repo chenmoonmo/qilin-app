@@ -75,7 +75,10 @@ export const lastMarginSelectionAtom = atom<{
   address: string;
 } | null>(null);
 
-export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
+export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
+  onSucceess,
+  children,
+}) => {
   const chainId = useChainId();
   const { canSendCreate, form, setForm, createRoom, players, setPlayers } =
     useCreateRoom();
@@ -132,6 +135,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
   const handleCreateRoom = async () => {
     await createRoom();
     setOpen(false);
+    onSucceess?.();
   };
 
   return (

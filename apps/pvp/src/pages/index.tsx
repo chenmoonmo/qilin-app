@@ -64,7 +64,7 @@ const Home: NextPageWithLayout = () => {
   const { canCreateRoom } = useCreateRoom();
 
   // 玩家拥有的 player nft（可以进入的房间）
-  const playerNFTIds = useGetPlayerNFTIds();
+  const { playerNFTIds, refetch } = useGetPlayerNFTIds();
 
   console.log({
     canCreateRoom,
@@ -86,7 +86,7 @@ const Home: NextPageWithLayout = () => {
     <StyledMain>
       <HomeInfo>
         <div>My Betting Room</div>
-        <CreateRoomDialog>
+        <CreateRoomDialog onSucceess={refetch}>
           <Dialog.Trigger asChild>
             <Button disabled={!canCreateRoom}>
               <PlusIcon
