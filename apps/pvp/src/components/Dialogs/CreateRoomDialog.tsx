@@ -155,7 +155,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
               />
             </FromItem>
             <FromItem>
-              <label>Select Pair</label>
+              <label>Select Pair *</label>
               <SelectToken
                 css={css`
                   width: 264px;
@@ -178,7 +178,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
               />
             </FromItem>
             <FromItem>
-              <label>Margin</label>
+              <label>Margin *</label>
               <SelectToken
                 css={css`
                   width: 264px;
@@ -201,7 +201,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({ children }) => {
               />
             </FromItem>
             <FromItem>
-              <label>Number Of Seats </label>
+              <label>Number Of Seats</label>
               <SeatItem value={6} disabled></SeatItem>
             </FromItem>
             <WhielistContainer>

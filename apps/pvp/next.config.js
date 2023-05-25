@@ -1,14 +1,12 @@
-const graphqlApi =
-  'https://thegraph.com/explorer/subgraph/tiannalu1229/pvp-new-test03';
-
 const developmentENV = {
   // Graphql_Api: '/graphqlApi',
-  Graphql_Api: 'https://api.thegraph.com/subgraphs/name/tiannalu1229/pvp-new-test03',
-  Dealer_Contract_Address: '0x5aD78C21d80887c098c375d44B8712c6ab4810e2',
-  Player_Contract_Address: '0x5DEE89923eD12129abF31D998e42982777D56e4D',
-  Price_Contract_Address: '0x9D12Ae3A29c26AD840e3989Beaa6BF7A3DdA800E',
-  Factory_Contract_Address: '0x2D942b7df8BcDccADee1d968464F092dccd42d01',
-  Router_Contract_Address: '0x47F4fe479b64D3285D36111C1b9bD391b6FCd101',
+  Graphql_Api:
+    'https://api.thegraph.com/subgraphs/name/tiannalu1229/pvp-new-test03',
+  Dealer_Contract_Address: '0xA08947cE1C5FC906cfa1ed1318B080AB625564D0',
+  Player_Contract_Address: '0x953d8D626AD37ac7B8Cf390f977E0ef55B809247',
+  Price_Contract_Address: '0x97911BB0B1296c4040bDe43D0Ea389083EBDf577',
+  Factory_Contract_Address: '0x5d12A97bcea9374f2827Bc9751c5De32F8f1b12d',
+  Router_Contract_Address: '0xcF55751EAAEBfB9BbA3e15A7c2fd054e3A1d8a63',
 };
 
 const productionENV = {};
@@ -21,14 +19,6 @@ const env = isDevelopment ? developmentENV : productionENV;
 const nextConfig = {
   reactStrictMode: false,
   transpilePackages: ['@qilin/wagmi-provider'],
-  // async rewrites() {
-  //   return [
-  //     {
-  //       source: `${env.Graphql_Api}/:path*`,
-  //       destination: `${graphqlApi}/:path*`,
-  //     },
-  //   ];
-  // },
   env,
 };
 

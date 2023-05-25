@@ -43,6 +43,7 @@ import {
   SubmitButton,
   SubmitContainer,
   SytledSeatItem,
+  TableLevel,
   UserName,
 } from '@/styles/nft';
 
@@ -422,7 +423,14 @@ const Detail = () => {
                     {/* Address */}
                     <td>{`${shortAddress} ${position.isMe ? '(I)' : ''}`}</td>
                     {/* Margin */}
-                    <td>{formatAmount(position.fomattedMargin)}</td>
+                    <td>
+                      {formatAmount(position.fomattedMargin)}{' '}
+                      <TableLevel
+                        data-type={position.level > 0 ? 'long' : 'short'}
+                      >
+                        x{Math.abs(position.level)}
+                      </TableLevel>
+                    </td>
                     {/* Direction */}
                     <td>{direction}</td>
                     {/* Open price */}

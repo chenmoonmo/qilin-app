@@ -53,7 +53,7 @@ type PoolGraph = {
     asset: string;
     level: number;
     lp: string;
-    type: 0 | 1 |  2 | 3
+    type: 0 | 1 | 2 | 3;
   }[];
 };
 
@@ -82,13 +82,13 @@ export const usePoolInfo = (playerNFTId: number) => {
     functionName: 'getPrice',
   });
 
-  const { data: deadline } = useContractRead({
-    address: CONTRACTS.DealerAddress,
-    abi: Dealer.abi,
-    functionName: 'dealerToDeadline',
-    args: [createDealerId],
-    enabled: !!createDealerId,
-  });
+  // const { data: deadline } = useContractRead({
+  //   address: CONTRACTS.DealerAddress,
+  //   abi: Dealer.abi,
+  //   functionName: 'dealerToDeadline',
+  //   args: [createDealerId],
+  //   enabled: !!createDealerId,
+  // });
 
   const { data, isLoading, mutate } = useSWR(
     poolAddress
@@ -120,7 +120,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           trade_pair: 'ETH/USD',
           token_price: +ethers.utils.formatEther(pools[0]?.token_price),
           lp_price: +ethers.utils.formatEther(pools[0]?.lp_price),
-          deadline: deadline?.toString(),
+          // deadline: deadline?.toString(),
           fomattedMargin,
         },
         positions,
@@ -352,7 +352,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           closePrice: undefined,
           marginSymbol: data?.poolInfo.pay_token_symbol,
           tradePair: data?.poolInfo.trade_pair,
-          type: 0
+          type: 0,
         };
       });
     }

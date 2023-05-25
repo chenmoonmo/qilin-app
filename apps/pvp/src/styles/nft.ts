@@ -333,6 +333,22 @@ export const RankingTable = styled.div`
   }
 `;
 
+export const TableLevel = styled.span`
+  padding: 0 3px;
+  font-weight: 400;
+  font-size: 8px;
+  line-height: 12px;
+  background: #404040;
+  margin-left: 5px;
+  border-radius: 2px;
+  &[data-type='long'] {
+    background: #44c27f;
+  }
+  &[data-type='short'] {
+    background: #e15c48;
+  }
+`;
+
 export const PositionNote = styled.div`
   margin-top: 14px;
   font-style: normal;
