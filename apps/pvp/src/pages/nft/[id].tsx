@@ -147,7 +147,7 @@ const Detail = () => {
           <div>Chainlink</div>
         </PairInfo>
         <Profit data-type={myPosition?.direction}>
-          {myPosition?.direction}
+          {myPosition?.direction ?? `Margin:${marginTokenInfo?.symbol}`}
         </Profit>
         <MainCard
           data-type={
@@ -178,12 +178,15 @@ const Detail = () => {
       <RoomCard>
         {/* 座位 */}
         <RoomSeats>
-          <WhitelistDialog type="add" roomId={id}>
+          <WhitelistDialog type="add" roomId={id} onSuccess={refresh}>
             <>
               <RoomHeader>
                 <div>
                   {poolInfo?.trade_pair}
-                  <span>{formatAmount(poolInfo?.token_price)} USDC</span>
+                  <span>
+                    {formatAmount(poolInfo?.token_price)}{' '}
+                    {poolInfo?.token1Decimal}
+                  </span>
                   {isOpend && !!poolInfo?.deadline && (
                     <EndTime>
                       {dayjs(+poolInfo?.deadline * 1000)
@@ -207,7 +210,7 @@ const Detail = () => {
               </RoomHeader>
               <RoomSeatsMap>
                 <div>
-                  Total margin: {formatAmount(poolInfo?.fomattedMargin)}
+                  Total margin: {formatAmount(poolInfo?.fomattedMargin)}{' '}
                   {marginTokenInfo?.symbol}
                 </div>
                 <div>Room ID: {poolInfo?.id}</div>
@@ -224,7 +227,7 @@ const Detail = () => {
                         data-id={index + 1}
                         data-position={position?.direction}
                         userName={`${userName}${position?.isMe ? '(I)' : ''}`}
-                        position={position?.fomattedMargin}
+                        position={position?.formattedLp}
                         pnl={isOpend && position?.estPnl}
                       />
                     </Dialog.Trigger>
@@ -233,7 +236,6 @@ const Detail = () => {
               </RoomSeatsMap>
             </>
           </WhitelistDialog>
-
           <div
             css={css`
               display: flex;
@@ -245,6 +247,7 @@ const Detail = () => {
             <OpenRoomDialog
               poolAddress={poolAddress}
               enabled={isOwner && !isOpend}
+              onSuccess={refresh}
             >
               <Button
                 css={css`
@@ -355,6 +358,8 @@ const Detail = () => {
             form={form}
             lpPrice={lpPrice}
             value={value}
+            stakePrice={stakePrice}
+            mergePositions={mergePositions}
             onConfirm={async () => {
               await submitPosition();
               refresh();
@@ -411,7 +416,7 @@ const Detail = () => {
                 <th>Margin({marginTokenInfo?.symbol})</th>
                 <th>Direction</th>
                 {/*TODO: 单位 */}
-                <th>Open price({marginTokenInfo?.symbol})</th>
+                <th>Open price({poolInfo?.token1Decimal})</th>
                 <th>Value({marginTokenInfo?.symbol})</th>
                 <th>Est.PNL({marginTokenInfo?.symbol})</th>
               </tr>
@@ -421,6 +426,8 @@ const Detail = () => {
                 const direction = position.level > 0 ? 'Long' : 'Short';
                 const shortAddress =
                   position.user.slice(0, 6) + '...' + position.user.slice(-4);
+                const isNeedLiquidate =
+                  !!position.ROE && position.ROE / 100 <= -0.8;
                 return (
                   <tr key={index}>
                     {/* Ranking */}
@@ -448,18 +455,20 @@ const Detail = () => {
                         <>
                           {formatAmount(position.estPnl)}(
                           {formatAmount(position.ROE, 2)}%)
-                          {position.isMe && isEnd && position.type === 1 && (
+                          {position.isMe && position.type === 1 && (
                             <ClosePostionDialog
                               position={position}
                               poolAddress={poolAddress}
+                              onSuccess={refresh}
                             >
                               <Dialog.Trigger asChild>
                                 <Button
                                   css={css`
                                     margin-left: 11px;
                                   `}
+                                  disabled={!isEnd}
                                 >
-                                  Close
+                                  {isNeedLiquidate ? 'Liquidate' : 'Close'}
                                 </Button>
                               </Dialog.Trigger>
                             </ClosePostionDialog>

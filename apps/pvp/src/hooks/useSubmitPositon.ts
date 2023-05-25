@@ -116,6 +116,11 @@ export const useSubmitPositon = ({
         ],
       });
       await res?.wait();
+      setForm({
+        marginAmount: '',
+        leverage: '2',
+        direction: undefined,
+      });
     } catch (e) {}
   };
 

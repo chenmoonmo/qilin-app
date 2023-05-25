@@ -1,16 +1,13 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, DatePicker, Dialog } from '@qilin/component';
-import {
-  addHours,
-  millisecondsToSeconds,
-} from 'date-fns';
+import { addHours, millisecondsToSeconds } from 'date-fns';
 import dayjs from 'dayjs';
 import tz from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { atom, useAtom } from 'jotai';
 import type { FC, ReactNode } from 'react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Address } from 'wagmi';
 
 import { useOpenPosition } from '@/hooks';
@@ -44,6 +41,7 @@ type OpenRoomDIalogPropsType = {
   children: ReactNode;
   poolAddress: Address;
   enabled: boolean;
+  onSuccess?: () => void;
 };
 
 export const openRoomOpenAtom = atom(false);
@@ -52,6 +50,7 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({
   poolAddress,
   children,
   enabled,
+  onSuccess,
 }) => {
   const [open, setOpen] = useAtom(openRoomOpenAtom);
 
@@ -61,7 +60,9 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({
     return addHours(new Date(), 3 - utcOffset);
   });
 
-  const utcTime = dayjs(endTime).tz('UTC', true).toDate();
+  const utcTime = useMemo(() => {
+    return dayjs(endTime).tz('UTC', true).toDate();
+  }, [endTime]);
 
   const openPosition = useOpenPosition({
     poolAddress,
@@ -73,6 +74,7 @@ export const OpenRoomDialog: FC<OpenRoomDIalogPropsType> = ({
   const handleOpen = async () => {
     await openPosition?.();
     setOpen(false);
+    onSuccess?.();
   };
 
   return (

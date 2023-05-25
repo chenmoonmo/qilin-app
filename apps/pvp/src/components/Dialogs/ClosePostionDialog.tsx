@@ -34,6 +34,7 @@ type ClosePostionDialogPropsType = {
   position: any;
   // TODO: poolAddress 也不需要 明确下 position 的类型
   poolAddress: Address;
+  onSuccess: () => void;
 };
 
 export const closePostionDialogOpenAtom = atom(false);
@@ -42,6 +43,7 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
   children,
   position,
   poolAddress,
+  onSuccess,
 }) => {
   const { isNeedLiquidate, closePostion } = useClosePostion({
     position,
@@ -55,6 +57,7 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
   const handleConfirm = async () => {
     await closePostion?.();
     setOpen(false);
+    onSuccess?.();
   };
 
   return (

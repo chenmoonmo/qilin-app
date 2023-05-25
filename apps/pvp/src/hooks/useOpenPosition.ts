@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Address} from 'wagmi';
+import type { Address } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';

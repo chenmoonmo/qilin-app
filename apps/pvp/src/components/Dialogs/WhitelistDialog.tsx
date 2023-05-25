@@ -59,6 +59,7 @@ type WhitelistDialogPropsType = {
   children?: ReactNode;
   roomId: number;
   type?: 'aftercreate' | 'add';
+  onSuccess: () => void;
 };
 
 export const WhitelistOpenAtom = atom(false);
@@ -67,6 +68,7 @@ export const WhitelistDialog: FC<WhitelistDialogPropsType> = ({
   children,
   type = 'aftercreate',
   roomId,
+  onSuccess,
 }) => {
   const [open, setOpen] = useAtom(WhitelistOpenAtom);
 
@@ -89,6 +91,7 @@ export const WhitelistDialog: FC<WhitelistDialogPropsType> = ({
   const handleAdd = async () => {
     await addPlayers();
     setOpen(false);
+    onSuccess?.();
   };
 
   return (

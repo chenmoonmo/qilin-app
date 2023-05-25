@@ -77,12 +77,8 @@ export const PAIRS = {
 export const PAY_TOKENS = {
   [goerli.id]: [
     {
-      symbol: 'USD',
-      address: '0x07865c6e87b9f70255377e024ace6630c1eaa37f',
-    },
-    {
-      symbol: 'USDT',
-      address: '0x0d79df66BE487753B02D015Fb622DED7f0E9793d',
+      symbol: 'USDC',
+      address: '0xd3603FA1b65cb6Fd5710395BC292a2E7f0B868e3',
     },
   ],
 };

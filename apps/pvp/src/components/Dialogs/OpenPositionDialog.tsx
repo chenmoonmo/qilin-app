@@ -50,6 +50,8 @@ const OpenPositionInfo = styled.div`
 type OpenPositionDialogPropsType = {
   children?: ReactNode;
   poolInfo?: any;
+  stakePrice: number;
+  mergePositions?: any;
   form: SubmitPositionForm;
   lpPrice?: string;
   value?: string;
@@ -63,6 +65,8 @@ export const OpenPositionDialog: FC<OpenPositionDialogPropsType> = ({
   form,
   lpPrice,
   value,
+  stakePrice,
+  mergePositions,
   children,
   onConfirm,
 }) => {
@@ -88,7 +92,9 @@ export const OpenPositionDialog: FC<OpenPositionDialogPropsType> = ({
               padding-top: 35px;
               margin-bottom: 27px;
             `}
-            stakePrice={1}
+            long={+(mergePositions?.long?.formattedLp ?? 0)}
+            short={+(mergePositions?.short?.formattedLp ?? 0)}
+            stakePrice={stakePrice}
             marginTokenSymbol={poolInfo?.pay_token_symbol}
           />
           <OpenPositionInfo>

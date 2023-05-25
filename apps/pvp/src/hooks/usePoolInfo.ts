@@ -100,7 +100,7 @@ export const usePoolInfo = (playerNFTId: number) => {
       const res = await graphFetcher<PoolGraph>(
         // TODO: 抽离 querystring
         gql`{
-          pools(where:{id:"${poolAddress}"}) {id,token0,token1, margin,margin_ratio ,trade_pair, pay_token, pay_token_decimal, pay_token_symbol, token_price, asset, lp, lp_price, level, token0Decimal, token1Decimal,deadline}
+          pools(where:{id:"${poolAddress}"}) {id,token0,token1, margin,margin_ratio ,trade_pair, pay_token, pay_token_decimal, pay_token_symbol, token_price, asset, lp, lp_price, level, token0Decimal, token1Decimal,deadline,player}
           positions(first:1000, where:{pool_address:"${poolAddress}"}){index, pool_address, open_price, margin, asset, level, lp,user,type}
           mergePositions(where:{id_in:["${poolAddress}-long", "${poolAddress}-short"]}){id, lp, fake_lp, asset,open_lp,open_price}
           }
@@ -119,6 +119,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           ...pools[0],
           token0: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6' as Address,
           token1: '0x07865c6e87b9f70255377e024ace6630c1eaa37f' as Address,
+          token1Decimal: 'USD',
           trade_pair: 'ETH/USD',
           token_price: +ethers.utils.formatEther(pools[0]?.token_price),
           lp_price: +ethers.utils.formatEther(pools[0]?.lp_price),
@@ -147,6 +148,8 @@ export const usePoolInfo = (playerNFTId: number) => {
     functionName: 'endPrice',
     enabled: !!poolAddress && isEnd,
   });
+
+  console.log('closePrice', closePrice);
 
   const formattedClosePrice = useMemo(() => {
     if (!closePrice) return 0;
