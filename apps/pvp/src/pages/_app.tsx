@@ -1,6 +1,7 @@
 // import JotaiProvider from '@/providers/JotaiProvider';
 import '@/styles/globals.css';
 
+// import { Toast, ToastProvider } from '@qilin/component';
 import Web3Provider from '@qilin/wagmi-provider';
 import type { NextPage } from 'next';
 import type { AppProps } from 'next/app';
@@ -25,7 +26,10 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   return (
     <Web3Provider defaultChains={[goerli]} connectorNames={['MetaMask']}>
+      {/* <ToastProvider> */}
       {getLayout(<Component {...pageProps} />)}
+      {/* <Toast title="1111" message='11111' type={'loading'} /> */}
+      {/* </ToastProvider> */}
     </Web3Provider>
   );
 }

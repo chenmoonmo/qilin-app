@@ -52,7 +52,9 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
 
   const [open, setOpen] = useAtom(closePostionDialogOpenAtom);
 
-  const pnl = `${position.estPnl > 0 ? '+' : ''}${position.estPnl}`;
+  const pnl = `${position.realizedPnl > 0 ? '+' : ''}${position.realizedPnl}`;
+
+  const symbol = position.tradePair.split('/')[1];
 
   const handleConfirm = async () => {
     await closePostion?.();
@@ -76,7 +78,9 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
           <PostionInfoItem>
             <span>Close Price</span>
             {/* TODO: 单位 */}
-            <span>{position.closePrice} </span>
+            <span>
+              {position.closePrice} {symbol}
+            </span>
           </PostionInfoItem>
           <PostionInfoItem>
             <span>Margin</span>
@@ -84,9 +88,8 @@ export const ClosePostionDialog: FC<ClosePostionDialogPropsType> = ({
               {position.fomattedMargin} {position.marginSymbol}
             </span>
           </PostionInfoItem>
-          {/* TODO: 盈亏色值 */}
           <PNLItem>
-            <span>Est.PNL</span>
+            <span>Realized PNL</span>
             <span>
               <strong>{formatAmount(pnl)}</strong> {position.marginSymbol}
             </span>

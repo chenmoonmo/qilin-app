@@ -28,7 +28,8 @@ export type PoolInfoType = Record<'token0' | 'token1' | 'pay_token', Address> &
     | 'margin_ratio'
     | 'lp'
     | 'lp_price'
-    | 'deadline',
+    | 'deadline'
+    | 'fact_pnl',
     string
   > & {
     level: number[];
@@ -57,6 +58,17 @@ type PoolGraph = {
     lp: string;
     type: 0 | 1 | 2 | 3;
   }[];
+  players: [
+    {
+      id: string;
+      user: Address[];
+    }
+  ];
+  settings: [
+    {
+      liq_protocol_fee: string;
+    }
+  ];
 };
 
 export const usePoolInfo = (playerNFTId: number) => {
@@ -78,6 +90,13 @@ export const usePoolInfo = (playerNFTId: number) => {
     enabled: !!createDealerId,
   });
 
+  // const { data: poolAddress } = useContractRead({
+  //   address: CONTRACTS.PlayerAddress,
+  //   abi: Player.abi,
+  //   functionName: 'playerToPool',
+  //   args: [playerNFTId],
+  // });
+
   const { data: nowPrice } = useContractRead({
     address: poolAddress as Address,
     abi: Pool.abi,
@@ -94,19 +113,22 @@ export const usePoolInfo = (playerNFTId: number) => {
 
   const { data, isLoading, mutate } = useSWR(
     poolAddress
-      ? ['getPoolInfo', (poolAddress as Address).toLowerCase()]
+      ? ['getPoolInfo', (poolAddress as Address).toLowerCase(), playerNFTId]
       : null,
-    async ([_, poolAddress]) => {
+    async ([_, poolAddress, playerNFTId]) => {
       const res = await graphFetcher<PoolGraph>(
         // TODO: 抽离 querystring
         gql`{
-          pools(where:{id:"${poolAddress}"}) {id,token0,token1, margin,margin_ratio ,trade_pair, pay_token, pay_token_decimal, pay_token_symbol, token_price, asset, lp, lp_price, level, token0Decimal, token1Decimal,deadline,player}
-          positions(first:1000, where:{pool_address:"${poolAddress}"}){index, pool_address, open_price, margin, asset, level, lp,user,type}
+          pools(where:{id:"${poolAddress}"}) {id,token0,token1, margin,margin_ratio ,trade_pair, pay_token, pay_token_decimal, pay_token_symbol, token_price, asset, lp, lp_price, level, token0Decimal, token1Decimal,deadline}
+          positions(first:1000, where:{pool_address:"${poolAddress}"}){index, pool_address, open_price, margin, asset, level, lp,user,type,fact_pnl}
           mergePositions(where:{id_in:["${poolAddress}-long", "${poolAddress}-short"]}){id, lp, fake_lp, asset,open_lp,open_price}
+          players(where:{id:"${playerNFTId}"}){user}
+          settings(where:{id:"${CONTRACTS.FactoryAddress.toLocaleLowerCase()}"}){liq_protocol_fee}
           }
           `
       );
-      const { pools, mergePositions, positions } = res;
+      // TODO: 处理 players
+      const { pools, mergePositions, positions, players } = res;
 
       const fomattedMargin = ethers.utils.formatUnits(
         pools[0]?.margin,
@@ -119,7 +141,8 @@ export const usePoolInfo = (playerNFTId: number) => {
           ...pools[0],
           token0: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6' as Address,
           token1: '0x07865c6e87b9f70255377e024ace6630c1eaa37f' as Address,
-          token1Decimal: 'USD',
+          token1Decimal: 18,
+          token1Symbol: 'USD',
           trade_pair: 'ETH/USD',
           token_price: +ethers.utils.formatEther(pools[0]?.token_price),
           lp_price: +ethers.utils.formatEther(pools[0]?.lp_price),
@@ -129,6 +152,8 @@ export const usePoolInfo = (playerNFTId: number) => {
         },
         positions,
         mergePositions,
+        players: players[0],
+        fee: +ethers.utils.formatEther(res.settings[0]?.liq_protocol_fee),
       };
     }
   );
@@ -149,16 +174,13 @@ export const usePoolInfo = (playerNFTId: number) => {
     enabled: !!poolAddress && isEnd,
   });
 
-  console.log('closePrice', closePrice);
-
+  // TODO: closePrice 和 open price 的精度是否固定
   const formattedClosePrice = useMemo(() => {
     if (!closePrice) return 0;
-    const marginTokenDecimal = data?.poolInfo.pay_token_decimal ?? 6;
-    return +ethers.utils.formatUnits(
-      closePrice as BigNumber,
-      marginTokenDecimal
-    );
-  }, [closePrice, data?.poolInfo.pay_token_decimal]);
+    return +ethers.utils.formatUnits(closePrice as BigNumber);
+  }, [closePrice]);
+
+  console.log('formattedClosePrice', formattedClosePrice);
 
   // 未开仓前 使用这里的数据获取 mergePositions 和 positions
   const waitPositions = useWaitPositions({
@@ -190,7 +212,7 @@ export const usePoolInfo = (playerNFTId: number) => {
         (pre, cur) => {
           const direction = cur.level > 0 ? 'long' : 'short';
           const formattedLp = ethers.utils.formatUnits(
-            cur.asset,
+            cur.asset.mul(cur.level).abs(),
             marginTokenDecimal
           );
           return {
@@ -276,106 +298,187 @@ export const usePoolInfo = (playerNFTId: number) => {
   const positions = useMemo(() => {
     const marginTokenDecimal = data?.poolInfo.pay_token_decimal ?? 6;
     if (isOpend) {
-      return data?.positions?.map(position => {
-        const currentPrice = isEnd
-          ? formattedClosePrice
-          : +ethers.utils.formatUnits(nowPrice as BigNumber);
-        const openPrice = +ethers.utils.formatUnits(position?.open_price);
-        const direction = position.level > 0 ? 'long' : 'short';
-        const fomattedMargin = +ethers.utils.formatUnits(
-          position.margin,
-          +marginTokenDecimal
-        );
+      const unSubmitedPlayer =
+        data?.players.user
+          ?.filter(
+            playerAddress =>
+              data?.positions?.findIndex(position =>
+                BigNumber.from(position.user).eq(playerAddress)
+              ) === -1
+          )
+          ?.map(playerAddress => {
+            const isMe = BigNumber.from(playerAddress).eq(
+              BigNumber.from(address)
+            );
 
-        const formattedLp = ethers.utils.formatUnits(
-          position.lp,
-          +marginTokenDecimal
-        );
-        // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
-        let fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
-        if (direction === 'short') {
-          const fakeLp = (currentPrice / openPrice) * fotmattedStakeAmount;
-          fotmattedStakeAmount = 2 * fotmattedStakeAmount - fakeLp;
-        } else {
-          fotmattedStakeAmount =
-            (currentPrice / openPrice) * fotmattedStakeAmount;
-        }
-        // 仓位价值：current Value = stake amount * stake price
-        const currentValue = fotmattedStakeAmount * stakePrice;
-        // 仓位收益：profit = current Value - Value
-        const estPnl = currentValue - fomattedMargin;
+            return {
+              user: address,
+              isMe,
+              openPrice: undefined,
+              closePrice: undefined,
+              fomattedMargin: undefined,
+              formattedLp: undefined,
+              type: 0,
+            };
+          }) ?? [];
 
-        // ROE = Est.pnl / Margin
-        const ROE = (estPnl / fomattedMargin) * 100;
+      return data?.positions
+        ?.map(position => {
+          const currentPrice = isEnd
+            ? formattedClosePrice
+            : +ethers.utils.formatUnits(nowPrice as BigNumber);
+          const openPrice = +ethers.utils.formatUnits(position?.open_price);
+          const direction = position.level > 0 ? 'long' : 'short';
+          const fomattedMargin = +ethers.utils.formatUnits(
+            position.margin,
+            +marginTokenDecimal
+          );
 
-        const isMe = BigNumber.from(position.user).eq(BigNumber.from(address));
+          const formattedLp = ethers.utils.formatUnits(
+            position.lp,
+            +marginTokenDecimal
+          );
+          // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
+          let fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
+          if (direction === 'short') {
+            const fakeLp = (currentPrice / openPrice) * fotmattedStakeAmount;
+            fotmattedStakeAmount = 2 * fotmattedStakeAmount - fakeLp;
+          } else {
+            fotmattedStakeAmount =
+              (currentPrice / openPrice) * fotmattedStakeAmount;
+          }
 
-        return {
-          ...position,
-          direction,
-          formattedLp,
-          fomattedMargin,
-          fotmattedStakeAmount,
-          currentValue,
-          estPnl,
-          ROE,
-          isMe,
-          openPrice,
-          marginSymbol: data?.poolInfo.pay_token_symbol,
-          tradePair: data?.poolInfo.trade_pair,
-          closePrice: formattedClosePrice,
-        };
-      });
+          // 仓位价值：current Value = stake amount * stake price
+          let currentValue = fotmattedStakeAmount * stakePrice;
+          // 仓位收益：profit = current Value - Value
+          const estPnl =
+            position.type === 1
+              ? currentValue - fomattedMargin
+              : +ethers.utils.formatUnits(
+                  position.fact_pnl,
+                  +marginTokenDecimal
+                );
+
+          if (position.type !== 1) {
+            currentValue = estPnl + fomattedMargin;
+          }
+
+          const realizedPnl = estPnl - data?.fee;
+
+          // ROE = Est.pnl / Margin
+          const ROE = (estPnl / fomattedMargin) * 100;
+
+          const isMe = BigNumber.from(position.user).eq(
+            BigNumber.from(address)
+          );
+
+          return {
+            ...position,
+            direction,
+            formattedLp,
+            fomattedMargin,
+            fotmattedStakeAmount,
+            currentValue,
+            estPnl,
+            realizedPnl,
+            ROE,
+            isMe,
+            openPrice,
+            marginSymbol: data?.poolInfo.pay_token_symbol,
+            tradePair: data?.poolInfo.trade_pair,
+            closePrice: formattedClosePrice,
+          };
+        })
+        .concat(unSubmitedPlayer as any);
     } else {
-      return waitPositions?.map(position => {
-        const direction = position.level > 0 ? 'long' : 'short';
-        const fomattedMargin = +ethers.utils.formatUnits(
-          position.asset,
-          marginTokenDecimal
-        );
-        const formattedLp = fomattedMargin;
-        // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
-        const fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
-        // 仓位价值：current Value = stake amount * stake price
-        const currentValue = fotmattedStakeAmount * stakePrice;
-        // 仓位收益：profit = current Value - Value
-        const estPnl = undefined;
-        // ROE = Est.pnl / Margin
-        const ROE = undefined;
+      const unSubmitedPlayer =
+        data?.players.user
+          ?.filter(
+            playerAddress =>
+              waitPositions.findIndex(position =>
+                BigNumber.from(position.user).eq(playerAddress)
+              ) === -1
+          )
+          ?.map(playerAddress => {
+            const isMe = BigNumber.from(playerAddress).eq(
+              BigNumber.from(address)
+            );
 
-        const isMe = BigNumber.from(position.user).eq(BigNumber.from(address));
-        return {
-          ...position,
-          direction,
-          fomattedMargin,
-          formattedLp,
-          fotmattedStakeAmount,
-          currentValue,
-          estPnl,
-          ROE,
-          isMe,
-          openPrice: undefined,
-          closePrice: undefined,
-          marginSymbol: data?.poolInfo.pay_token_symbol,
-          tradePair: data?.poolInfo.trade_pair,
-          type: 0,
-        };
-      });
+            return {
+              user: address,
+              isMe,
+              openPrice: undefined,
+              closePrice: undefined,
+              fomattedMargin: undefined,
+              formattedLp: undefined,
+              type: 0,
+            };
+          }) ?? [];
+
+      return waitPositions
+        ?.map(position => {
+          const direction = position.level > 0 ? 'long' : 'short';
+          const fomattedMargin = +ethers.utils.formatUnits(
+            position.asset,
+            marginTokenDecimal
+          );
+          const formattedLp = +ethers.utils.formatUnits(
+            position.asset.mul(position.level).abs(),
+            marginTokenDecimal
+          );
+          // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
+          const fotmattedStakeAmount = Math.abs(
+            +fomattedMargin * position.level
+          );
+          // 仓位价值：current Value = stake amount * stake price
+          const currentValue = fotmattedStakeAmount * stakePrice;
+          // 仓位收益：profit = current Value - Value
+          const estPnl = undefined;
+          // ROE = Est.pnl / Margin
+          const ROE = undefined;
+
+          const realizedPnl = undefined;
+
+          const isMe = BigNumber.from(position.user).eq(
+            BigNumber.from(address)
+          );
+          return {
+            ...position,
+            direction,
+            fomattedMargin,
+            formattedLp,
+            fotmattedStakeAmount,
+            currentValue,
+            estPnl,
+            realizedPnl,
+            ROE,
+            isMe,
+            openPrice: undefined,
+            closePrice: undefined,
+            marginSymbol: data?.poolInfo.pay_token_symbol,
+            tradePair: data?.poolInfo.trade_pair,
+            type: 0,
+          };
+        })
+        .concat(unSubmitedPlayer as any);
     }
   }, [
-    data?.poolInfo,
+    data?.poolInfo.pay_token_decimal,
+    data?.poolInfo.pay_token_symbol,
+    data?.poolInfo.trade_pair,
     data?.positions,
+    data?.players,
     isOpend,
     isEnd,
-    waitPositions,
-    stakePrice,
     formattedClosePrice,
-    address,
     nowPrice,
+    stakePrice,
+    address,
+    waitPositions,
   ]);
 
   const myPosition = useMemo(() => {
-    return (positions as any[])?.find(position => position.isMe);
+    return (positions as any[])?.find(position => position?.isMe);
   }, [positions]);
 
   const status = useMemo(() => {

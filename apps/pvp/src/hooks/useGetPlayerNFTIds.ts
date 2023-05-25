@@ -5,13 +5,13 @@ import { useAccount, useContractRead, useContractReads } from 'wagmi';
 import { CONTRACTS } from '@/constant';
 import Player from '@/constant/abis/Player.json';
 
+const playerContract = {
+  address: CONTRACTS.PlayerAddress,
+  abi: Player.abi,
+};
+
 export const useGetPlayerNFTIds = () => {
   const { address } = useAccount();
-
-  const playerContract = {
-    address: CONTRACTS.PlayerAddress,
-    abi: Player.abi,
-  };
 
   const {
     data: index,
@@ -46,7 +46,7 @@ export const useGetPlayerNFTIds = () => {
     return ids.filter((item: any, index: number) => {
       return data[index] && (data[index] as BigNumber).gt(0);
     });
-  }, [contracts, data, address]);
+  }, [contracts, data]);
 
   return { playerNFTIds, refetch };
 };

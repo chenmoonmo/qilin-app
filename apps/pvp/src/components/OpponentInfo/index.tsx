@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { formatAmount } from '@qilin/utils';
-import type { AllHTMLAttributes, FC} from 'react';
+import type { AllHTMLAttributes, FC } from 'react';
 import { useMemo } from 'react';
 
 const StakePrice = styled.div`
@@ -51,9 +51,11 @@ const OpponentItem = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   flex: 1;
   padding: 5px 0;
+  height: 30px;
   background-color: rgba(68, 194, 127, 0.4);
   border-radius: 100px;
 
@@ -127,7 +129,7 @@ export const OpponentInfo: FC<OpponentInfoPropsType> = ({
       <OpponentContainer>
         <OpponentItem>
           <div>{formatAmount(long)} LP</div>
-          <div>{formatAmount(long * stakePrice)} USDC</div>
+          <div></div>
           <PostionRate>
             <div>{formatAmount(longPrecent, 2)}%</div>
             <div>Long</div>
@@ -135,7 +137,7 @@ export const OpponentInfo: FC<OpponentInfoPropsType> = ({
         </OpponentItem>
         <OpponentItem>
           <div>{formatAmount(short)} LP</div>
-          <div>{formatAmount(short * stakePrice)} USDC</div>
+          <div></div>
           <PostionRate>
             <div>{formatAmount(shortPrecent, 2)}%</div>
             <div>Short</div>

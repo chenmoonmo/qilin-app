@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Tooltip } from '@qilin/component';
 import { atom, useAtom } from 'jotai';
-import type { FC, ReactNode } from 'react';
+import { type FC, type ReactNode,useMemo } from 'react';
 
 import type { SubmitPositionForm } from '@/hooks/useSubmitPositon';
 
@@ -72,6 +72,13 @@ export const OpenPositionDialog: FC<OpenPositionDialogPropsType> = ({
 }) => {
   const [open, setOpen] = useAtom(openPositionDialogOpenAtom);
 
+  const [long, short] = useMemo(() => {
+    const long = mergePositions?.long?.formattedLp ?? 0;
+    const short = mergePositions?.short?.formattedLp ?? 0;
+    const direction = form.direction;
+    return direction === 'long' ? [long + value, short] : [long, short + value];
+  }, []);
+
   const handleSubmit = async () => {
     await onConfirm?.();
     setOpen(false);
@@ -92,18 +99,14 @@ export const OpenPositionDialog: FC<OpenPositionDialogPropsType> = ({
               padding-top: 35px;
               margin-bottom: 27px;
             `}
-            long={+(mergePositions?.long?.formattedLp ?? 0)}
-            short={+(mergePositions?.short?.formattedLp ?? 0)}
+            long={long}
+            short={short}
             stakePrice={stakePrice}
             marginTokenSymbol={poolInfo?.pay_token_symbol}
           />
           <OpenPositionInfo>
             <span>Symbol</span>
             <span>{poolInfo?.trade_pair}</span>
-          </OpenPositionInfo>
-          <OpenPositionInfo>
-            <span>Open price</span>
-            <span>100.12 USDC</span>
           </OpenPositionInfo>
           <OpenPositionInfo>
             <span>Margin</span>

@@ -62,7 +62,7 @@ const SeatItem = forwardRef<SeatItemProps, any>(
             <DefaultAvatar />
             <UserName>{userName}</UserName>
             <Positioninfo>
-              <div>{formatAmount(position)}</div>
+              <div>{position && formatAmount(position)}</div>
               <div>{pnl && formatAmount(pnl)}</div>
             </Positioninfo>
           </>
@@ -147,7 +147,7 @@ const Detail = () => {
           <div>Chainlink</div>
         </PairInfo>
         <Profit data-type={myPosition?.direction}>
-          {myPosition?.direction ?? `Margin:${marginTokenInfo?.symbol}`}
+          {myPosition?.direction ?? `Margin:${marginTokenInfo?.symbol ?? ''}`}
         </Profit>
         <MainCard
           data-type={
@@ -185,7 +185,7 @@ const Detail = () => {
                   {poolInfo?.trade_pair}
                   <span>
                     {formatAmount(poolInfo?.token_price)}{' '}
-                    {poolInfo?.token1Decimal}
+                    {poolInfo?.token1Symbol}
                   </span>
                   {isOpend && !!poolInfo?.deadline && (
                     <EndTime>
@@ -416,14 +416,18 @@ const Detail = () => {
                 <th>Margin({marginTokenInfo?.symbol})</th>
                 <th>Direction</th>
                 {/*TODO: 单位 */}
-                <th>Open price({poolInfo?.token1Decimal})</th>
+                <th>Open price({poolInfo?.token1Symbol})</th>
                 <th>Value({marginTokenInfo?.symbol})</th>
                 <th>Est.PNL({marginTokenInfo?.symbol})</th>
               </tr>
             </thead>
             <tbody>
               {positions?.map((position, index) => {
-                const direction = position.level > 0 ? 'Long' : 'Short';
+                const direction = position.level
+                  ? position.level > 0
+                    ? 'Long'
+                    : 'Short'
+                  : '-';
                 const shortAddress =
                   position.user.slice(0, 6) + '...' + position.user.slice(-4);
                 const isNeedLiquidate =
@@ -437,11 +441,13 @@ const Detail = () => {
                     {/* Margin */}
                     <td>
                       {formatAmount(position.fomattedMargin)}{' '}
-                      <TableLevel
-                        data-type={position.level > 0 ? 'long' : 'short'}
-                      >
-                        x{Math.abs(position.level)}
-                      </TableLevel>
+                      {position?.level && (
+                        <TableLevel
+                          data-type={position.level > 0 ? 'long' : 'short'}
+                        >
+                          x{Math.abs(position.level)}
+                        </TableLevel>
+                      )}
                     </td>
                     {/* Direction */}
                     <td>{direction}</td>
@@ -466,7 +472,7 @@ const Detail = () => {
                                   css={css`
                                     margin-left: 11px;
                                   `}
-                                  disabled={!isEnd}
+                                  disabled={!isEnd || position.type !== 1}
                                 >
                                   {isNeedLiquidate ? 'Liquidate' : 'Close'}
                                 </Button>
