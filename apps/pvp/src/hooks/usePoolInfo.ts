@@ -302,9 +302,9 @@ export const usePoolInfo = (playerNFTId: number) => {
         data?.players.user
           ?.filter(
             playerAddress =>
-              data?.positions?.findIndex(position =>
+              !data?.positions?.some(position =>
                 BigNumber.from(position.user).eq(playerAddress)
-              ) === -1
+              )
           )
           ?.map(playerAddress => {
             const isMe = BigNumber.from(playerAddress).eq(
@@ -312,8 +312,8 @@ export const usePoolInfo = (playerNFTId: number) => {
             );
 
             return {
-              user: address,
               isMe,
+              user: playerAddress,
               openPrice: undefined,
               closePrice: undefined,
               fomattedMargin: undefined,
@@ -395,9 +395,9 @@ export const usePoolInfo = (playerNFTId: number) => {
         data?.players.user
           ?.filter(
             playerAddress =>
-              waitPositions.findIndex(position =>
+              !waitPositions.some(position =>
                 BigNumber.from(position.user).eq(playerAddress)
-              ) === -1
+              )
           )
           ?.map(playerAddress => {
             const isMe = BigNumber.from(playerAddress).eq(
@@ -405,8 +405,8 @@ export const usePoolInfo = (playerNFTId: number) => {
             );
 
             return {
-              user: address,
               isMe,
+              user: playerAddress,
               openPrice: undefined,
               closePrice: undefined,
               fomattedMargin: undefined,
@@ -466,14 +466,15 @@ export const usePoolInfo = (playerNFTId: number) => {
     data?.poolInfo.pay_token_decimal,
     data?.poolInfo.pay_token_symbol,
     data?.poolInfo.trade_pair,
+    data?.players.user,
     data?.positions,
-    data?.players,
+    data?.fee,
     isOpend,
+    address,
     isEnd,
     formattedClosePrice,
     nowPrice,
     stakePrice,
-    address,
     waitPositions,
   ]);
 

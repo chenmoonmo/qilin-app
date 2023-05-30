@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
 import * as Popover from '@radix-ui/react-popover';
-import * as RadixSelect from '@radix-ui/react-select';
-import { ButtonHTMLAttributes, FC, ReactNode, useMemo, useState } from 'react';
 import * as ScrollArea from '@radix-ui/react-scroll-area';
+import * as RadixSelect from '@radix-ui/react-select';
+import type { ButtonHTMLAttributes, FC, ReactNode } from 'react';
+import { useMemo } from 'react';
 
 type SelectPropsType = {
   selections: { text: string; value: string }[];
@@ -103,8 +104,6 @@ const SelectTokenTriger = styled(Trigger.withComponent(Popover.Trigger))`
     border-color: var(--active-border-color);
   }
 `;
-
-const SelectTokenValue = styled(RadixSelect.Value)``;
 
 const SelectTokenContent = styled(Popover.Content)`
   display: flex;
@@ -208,7 +207,7 @@ NoSelection.defaultProps = {
   children: 'No results found.',
 };
 
-type SelectTokenWithTokenPropsType<T extends {} = any> = {
+type SelectTokenWithTokenPropsType<T extends object = any> = {
   selections: T[];
   value: string | undefined;
   onChange?: (selection: T) => void;

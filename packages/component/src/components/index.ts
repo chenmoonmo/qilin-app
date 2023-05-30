@@ -1,9 +1,8 @@
 export * from './Button';
-export * from './DatePicker'
+export * from './DatePicker';
 export * from './Dialog';
 export * from './HoverCard';
-export * from './Popover';
-export * from './Select'
+export { default as Icon } from './Icons';
+export * from './Select';
+export * from './Toast';
 export * from './ToolTip';
-
-export {default as Icon}  from './Icons'

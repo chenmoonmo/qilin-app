@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import { Button } from '@qilin/component';
+import { Button, useToast } from '@qilin/component';
 import type { BigNumber } from 'ethers';
 import Image from 'next/image';
 import {
@@ -24,6 +24,7 @@ import type { NextPageWithLayout } from './_app';
 
 const Index: NextPageWithLayout = () => {
   const { address } = useAccount();
+  const { showWalletToast, closeWalletToast } = useToast();
 
   // 玩家拥有的 dealer ID
   const { data: dealerId, refetch } = useContractRead({
@@ -45,11 +46,23 @@ const Index: NextPageWithLayout = () => {
   const { writeAsync } = useContractWrite(config);
 
   const mint = async () => {
+    // TODO: Not on the whitelist
+    showWalletToast({
+      title: 'Minting NFT',
+      message: 'Please confirm the transaction in your wallet',
+      type: 'loading',
+    });
     const res = await writeAsync?.();
     await res?.wait();
     refetch();
-  };
+    showWalletToast({
+      title: 'Minting NFT',
+      message: 'Please confirm the transaction in your wallet',
+      type: 'success',
+    });
 
+    setTimeout(closeWalletToast, 3000);
+  };
   return (
     <Main>
       <MintContainer>
