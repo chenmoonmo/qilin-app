@@ -1,3 +1,4 @@
+import { useToast } from '@qilin/component';
 import { useCallback } from 'react';
 import type { Address } from 'wagmi';
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
