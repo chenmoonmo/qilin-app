@@ -22,7 +22,7 @@
   --tooltip-content-background-color: var(--background-color);
   --tooltip-content-border-color: #585d6c;
 
-  --rs-bg-overlay:  var(--background-color);
+  --rs-bg-overlay: var(--background-color);
 }
 
 html[data-theme='light'] {
@@ -41,4 +41,7 @@ body {
   box-sizing: border-box;
 }
 
-
+button,
+input {
+  all: unset;
+}
