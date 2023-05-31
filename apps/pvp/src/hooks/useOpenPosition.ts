@@ -1,3 +1,4 @@
+import { useToast } from '@qilin/component';
 import { useCallback } from 'react';
 import type { Address } from 'wagmi';
 import { useContractWrite, usePrepareContractWrite } from 'wagmi';
@@ -16,6 +17,8 @@ export const useOpenPosition = ({
   endTime,
   enabled = false,
 }: OpenPositionPropsType) => {
+  const { showWalletToast, closeWalletToast } = useToast();
+
   const { config } = usePrepareContractWrite({
     address: CONTRACTS.RouterAddress,
     abi: Router.abi,
@@ -27,7 +30,32 @@ export const useOpenPosition = ({
   const { writeAsync } = useContractWrite(config);
 
   return useCallback(async () => {
-    const res = await writeAsync?.();
-    await res?.wait();
+    try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
+      const res = await writeAsync?.();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
+      await res?.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
+    } catch (e) {
+      console.error(e);
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
+    }
+    setTimeout(closeWalletToast, 3000);
   }, [writeAsync]);
 };

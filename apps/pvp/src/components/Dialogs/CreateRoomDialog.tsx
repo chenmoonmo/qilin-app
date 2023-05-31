@@ -80,6 +80,7 @@ export const CreateRoomDialog: FC<CreateRoomDialogType> = ({
   children,
 }) => {
   const chainId = useChainId();
+
   const { canSendCreate, form, setForm, createRoom, players, setPlayers } =
     useCreateRoom();
 

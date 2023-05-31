@@ -1,7 +1,8 @@
+import { useToast } from '@qilin/component';
 import type { BigNumber } from 'ethers';
 import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom, useAtomValue } from 'jotai';
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import {
   useAccount,
   useContractRead,
@@ -54,6 +55,7 @@ export const useCreateRoom = () => {
   const [form, setForm] = useAtom(createPoolFormAtom);
   const [players, setPlayers] = useAtom(playersAtom);
   const canSendCreate = useAtomValue(canSendCreateAtom);
+  const { showWalletToast, closeWalletToast } = useToast();
 
   const { dealerId } = useDealerId();
 
@@ -95,15 +97,37 @@ export const useCreateRoom = () => {
 
   const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
 
-  // TODO: setPlayers 默认填充用户address
-  const createRoom = useMemo(() => {
-    return async () => {
+  const createRoom = useCallback(async () => {
+    try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
       const res = await createRoomWrite?.();
       await res?.wait();
       const res2 = await setPlayersWrite?.();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
       await res2?.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
       refetch();
-    };
+    } catch (e) {
+      console.error(e);
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
+    }
+    setTimeout(closeWalletToast, 3000);
   }, [createRoomWrite, setPlayersWrite]);
 
   return {

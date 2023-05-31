@@ -1,3 +1,4 @@
+import { useToast } from '@qilin/component';
 import type { BigNumber } from 'ethers';
 import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom, useAtomValue } from 'jotai';
@@ -25,6 +26,8 @@ const seatsAddressValidAtom = atom(get => {
 });
 
 export const useAddPlayers = ({ id }: { id: number }) => {
+  const { showWalletToast, closeWalletToast } = useToast();
+
   // 玩家地址表单
   const [playerSeats, setSeats] = useAtom(playerSeatsAtom);
   // 输入是否为地址
@@ -55,10 +58,33 @@ export const useAddPlayers = ({ id }: { id: number }) => {
 
   const addPlayers = async () => {
     try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
       const res = await writeAsync?.();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
       await res?.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
       refetch();
-    } catch {}
+    } catch (e) {
+      console.error(e);
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
+    }
+    setTimeout(closeWalletToast, 3000);
   };
 
   useEffect(() => {

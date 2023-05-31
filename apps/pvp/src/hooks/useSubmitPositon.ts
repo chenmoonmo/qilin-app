@@ -1,3 +1,4 @@
+import { useToast } from '@qilin/component';
 import { BigNumber, ethers } from 'ethers';
 import { atom, useAtom } from 'jotai';
 import { useMemo } from 'react';
@@ -44,6 +45,8 @@ export const useSubmitPositon = ({
   marginTokenInfo,
   marginTokenAddress,
 }: useSubmitPositonProps) => {
+  const { showWalletToast, closeWalletToast } = useToast();
+
   const { address } = useAccount();
 
   const [form, setForm] = useAtom(submitFormAtom);
@@ -103,6 +106,11 @@ export const useSubmitPositon = ({
   const submitPosition = async () => {
     // TODO: 处理完成后的情况 数据刷新 和 状态显示
     try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
       if (allowance!.lt(marginAmountToBN)) {
         const res = await approve?.();
         await res?.wait();
@@ -115,13 +123,31 @@ export const useSubmitPositon = ({
           `${form.direction === 'short' ? '-' : ''}${form.leverage}`,
         ],
       });
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
       await res?.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
       setForm({
         marginAmount: '',
         leverage: '2',
         direction: undefined,
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
+    }
+    setTimeout(closeWalletToast, 3000);
   };
 
   return {

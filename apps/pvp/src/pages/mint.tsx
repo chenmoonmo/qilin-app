@@ -23,7 +23,7 @@ import {
 import type { NextPageWithLayout } from './_app';
 
 const Index: NextPageWithLayout = () => {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { showWalletToast, closeWalletToast } = useToast();
 
   // 玩家拥有的 dealer ID
@@ -47,20 +47,33 @@ const Index: NextPageWithLayout = () => {
 
   const mint = async () => {
     // TODO: Not on the whitelist
-    showWalletToast({
-      title: 'Minting NFT',
-      message: 'Please confirm the transaction in your wallet',
-      type: 'loading',
-    });
-    const res = await writeAsync?.();
-    await res?.wait();
-    refetch();
-    showWalletToast({
-      title: 'Minting NFT',
-      message: 'Please confirm the transaction in your wallet',
-      type: 'success',
-    });
-
+    try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
+      const res = await writeAsync?.();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
+      await res?.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
+      refetch();
+    } catch (e) {
+      console.error(e);
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
+    }
     setTimeout(closeWalletToast, 3000);
   };
   return (
@@ -77,7 +90,7 @@ const Index: NextPageWithLayout = () => {
                 width: 332px;
                 height: 40px;
               `}
-              disabled={(dealerId as BigNumber)?.gt(0)}
+              disabled={!isConnected || (dealerId as BigNumber)?.gt(0)}
               onClick={mint}
             >
               Mint NFT
