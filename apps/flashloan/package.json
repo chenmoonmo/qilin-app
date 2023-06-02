@@ -1,0 +1,32 @@
+{
+  "name": "@qilin/flashloan",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@qilin/component": "workspace:*",
+    "@qilin/hooks": "workspace:*",
+    "@qilin/utils": "workspace:*",
+    "@qilin/wagmi-provider": "workspace:*",
+    "@types/node": "18.16.3",
+    "@types/react": "18.2.5",
+    "@types/react-dom": "18.2.3",
+    "eslint": "8.39.0",
+    "eslint-config-next": "13.4.0",
+    "next": "13.4.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.0.4",
+    "wagmi": "0.12.13",
+    "ethers": "^5",
+    "swr": "^2.1.5"
+  }
+}

@@ -8,7 +8,7 @@ const config = {
       version: 'detect',
     },
     next: {
-      rootDir: 'apps/app',
+      rootDir: 'apps/',
     },
   },
   extends: [

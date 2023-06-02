@@ -64,6 +64,66 @@ importers:
         specifier: ^0.12.13
         version: 0.12.13(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.0.4)
 
+  apps/flashloan:
+    dependencies:
+      '@emotion/babel-plugin':
+        specifier: ^11.11.0
+        version: 11.11.0
+      '@emotion/react':
+        specifier: ^11.11.0
+        version: 11.11.0(@types/react@18.2.5)(react@18.2.0)
+      '@emotion/styled':
+        specifier: ^11.11.0
+        version: 11.11.0(@emotion/react@11.11.0)(@types/react@18.2.5)(react@18.2.0)
+      '@qilin/component':
+        specifier: workspace:*
+        version: link:../../packages/component
+      '@qilin/hooks':
+        specifier: workspace:*
+        version: link:../../packages/hooks
+      '@qilin/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@qilin/wagmi-provider':
+        specifier: workspace:*
+        version: link:../../packages/wagmi-provider
+      '@types/node':
+        specifier: 18.16.3
+        version: 18.16.3
+      '@types/react':
+        specifier: 18.2.5
+        version: 18.2.5
+      '@types/react-dom':
+        specifier: 18.2.3
+        version: 18.2.3
+      eslint:
+        specifier: 8.39.0
+        version: 8.39.0
+      eslint-config-next:
+        specifier: 13.4.0
+        version: 13.4.0(eslint@8.39.0)(typescript@5.0.4)
+      ethers:
+        specifier: ^5
+        version: 5.7.2
+      next:
+        specifier: 13.4.0
+        version: 13.4.0(react-dom@18.2.0)(react@18.2.0)
+      react:
+        specifier: 18.2.0
+        version: 18.2.0
+      react-dom:
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
+      swr:
+        specifier: ^2.1.5
+        version: 2.1.5(react@18.2.0)
+      typescript:
+        specifier: 5.0.4
+        version: 5.0.4
+      wagmi:
+        specifier: 0.12.13
+        version: 0.12.13(ethers@5.7.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.0.4)
+
   apps/pvp:
     dependencies:
       '@emotion/babel-plugin':

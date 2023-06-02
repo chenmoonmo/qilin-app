@@ -72,7 +72,7 @@ const Description = styled(RadixDialog.Description)`
   line-height: 1.5;
 `;
 
-const StyledCloseIcon = styled.button`
+const StyledCloseIcon = styled(RadixDialog.Close)`
   position: absolute;
   top: 20px;
   right: 20px;
@@ -81,11 +81,9 @@ const StyledCloseIcon = styled.button`
 
 const CloseIcon = forwardRef<any>((props, ref) => {
   return (
-    <RadixDialog.Close asChild ref={ref} {...props}>
-      <StyledCloseIcon>
-        <Cross2Icon />
-      </StyledCloseIcon>
-    </RadixDialog.Close>
+    <StyledCloseIcon ref={ref} {...props}>
+      <Cross2Icon />
+    </StyledCloseIcon>
   );
 });
 
@@ -100,5 +98,5 @@ export const Dialog = {
   Title,
   Description,
   Close,
-  CloseIcon
+  CloseIcon,
 };
