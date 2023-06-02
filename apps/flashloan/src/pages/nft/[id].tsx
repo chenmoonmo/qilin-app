@@ -3,7 +3,8 @@ import { formatAmount } from '@qilin/utils';
 import { useMemo } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 
-import { ArrowIcon, FlashIcon } from '@/component';
+// import { useToast } from '@/component';
+import { ArrowIcon, FlashIcon, ToastProvider } from '@/component';
 import {
   AbsoluteArrow,
   ActionButton,
@@ -17,7 +18,10 @@ import {
   Roadmap,
 } from '@/styles/nft';
 
-const Index = () => {
+import type { NextPageWithLayout } from '../_app';
+
+const Index: NextPageWithLayout = () => {
+  // const { showToast, closeToast } = useToast();
   const { address, isConnected } = useAccount();
 
   const shortedAddress =
@@ -97,6 +101,10 @@ const Index = () => {
       </NFTContain>
     </Main>
   );
+};
+
+Index.getLayout = page => {
+  return <ToastProvider>{page}</ToastProvider>;
 };
 
 export default Index;
