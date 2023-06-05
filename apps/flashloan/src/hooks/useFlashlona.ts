@@ -37,11 +37,13 @@ export const useFlashlona = () => {
   const flashLoan = useMemo(() => {
     if (!supplie || !borrow) return null;
     const abi = new ethers.utils.AbiCoder();
-    const ethWithDrawAmount = BigNumber.from(
-      (+supplie.formatted * 0.9 * 10 ** supplie.decimals).toFixed()
-    );
 
+    const ethWithDrawAmount = supplie.value;
     const usdcOutAmount = borrow.value;
+
+    // BigNumber.from(
+    //   (+supplie.formatted * 0.9 * 10 ** supplie.decimals).toFixed()
+    // );
 
     console.log({
       ethWithDrawAmount: ethWithDrawAmount.toString(),
