@@ -35,9 +35,10 @@ export const useFlashlona = () => {
   });
 
   const flashLoan = useMemo(() => {
+    if (!supplie || !borrow) return null;
     const abi = new ethers.utils.AbiCoder();
     const ethWithDrawAmount = BigNumber.from(
-      +(supplie?.formatted ?? 0) * 0.9 * 10 ** supplie!.decimals
+      +supplie.formatted * 0.9 * 10 ** supplie.decimals
     );
 
     const withDrawParam = abi.encode(
@@ -50,7 +51,7 @@ export const useFlashlona = () => {
       [address, CONTRACTS.AaveNext, 2, withDrawParam]
     );
 
-    const usdcOutAmount = borrow?.value;
+    const usdcOutAmount = borrow.value;
 
     const relayParam = abi.encode(
       ['address', 'uint256', 'uint256', 'bytes'],
@@ -93,13 +94,21 @@ export const useFlashlona = () => {
         type: 'loading',
       });
       await hanldeApprove();
+      console.log(config);
       const res = await writeAsync?.();
       const res2 = await res?.wait();
       console.log(res2);
-      showToast({
-        message: 'Operation success',
-        type: 'success',
-      });
+      if (res2?.status === 0) {
+        showToast({
+          message: 'Operation fail',
+          type: 'error',
+        });
+      } else {
+        showToast({
+          message: 'Operation success',
+          type: 'success',
+        });
+      }
     } catch (e) {
       console.error(e);
       showToast({
