@@ -90,6 +90,17 @@ export const useApproveTokens = ({
     USDCAmount
   );
 
+  //  WETHAToken代币approve给aaveNext.用于赎回自己的WETH
+  const {
+    isNeedApprove: isNeedWETHATokenApprove,
+    approve: approveWETHAToken,
+    refetch: refetchWETHAToken,
+  } = useApprove(
+    TOKENS.WETHAToken as Address,
+    CONTRACTS.AaveNext as Address,
+    WETHAmount
+  );
+
   const hanldeApprove = async () => {
     try {
       showToast({
@@ -106,6 +117,11 @@ export const useApproveTokens = ({
         res = await approveUSDC?.();
         await res?.wait();
         refetchUSDC();
+      }
+      if (isNeedWETHATokenApprove) {
+        res = await approveWETHAToken?.();
+        await res?.wait();
+        refetchWETHAToken();
       }
       showToast({
         message: 'Operation success',
@@ -124,7 +140,8 @@ export const useApproveTokens = ({
   };
 
   return {
-    isNeedApprove: isNeedWETHApprove || isNeedUSDCApprove,
+    isNeedApprove:
+      isNeedWETHApprove || isNeedUSDCApprove || isNeedWETHATokenApprove,
     hanldeApprove,
   };
 };
