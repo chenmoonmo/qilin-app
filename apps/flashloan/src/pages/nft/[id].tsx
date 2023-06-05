@@ -30,7 +30,8 @@ const Index: NextPageWithLayout = () => {
   const shortedAddress =
     address && `${address.slice(0, 6)}...${address.slice(-4)}`;
 
-  const { handleFlashLoan, supplie, borrow } = useFlashlona();
+  const { isNeedApprove, hanldeApprove, handleFlashLoan, supplie, borrow } =
+    useFlashlona();
 
   const abledToConfirm = useMemo(() => {
     return supplie?.value.gt(0) && borrow?.value.gt(0);
@@ -48,12 +49,22 @@ const Index: NextPageWithLayout = () => {
         <ActionButton onClick={handleConnect}>Connect Wallet</ActionButton>
       );
     } else {
+      if (isNeedApprove) {
+        return <ActionButton onClick={hanldeApprove}>Approve</ActionButton>;
+      }
       if (abledToConfirm) {
         return <ActionButton onClick={handleFlashLoan}>Confirm</ActionButton>;
       }
       return <ActionButton disabled>Nothing borrowed in AAVE</ActionButton>;
     }
-  }, [handleConnect, handleFlashLoan, isConnected, abledToConfirm]);
+  }, [
+    isConnected,
+    handleConnect,
+    isNeedApprove,
+    abledToConfirm,
+    hanldeApprove,
+    handleFlashLoan,
+  ]);
 
   return (
     <Main>

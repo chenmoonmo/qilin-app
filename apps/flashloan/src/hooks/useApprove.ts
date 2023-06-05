@@ -9,6 +9,7 @@ import {
   usePrepareContractWrite,
 } from 'wagmi';
 
+import { useToast } from '@/component';
 import { CONTRACTS, TOKENS } from '@/constant';
 
 const useApprove = (
@@ -46,9 +47,6 @@ const useApprove = (
       ),
     ],
     enabled: isNeedApprove,
-    onSuccess: () => {
-      refetch();
-    },
   });
 
   const { writeAsync: approve } = useContractWrite(config);
@@ -57,6 +55,7 @@ const useApprove = (
     return {
       isNeedApprove,
       approve,
+      refetch,
     };
   }, [isNeedApprove, approve]);
 };
@@ -68,27 +67,64 @@ export const useApproveTokens = ({
   WETHAmount: BigNumber | number;
   USDCAmount: BigNumber | number;
 }) => {
+  const { showToast, closeToast } = useToast();
+
   // weth代币approve给NftUniV2FlashAndExec
-  const { isNeedApprove: isNeedWETHApprove, approve: approveWETH } = useApprove(
+  const {
+    isNeedApprove: isNeedWETHApprove,
+    approve: approveWETH,
+    refetch: refetchWETH,
+  } = useApprove(
     TOKENS.WETH as Address,
     CONTRACTS.NftUniV2FlashAndExec as Address,
     WETHAmount
   );
   //   // USDCVariableDebt代币approve给aaveNext.用于归还自己的贷款代币USDC
-  const { isNeedApprove: isNeedUSDCApprove, approve: approveUSDC } = useApprove(
+  const {
+    isNeedApprove: isNeedUSDCApprove,
+    approve: approveUSDC,
+    refetch: refetchUSDC,
+  } = useApprove(
     TOKENS.USDC as Address,
     CONTRACTS.AaveNext as Address,
     USDCAmount
   );
 
   const hanldeApprove = async () => {
-    if (isNeedWETHApprove) {
-      await approveWETH?.();
+    try {
+      showToast({
+        message: 'Pending',
+        type: 'loading',
+      });
+      let res;
+      if (isNeedWETHApprove) {
+        res = await approveWETH?.();
+        await res?.wait();
+        refetchWETH();
+      }
+      if (isNeedUSDCApprove) {
+        res = await approveUSDC?.();
+        await res?.wait();
+        refetchUSDC();
+      }
+      showToast({
+        message: 'Operation success',
+        type: 'success',
+      });
+    } catch (e) {
+      console.error(e);
+      showToast({
+        message: 'Operation fail',
+        type: 'error',
+      });
     }
-    if (isNeedUSDCApprove) {
-      await approveUSDC?.();
-    }
+    setTimeout(() => {
+      closeToast();
+    }, 3000);
   };
 
-  return hanldeApprove;
+  return {
+    isNeedApprove: isNeedWETHApprove || isNeedUSDCApprove,
+    hanldeApprove,
+  };
 };

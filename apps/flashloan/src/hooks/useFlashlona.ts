@@ -29,7 +29,7 @@ export const useFlashlona = () => {
     address,
   });
 
-  const hanldeApprove = useApproveTokens({
+  const { isNeedApprove, hanldeApprove } = useApproveTokens({
     WETHAmount: supplie?.value ?? 0,
     USDCAmount: borrow?.value ?? 0,
   });
@@ -38,8 +38,15 @@ export const useFlashlona = () => {
     if (!supplie || !borrow) return null;
     const abi = new ethers.utils.AbiCoder();
     const ethWithDrawAmount = BigNumber.from(
-      +supplie.formatted * 0.9 * 10 ** supplie.decimals
+      (+supplie.formatted * 0.9 * 10 ** supplie.decimals).toFixed()
     );
+
+    const usdcOutAmount = borrow.value;
+
+    console.log({
+      ethWithDrawAmount: ethWithDrawAmount.toString(),
+      usdcOutAmount: usdcOutAmount.toString(),
+    });
 
     const withDrawParam = abi.encode(
       ['address', 'uint256', 'string'],
@@ -50,8 +57,6 @@ export const useFlashlona = () => {
       ['address', 'address', 'uint256', 'bytes'],
       [address, CONTRACTS.AaveNext, 2, withDrawParam]
     );
-
-    const usdcOutAmount = borrow.value;
 
     const relayParam = abi.encode(
       ['address', 'uint256', 'uint256', 'bytes'],
@@ -67,6 +72,7 @@ export const useFlashlona = () => {
       ['address', 'uint256', 'uint256', 'bytes'],
       [TOKENS.PairAddress, usdcOutAmount, 0, relay]
     );
+
     return abi.encode(
       ['address', 'address', 'uint256', 'bytes'],
       [address, CONTRACTS.NftUniV2FlashAndExec, 1, flashLoanParam]
@@ -93,7 +99,6 @@ export const useFlashlona = () => {
         message: 'Pending',
         type: 'loading',
       });
-      await hanldeApprove();
       console.log(config);
       const res = await writeAsync?.();
       const res2 = await res?.wait();
@@ -125,9 +130,11 @@ export const useFlashlona = () => {
   };
 
   return {
+    isNeedApprove,
     isLoadding,
-    handleFlashLoan,
     supplie,
     borrow,
+    hanldeApprove,
+    handleFlashLoan,
   };
 };
