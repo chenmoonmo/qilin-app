@@ -17,7 +17,7 @@ type HomeLayoutType = {
 
 const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
   const router = useRouter();
-  const { connect, connectors } = useConnect();
+  const { connectAsync, connectors } = useConnect();
   const { chain, chains } = useNetwork();
   const { address, isConnected } = useAccount();
   const { switchNetwork } = useSwitchNetwork();
@@ -26,9 +26,13 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
 
   const isErrorNetwork = !chains.find(item => item.id === chain?.id);
 
-  const handleConnect = () => {
-    connect({
+  const handleConnect = async () => {
+    await connectAsync({
       connector: connectors[0],
+    });
+    const ifrmaes = document.querySelectorAll('iframe');
+    ifrmaes.forEach(item => {
+      (item?.contentWindow as any)?.connectRefetch?.();
     });
   };
 

@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { formatAmount } from '@qilin/utils';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useAccount, useConnect } from 'wagmi';
 
 // import { useToast } from '@/component';
@@ -65,6 +65,12 @@ const Index: NextPageWithLayout = () => {
     hanldeApprove,
     handleFlashLoan,
   ]);
+
+  useEffect(() => {
+    (window as any).connectRefetch = () => {
+      handleConnect();
+    };
+  }, [handleConnect]);
 
   return (
     <Main>
