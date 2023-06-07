@@ -38,7 +38,7 @@ export const useFlashlona = () => {
     if (!supplie || !borrow) return null;
     const abi = new ethers.utils.AbiCoder();
 
-    const returnBalance = borrow.value.mul(1000600).div(1000000);
+    const returnBalance = borrow.value.mul(1000650).div(1000000);
     const debtBalance = borrow.value;
     const aTokenBlance = supplie.value;
 
