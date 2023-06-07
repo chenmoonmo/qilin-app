@@ -69,17 +69,7 @@ export const useApproveTokens = ({
 }) => {
   const { showToast, closeToast } = useToast();
 
-  // weth代币approve给NftUniV2FlashAndExec
-  const {
-    isNeedApprove: isNeedWETHApprove,
-    approve: approveWETH,
-    refetch: refetchWETH,
-  } = useApprove(
-    TOKENS.WETH as Address,
-    CONTRACTS.NftUniV2FlashAndExec as Address,
-    WETHAmount
-  );
-  //   // USDCVariableDebt代币approve给aaveNext.用于归还自己的贷款代币USDC
+  // USDC to AaveNext
   const {
     isNeedApprove: isNeedUSDCApprove,
     approve: approveUSDC,
@@ -88,6 +78,28 @@ export const useApproveTokens = ({
     TOKENS.USDC as Address,
     CONTRACTS.AaveNext as Address,
     USDCAmount
+  );
+
+  // USDC to V3FlashNft
+  const {
+    isNeedApprove: isNeedUSDCApprove1,
+    approve: approveUSDC1,
+    refetch: refetchUSDC1,
+  } = useApprove(
+    TOKENS.USDC as Address,
+    CONTRACTS.V3FlashNft as Address,
+    USDCAmount
+  );
+
+  // weth to V3SwapNft
+  const {
+    isNeedApprove: isNeedWETHApprove,
+    approve: approveWETH,
+    refetch: refetchWETH,
+  } = useApprove(
+    TOKENS.WETH as Address,
+    CONTRACTS.V3SwapNft as Address,
+    WETHAmount
   );
 
   //  WETHAToken代币approve给aaveNext.用于赎回自己的WETH
@@ -108,15 +120,20 @@ export const useApproveTokens = ({
         type: 'loading',
       });
       let res;
-      if (isNeedWETHApprove) {
-        res = await approveWETH?.();
-        await res?.wait();
-        refetchWETH();
-      }
       if (isNeedUSDCApprove) {
         res = await approveUSDC?.();
         await res?.wait();
         refetchUSDC();
+      }
+      if (isNeedUSDCApprove1) {
+        res = await approveUSDC1?.();
+        await res?.wait();
+        refetchUSDC1();
+      }
+      if (isNeedWETHApprove) {
+        res = await approveWETH?.();
+        await res?.wait();
+        refetchWETH();
       }
       if (isNeedWETHATokenApprove) {
         res = await approveWETHAToken?.();
