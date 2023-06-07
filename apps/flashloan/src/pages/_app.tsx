@@ -6,7 +6,7 @@ import Web3Provider from '@qilin/wagmi-provider';
 import type { NextPage } from 'next';
 import type { AppProps } from 'next/app';
 import type { ReactElement, ReactNode } from 'react';
-import { arbitrumGoerli } from 'wagmi/chains';
+import { arbitrum } from 'wagmi/chains';
 
 export type NextPageWithLayout<P = Record<string, unknown>, IP = P> = NextPage<
   P,
@@ -25,10 +25,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout || EmptyLayout;
 
   return (
-    <Web3Provider
-      defaultChains={[arbitrumGoerli]}
-      connectorNames={['MetaMask']}
-    >
+    <Web3Provider defaultChains={[arbitrum]} connectorNames={['MetaMask']}>
       <ToastProvider>{getLayout(<Component {...pageProps} />)}</ToastProvider>
     </Web3Provider>
   );
