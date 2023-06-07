@@ -12,13 +12,13 @@ import {
   NFTMainDialogOpenAtom,
   NFTMMainDialog,
 } from '@/components';
-import { useCreateRoom, useGetPlayerNFTIds } from '@/hooks';
+import { useCreateRoom, useGetPlayerNFTIds, useNFTList } from '@/hooks';
 import HomeLayout from '@/layouts/home-layout';
 
 import type { NextPageWithLayout } from './_app';
 
 const StyledMain = styled.main`
-  max-width: 1440px;
+  width: max-content;
   margin: 22px auto 0;
 `;
 
@@ -26,7 +26,7 @@ const HomeInfo = styled.div`
   display: flex;
   justify-content: space-between;
 
-  margin-bottom: 27px;
+  margin-bottom: 15px;
   > div:nth-of-type(1) {
     font-style: normal;
     font-weight: 600;
@@ -38,55 +38,59 @@ const HomeInfo = styled.div`
 const NFTContainer = styled.ul`
   all: unset;
   display: grid;
-  grid-template-columns: repeat(5, 272px);
+  grid-template-columns: repeat(2, 516px);
   grid-template-rows: auto;
   gap: 20px;
   > li {
-    height: 320px;
+    position: relative;
+    height: 581px;
     list-style: none;
-    border: 2px solid #262626;
-    border-radius: 16px;
+    border-radius: 5px;
     overflow: hidden;
     cursor: pointer;
     iframe {
       all: unset;
       width: 100%;
       height: 100%;
-      pointer-events: none;
+      /* pointer-events: none; */
     }
   }
 `;
 
 const Home: NextPageWithLayout = () => {
-  const router = useRouter();
-  const id = router.query.id as string;
+  // const router = useRouter();
+  // const id = router.query.id as string;
 
-  const { canCreateRoom } = useCreateRoom();
+  const { data } = useNFTList();
+
+  console.log(data);
+
+  // const { canCreateRoom } = useCreateRoom();
 
   // 玩家拥有的 player nft（可以进入的房间）
-  const { playerNFTIds, refetch } = useGetPlayerNFTIds();
+  // const { playerNFTIds, refetch } = useGetPlayerNFTIds();
 
-  console.log({
-    canCreateRoom,
-    playerNFTIds,
-  });
+  // console.log({
+  //   canCreateRoom,
+  //   playerNFTIds,
+  // });
 
-  const setNFTDialogOpen = useSetAtom(NFTMainDialogOpenAtom);
+  // const setNFTDialogOpen = useSetAtom(NFTMainDialogOpenAtom);
 
-  const setNFTID = useSetAtom(NFTIDAtom);
+  // const setNFTID = useSetAtom(NFTIDAtom);
 
-  useEffect(() => {
-    if (id && playerNFTIds.includes(+id)) {
-      setNFTID(+id);
-      setNFTDialogOpen(true);
-    }
-  }, [id, playerNFTIds, setNFTID]);
+  // useEffect(() => {
+  //   if (id && playerNFTIds.includes(+id)) {
+  //     setNFTID(+id);
+  //     setNFTDialogOpen(true);
+  //   }
+  // }, [id, playerNFTIds, setNFTID]);
 
   return (
     <StyledMain>
       <HomeInfo>
-        <div>My Betting Room</div>
-        <CreateRoomDialog onSucceess={refetch}>
+        <div>Your NFTs</div>
+        {/* <CreateRoomDialog onSucceess={refetch}>
           <Dialog.Trigger asChild>
             <Button disabled={!canCreateRoom}>
               <PlusIcon
@@ -97,17 +101,35 @@ const Home: NextPageWithLayout = () => {
               Create a Betting Room
             </Button>
           </Dialog.Trigger>
-        </CreateRoomDialog>
+        </CreateRoomDialog> */}
       </HomeInfo>
       <NFTMMainDialog>
         <NFTContainer>
-          {playerNFTIds.map(id => (
+          {/* dealer nft  */}
+          {data?.dealer && (
+            <li>
+              <iframe src={`/dealer/${data.dealer.id}`} />
+            </li>
+          )}
+          
+          <li>
+            <iframe src={"http://localhost:3000/player/1"} />
+          </li>
+
+          {/* player nft */}
+          {data?.player?.map(({ id }) => (
+            <li key={id}>
+              <iframe src={`/player/${id}`} />
+            </li>
+          ))}
+
+          {/* {playerNFTIds.map(id => (
             <Dialog.Trigger key={id} asChild>
               <li onClick={() => setNFTID(id)}>
                 <iframe src={`/nft/${id}`} />
               </li>
             </Dialog.Trigger>
-          ))}
+          ))} */}
         </NFTContainer>
       </NFTMMainDialog>
     </StyledMain>

@@ -2,6 +2,7 @@ export * from './useAddPlayers';
 export * from './useClosePostion';
 export * from './useCreateRoom';
 export * from './useGetPlayerNFTIds';
+export * from './useNFTList'
 export * from './useOpenPosition';
 export * from './useSearchToken';
 export * from './useSubmitPositon';

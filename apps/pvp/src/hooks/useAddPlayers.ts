@@ -33,7 +33,7 @@ export const useAddPlayers = ({ id }: { id: number }) => {
   // 输入是否为地址
   const seatsAddressValid = useAtomValue(seatsAddressValidAtom);
 
-  const { dealerId } = useDealerId();
+  const { data:dealerId } = useDealerId();
 
   // 已经添加的席位
   const { data, refetch } = useContractRead({
