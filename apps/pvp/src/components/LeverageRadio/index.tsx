@@ -19,20 +19,22 @@ const Item = styled(RadioGroup.Item)`
   align-items: center;
   justify-content: center;
   padding: 10px;
-  margin-left: 17px;
   flex: 1;
-  background: #2c2f38;
-  border-radius: 6px;
+  background: #536193;
+  border-radius: 2px;
   font-style: normal;
-  font-weight: 500;
-  font-size: 12px;
+  font-weight: 600;
+  font-size: 14px;
   line-height: 12px;
   cursor: pointer;
+  &:not(:first-child) {
+    margin-left: 17px;
+  }
   &[data-state='checked'] {
-    background: #464a56;
+    background: #2e71ff;
   }
   &:hover {
-    background: #464a56;
+    background: #2e71ff;
   }
 `;
 

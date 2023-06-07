@@ -111,9 +111,9 @@ const Home: NextPageWithLayout = () => {
               <iframe src={`/dealer/${data.dealer.id}`} />
             </li>
           )}
-          
+
           <li>
-            <iframe src={"http://localhost:3000/player/1"} />
+            <iframe src={'http://localhost:3000/player/1'} />
           </li>
 
           {/* player nft */}

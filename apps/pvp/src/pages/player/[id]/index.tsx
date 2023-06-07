@@ -1,18 +1,27 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+import { LeverageRadio } from '@/components';
 import Layout from '@/layouts/nft-layout';
 import {
+  FormButtonContainer,
+  MarginInputContainer,
   NotOpen,
+  OpenPositionForm,
+  OpenPositionFormItem,
+  OpenPositionOuter,
   Pair,
+  PairInfo,
   PNLInfo,
   PNLInfoContainer,
   PositionDirection,
   PositionInfoContainer,
+  PositionPercent,
   PositionSize,
   PriceInfo,
   PriceItem,
   RoomInfo,
+  SubmitButton,
 } from '@/styles/player';
 
 import type { NextPageWithLayout } from '../../_app';
@@ -61,10 +70,45 @@ const PositionInfo = () => {
   );
 };
 
+const OpenPostition = () => {
+  return (
+    <>
+      <PairInfo>
+        <div>BTC / USDC</div>
+        <div>26876.24 USD</div>
+      </PairInfo>
+      <PositionPercent longSize={60} shortSize={40} />
+      <OpenPositionOuter>
+        <OpenPositionForm>
+          <OpenPositionFormItem>
+            <div>Leverage</div>
+            <LeverageRadio></LeverageRadio>
+          </OpenPositionFormItem>
+          <OpenPositionFormItem>
+            <div>Margin</div>
+            <MarginInputContainer>
+              <input type="text" />
+              <div>
+                <div>USDC</div>
+                <div>Balance: 0.0001441</div>
+              </div>
+            </MarginInputContainer>
+          </OpenPositionFormItem>
+          <FormButtonContainer>
+            <SubmitButton backgroundColor="#4BD787">Long</SubmitButton>
+            <SubmitButton backgroundColor="#F45E68">Short</SubmitButton>
+          </FormButtonContainer>
+        </OpenPositionForm>
+      </OpenPositionOuter>
+    </>
+  );
+};
+
 const Player: NextPageWithLayout = () => {
   return (
     <>
-      <PositionInfo />
+      {/* <PositionInfo /> */}
+      <OpenPostition />
     </>
   );
 };

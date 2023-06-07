@@ -126,6 +126,94 @@ NotOpen.defaultProps = {
   children: 'Not Open',
 };
 
+// Open price 相关
+export const PairInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 20px;
+  margin: 36px 0 24px;
+  border: 1px solid rgba(139, 162, 212, 0.5);
+  border-radius: 6px;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 12px;
+`;
+
+export const OpenPositionOuter = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+`;
+
+export const OpenPositionForm = styled.div`
+  width: 100%;
+  padding: 14px 20px;
+  border: 1px solid rgba(139, 162, 212, 0.5);
+  border-radius: 6px;
+`;
+
+export const OpenPositionFormItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 12px;
+  color: #ffffff;
+  &:not(:first-of-type) {
+    margin-top: 12px;
+  }
+  > :last-child {
+    width: 340px;
+  }
+`;
+
+export const MarginInputContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #536193;
+  border-radius: 2px;
+  white-space: nowrap;
+  input {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 12px;
+  }
+  > div {
+    font-style: normal;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 12px;
+    text-align: right;
+    > div:last-of-type {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 10px;
+      line-height: 20px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+`;
+
+export const FormButtonContainer = styled.div`
+  display: flex;
+  align-items: center;
+`
+
+export const SubmitButton = styled(Button)`
+  flex: 1;
+  padding: 12px 0;
+  margin-top: 24px;
+  &:not(:first-of-type) {
+    margin-left: 12px;
+  }
+`
+
 export const BackLink = styled(Link)`
   display: block;
   margin: 20px 0;
