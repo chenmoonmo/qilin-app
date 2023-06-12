@@ -44,24 +44,19 @@ const Index: NextPageWithLayout = () => {
   }, [connect, connectors]);
 
   const button = useMemo(() => {
+    if (!hasNFT) {
+      return <ActionButton disabled>Account lacks current NFT</ActionButton>;
+    }
     if (!isConnected) {
       return (
         <ActionButton onClick={handleConnect}>Connect Wallet</ActionButton>
       );
     } else {
       if (isNeedApprove) {
-        return (
-          <ActionButton disabled={!hasNFT} onClick={hanldeApprove}>
-            Approve
-          </ActionButton>
-        );
+        return <ActionButton onClick={hanldeApprove}>Approve</ActionButton>;
       }
       if (abledToConfirm) {
-        return (
-          <ActionButton disabled={!hasNFT} onClick={handleFlashLoan}>
-            Confirm
-          </ActionButton>
-        );
+        return <ActionButton onClick={handleFlashLoan}>Confirm</ActionButton>;
       }
       return <ActionButton disabled>Nothing borrowed in AAVE</ActionButton>;
     }
