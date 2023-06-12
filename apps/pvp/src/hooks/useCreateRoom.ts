@@ -64,7 +64,6 @@ export const useDealerId = () => {
                 }
                 `
       );
-      return BigNumber.from(2);
       return res?.dealers?.[0]?.id
         ? BigNumber.from(res?.dealers?.[0]?.id)
         : null;
@@ -114,8 +113,6 @@ export const useCreateRoom = () => {
   // 创建房间
   const { config, error } = usePrepareContractWrite({
     ...DealerContract,
-    // address: CONTRACTS.FactoryAddress,
-    // abi: Factory.abi,
     functionName: 'createPool',
     args: [
       dealerId,
@@ -124,7 +121,6 @@ export const useCreateRoom = () => {
       form.oracle,
       false,
       1,
-      2,
       BigNumber.from(6),
       [address, ...players.filter(address => isAddress(address))],
     ],
@@ -144,18 +140,18 @@ export const useCreateRoom = () => {
   // 设置玩家 mint nft2
   const { writeAsync: createRoomWrite } = useContractWrite(config);
 
-  const { config: setPlayersConfig } = usePrepareContractWrite({
-    ...DealerContract,
-    functionName: 'setPlayers',
-    args: [
-      dealerId,
-      6,
-      [address, ...players.filter(address => isAddress(address))],
-    ],
-    enabled: canCreateRoom as boolean,
-  });
+  // const { config: setPlayersConfig } = usePrepareContractWrite({
+  //   ...DealerContract,
+  //   functionName: 'initPlayer',
+  //   args: [
+  //     dealerId,
+  //     6,
+  //     [address, ...players.filter(address => isAddress(address))],
+  //   ],
+  //   enabled: canCreateRoom as boolean,
+  // });
 
-  const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
+  // const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
 
   const createRoom = useCallback(async () => {
     try {
@@ -171,8 +167,8 @@ export const useCreateRoom = () => {
         type: 'loading',
       });
       await res?.wait();
-      const res2 = await setPlayersWrite?.();
-      await res2?.wait();
+      // const res2 = await setPlayersWrite?.();
+      // await res2?.wait();
       showWalletToast({
         title: 'Transaction Confirmation',
         message: 'Transaction Confirmed',

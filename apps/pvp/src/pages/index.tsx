@@ -3,15 +3,18 @@ import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { PlusIcon } from '@radix-ui/react-icons';
 import { useSetAtom } from 'jotai';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 import { NFTIDAtom } from '@/atoms';
 import {
   CreateRoomDialog,
+  NFTCard,
   NFTMainDialogOpenAtom,
   NFTMMainDialog,
 } from '@/components';
+import { CONTRACTS } from '@/constant';
 import { useCreateRoom, useGetPlayerNFTIds, useNFTList } from '@/hooks';
 import HomeLayout from '@/layouts/home-layout';
 
@@ -25,7 +28,6 @@ const StyledMain = styled.main`
 const HomeInfo = styled.div`
   display: flex;
   justify-content: space-between;
-
   margin-bottom: 15px;
   > div:nth-of-type(1) {
     font-style: normal;
@@ -35,26 +37,12 @@ const HomeInfo = styled.div`
   }
 `;
 
-const NFTContainer = styled.ul`
+const NFTContainer = styled.div`
   all: unset;
   display: grid;
-  grid-template-columns: repeat(2, 516px);
+  grid-template-columns: repeat(5, 256px);
   grid-template-rows: auto;
-  gap: 20px;
-  > li {
-    position: relative;
-    height: 581px;
-    list-style: none;
-    border-radius: 5px;
-    overflow: hidden;
-    cursor: pointer;
-    iframe {
-      all: unset;
-      width: 100%;
-      height: 100%;
-      /* pointer-events: none; */
-    }
-  }
+  gap: 18px;
 `;
 
 const Home: NextPageWithLayout = () => {
@@ -62,8 +50,6 @@ const Home: NextPageWithLayout = () => {
   // const id = router.query.id as string;
 
   const { data } = useNFTList();
-
-  console.log(data);
 
   // const { canCreateRoom } = useCreateRoom();
 
@@ -105,8 +91,24 @@ const Home: NextPageWithLayout = () => {
       </HomeInfo>
       <NFTMMainDialog>
         <NFTContainer>
-          {/* dealer nft  */}
           {data?.dealer && (
+            <Link href={`/assets/${CONTRACTS.DealerAddress}/${data.dealer.id}`}>
+              <NFTCard
+                address={CONTRACTS.DealerAddress}
+                tokenId={+data.dealer.id}
+              />
+            </Link>
+          )}
+
+          {/* player nft */}
+          {data?.player?.map(({ id }) => (
+            <Link key={id} href={`/assets/${CONTRACTS.PlayerAddress}/${id}`}>
+              <NFTCard address={CONTRACTS.PlayerAddress} tokenId={+id} />
+            </Link>
+          ))}
+
+          {/* dealer nft  */}
+          {/* {data?.dealer && (
             <li>
               <iframe src={`/dealer/${data.dealer.id}`} />
             </li>
@@ -114,14 +116,14 @@ const Home: NextPageWithLayout = () => {
 
           <li>
             <iframe src={'http://localhost:3000/player/1'} />
-          </li>
+          </li> */}
 
           {/* player nft */}
-          {data?.player?.map(({ id }) => (
+          {/* {data?.player?.map(({ id }) => (
             <li key={id}>
               <iframe src={`/player/${id}`} />
             </li>
-          ))}
+          ))} */}
 
           {/* {playerNFTIds.map(id => (
             <Dialog.Trigger key={id} asChild>

@@ -2,11 +2,7 @@ import { css } from '@emotion/react';
 import { Button, useToast } from '@qilin/component';
 import Image from 'next/image';
 import { useMemo } from 'react';
-import {
-  useAccount,
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi';
+import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 import Dealer from '@/constant/abis/Dealer.json';
@@ -37,17 +33,14 @@ const Index: NextPageWithLayout = () => {
   //   args: [address],
   // });
 
-  console.log(dealerId);
-
   const { config } = usePrepareContractWrite({
     address: CONTRACTS.DealerAddress,
     abi: Dealer.abi,
     functionName: 'mint',
     // TODO: 请求默克尔根 和 获得最新的可mint id
     args: [1, []],
-    enabled: !!dealerId,
+    enabled: !dealerId,
   });
-
   const { writeAsync } = useContractWrite(config);
 
   const mint = async () => {

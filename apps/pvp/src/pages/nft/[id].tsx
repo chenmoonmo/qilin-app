@@ -309,7 +309,6 @@ const Detail = () => {
             symbol={marginTokenInfo?.symbol}
             onMaxClick={handleMaxMargin}
             onChange={(marginAmount: string) => {
-              // TODO: 格式化输入
               setForm(preForm => {
                 return {
                   ...preForm,

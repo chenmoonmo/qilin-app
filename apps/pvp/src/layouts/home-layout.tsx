@@ -57,9 +57,9 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
           `}
         >
           <Logo css={css`
-            margin-right: 70px;
+            margin-right: 86px;
           `} />
-          <MenuItem href="/" data-active={router.pathname === '/'}>Betting</MenuItem>
+          <MenuItem href="/" data-active={router.pathname === '/'}>Collections</MenuItem>
           {/* TODO: 白名单显示 */}
           <MenuItem href="/mint" data-active={router.pathname === '/mint'}>Mint</MenuItem>
         </div>

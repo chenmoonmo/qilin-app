@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 
-
 export const FormContainer = styled.div`
   padding: 22px 0 0;
 `;
@@ -111,7 +110,7 @@ export const TraddingEndTitle = styled.h1`
   all: unset;
   display: block;
   width: 100%;
-  margin-top: 87px;
+  margin-top: 47px;
   margin-bottom: 30px;
   font-weight: 600;
   font-size: 18px;

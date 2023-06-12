@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
 import Link from 'next/link';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import { useMemo } from 'react';
 
 export const PositionInfoContainer = styled.div`
@@ -82,18 +82,39 @@ export const PNLInfoContainer = styled.div`
   }
 `;
 
-export const PNLInfo = styled.div`
+export const PNLInfo = styled.div<{ children: ReactNode }>`
   display: flex;
   align-items: center;
   font-style: normal;
   font-weight: 600;
   font-size: 36px;
-  color: #4bd787;
-  &[data-type='profit'] {
-    color: #4bd787;
-  }
-  &[data-type='loss'] {
-    color: #f45e68;
+  color: ${props => {
+    const pnl = Number(props.children);
+    if (props.children === 'Not joined') {
+      return '#4bd787';
+    }
+    if (isNaN(pnl)) {
+      return '#FFFFFF';
+    }
+    if (pnl < 0) {
+      return '#f45e68';
+    } else {
+      return '#4bd787';
+    }
+  }};
+  &::before {
+    content: ${props => {
+      const pnl = Number(props.children);
+      if (isNaN(pnl)) {
+        return null;
+      }
+      if (pnl < 0) {
+        return null;
+      } else {
+        return '+';
+      }
+    }};
+    margin-right: 6px;
   }
 `;
 
@@ -203,7 +224,7 @@ export const MarginInputContainer = styled.div`
 export const FormButtonContainer = styled.div`
   display: flex;
   align-items: center;
-`
+`;
 
 export const SubmitButton = styled(Button)`
   flex: 1;
@@ -212,7 +233,7 @@ export const SubmitButton = styled(Button)`
   &:not(:first-of-type) {
     margin-left: 12px;
   }
-`
+`;
 
 export const BackLink = styled(Link)`
   display: block;
@@ -284,6 +305,7 @@ const PositionPercentContainer = styled.div<{
   > div {
     padding: 2px 12px;
     &:first-of-type {
+      display: ${props => (props.long === 0 ? 'none' : 'block')};
       width: calc(${props => props.long}% - 2px);
       background: #4bd787;
     }
@@ -293,8 +315,10 @@ const PositionPercentContainer = styled.div<{
       background: #ffffff;
     }
     &:last-of-type {
+      display: ${props => (props.short === 0 ? 'none' : 'block')};
       width: calc(${props => props.short}% - 2px);
       background: #f45e68;
+      text-align: right;
     }
   }
 `;
@@ -338,14 +362,15 @@ const PositionChartLegend = styled.div`
 `;
 
 export const PositionPercent: FC<{
-  longSize: number;
-  shortSize: number;
+  longSize: number | string;
+  shortSize: number | string;
 }> = ({ longSize, shortSize }) => {
   const [longPercent, shortPrecent] = useMemo(() => {
-    const total = longSize + shortSize;
-
-    return [(longSize / total) * 100, (shortSize / total) * 100];
+    const total = +longSize + +shortSize;
+    if (total === 0 || isNaN(total)) return [50, 50];
+    return [(+longSize / total) * 100, (+shortSize / total) * 100];
   }, [longSize, shortSize]);
+
   return (
     <>
       <PositionPercentContainer long={longPercent} short={shortPrecent}>

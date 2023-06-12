@@ -217,3 +217,17 @@ export const BackIcon = (props: React.SVGProps<SVGSVGElement>) => {
     </svg>
   );
 };
+
+export const ArrowIcon = (props: React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg
+      width={6}
+      height={9}
+      fill="#fff"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path d="M.842 9L0 8.242l4.289-3.795L.006.768.836 0 6 4.435.842 9z" />
+    </svg>
+  );
+};

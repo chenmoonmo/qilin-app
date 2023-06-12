@@ -1,17 +1,14 @@
 import { useToast } from '@qilin/component';
-import type { BigNumber } from 'ethers';
 import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 import {
-  useContractRead,
   useContractWrite,
   usePrepareContractWrite,
 } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 import Dealer from '@/constant/abis/Dealer.json';
-import Player from '@/constant/abis/Player.json';
 
 import { useDealerId } from './useCreateRoom';
 
@@ -25,7 +22,7 @@ const seatsAddressValidAtom = atom(get => {
   );
 });
 
-export const useAddPlayers = ({ id }: { id: number }) => {
+export const useAddPlayers = (id: number, restSeats: number) => {
   const { showWalletToast, closeWalletToast } = useToast();
 
   // 玩家地址表单
@@ -33,18 +30,7 @@ export const useAddPlayers = ({ id }: { id: number }) => {
   // 输入是否为地址
   const seatsAddressValid = useAtomValue(seatsAddressValidAtom);
 
-  const { data:dealerId } = useDealerId();
-
-  // 已经添加的席位
-  const { data, refetch } = useContractRead({
-    address: CONTRACTS.PlayerAddress,
-    abi: Player.abi,
-    functionName: 'idToAmount',
-    args: [id],
-  });
-
-  // 剩下可添加的位置
-  const restSeats = data ? 6 - (data as BigNumber).toNumber() : 0;
+  const { dealerId } = useDealerId();
 
   const { config, isError } = usePrepareContractWrite({
     address: CONTRACTS.DealerAddress,
@@ -75,7 +61,7 @@ export const useAddPlayers = ({ id }: { id: number }) => {
         message: 'Transaction Confirmed',
         type: 'success',
       });
-      refetch();
+      // refetch();
     } catch (e) {
       console.error(e);
       showWalletToast({
@@ -89,13 +75,13 @@ export const useAddPlayers = ({ id }: { id: number }) => {
 
   useEffect(() => {
     setSeats(new Array(restSeats).fill(''));
-  }, [restSeats]);
+  }, [restSeats, setSeats]);
 
   return {
-    enableAdd: restSeats > 0,
     playerSeats,
     setSeats,
     addPlayers,
+    enableAdd: restSeats > 0,
     seatsAddressValid: seatsAddressValid && !isError,
   };
 };

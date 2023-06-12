@@ -27,7 +27,7 @@ const Item = styled(RadioGroup.Item)`
   font-size: 14px;
   line-height: 12px;
   cursor: pointer;
-  &:not(:first-child) {
+  &:not(:first-of-type) {
     margin-left: 17px;
   }
   &[data-state='checked'] {

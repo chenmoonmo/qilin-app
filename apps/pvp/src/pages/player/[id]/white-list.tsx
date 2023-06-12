@@ -2,7 +2,8 @@ import { css } from '@emotion/react';
 import { useRouter } from 'next/router';
 
 import { BackIcon } from '@/components';
-import Layout from '@/layouts/nft-layout';
+import { useAddPlayers, usePoolInfo } from '@/hooks';
+import Layout, { Header } from '@/layouts/nft-layout';
 import {
   BackLink,
   MintButton,
@@ -16,10 +17,18 @@ import type { NextPageWithLayout } from '../../_app';
 
 const WhiteList: NextPageWithLayout = () => {
   const router = useRouter();
+  const { id } = router.query as { id: string };
   const finalSlashIndex = router.asPath.lastIndexOf('/');
   const previousPath = router.asPath.slice(0, finalSlashIndex);
+
+  const { poolInfo, players, status } = usePoolInfo(+id);
+
+  const { playerSeats, setSeats, seatsAddressValid, addPlayers } =
+    useAddPlayers(+id, 6 - players?.length);
+
   return (
     <>
+      <Header shortId={poolInfo?.shortId} />
       <BackLink href={previousPath}>
         <BackIcon />
       </BackLink>
@@ -29,11 +38,11 @@ const WhiteList: NextPageWithLayout = () => {
       </PositionInfoItem>
       <PositionInfoItem>
         <div>Pair：</div>
-        <div>BTC/USD</div>
+        <div>{poolInfo?.trade_pair}</div>
       </PositionInfoItem>
       <PositionInfoItem>
-        <div>Margin：：</div>
-        <div>DAI</div>
+        <div>Margin：</div>
+        <div>{poolInfo?.pay_token_symbol}</div>
       </PositionInfoItem>
       <PositionInfoItem>
         <div>Number Of Seats： </div>
@@ -50,15 +59,30 @@ const WhiteList: NextPageWithLayout = () => {
       >
         <div>Whitelist：</div>
         <WhiteItemContainer>
-          <WhiteItem />
-          <WhiteItem />
-          <WhiteItem />
-          <WhiteItem />
-          <WhiteItem />
+          {players?.map(address => {
+            return <WhiteItem key={address} value={address} disabled />;
+          })}
+          {playerSeats.map((address, index) => {
+            return (
+              <WhiteItem
+                key={index}
+                value={address}
+                onChange={e => {
+                  setSeats(pre => {
+                    return [
+                      ...pre.slice(0, index),
+                      e.target.value,
+                      ...pre.slice(index + 1),
+                    ];
+                  });
+                }}
+              />
+            );
+          })}
           <WhiteTip>Only whitelist can join</WhiteTip>
         </WhiteItemContainer>
       </PositionInfoItem>
-      <MintButton>Mint NFT</MintButton>
+      <MintButton disabled={!seatsAddressValid}>Mint NFT</MintButton>
     </>
   );
 };

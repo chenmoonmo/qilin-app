@@ -1,9 +1,13 @@
-import Layout from '@/layouts/nft-layout';
+import Layout, { Header } from '@/layouts/nft-layout';
 
 import type { NextPageWithLayout } from '../../_app';
 
 const ClostPosition: NextPageWithLayout = () => {
-  return <></>;
+  return (
+    <>
+      <Header />
+    </>
+  );
 };
 
 ClostPosition.getLayout = (page: any) => {

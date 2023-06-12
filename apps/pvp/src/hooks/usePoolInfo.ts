@@ -7,7 +7,6 @@ import type { Address } from 'wagmi';
 import { useAccount, useContractRead } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
-import Dealer from '@/constant/abis/Dealer.json';
 import Player from '@/constant/abis/Player.json';
 import Pool from '@/constant/abis/Pool.json';
 import { graphFetcher } from '@/hleper';
@@ -58,12 +57,9 @@ type PoolGraph = {
     fact_pnl: string;
     type: 0 | 1 | 2 | 3;
   }[];
-  players: [
-    {
-      id: string;
-      user: Address[];
-    }
-  ];
+  players: {
+    user: Address[];
+  }[];
   settings: [
     {
       liq_protocol_fee: string;
@@ -83,19 +79,11 @@ export const usePoolInfo = (playerNFTId: number) => {
   });
 
   const { data: poolAddress } = useContractRead({
-    address: CONTRACTS.DealerAddress,
-    abi: Dealer.abi,
-    functionName: 'dealerToPool',
-    args: [createDealerId],
-    enabled: !!createDealerId,
+    address: CONTRACTS.PlayerAddress,
+    abi: Player.abi,
+    functionName: 'playerToPool',
+    args: [playerNFTId],
   });
-
-  // const { data: poolAddress } = useContractRead({
-  //   address: CONTRACTS.PlayerAddress,
-  //   abi: Player.abi,
-  //   functionName: 'playerToPool',
-  //   args: [playerNFTId],
-  // });
 
   const { data: nowPrice } = useContractRead({
     address: poolAddress as Address,
@@ -103,15 +91,7 @@ export const usePoolInfo = (playerNFTId: number) => {
     functionName: 'getPrice',
   });
 
-  // const { data: deadline } = useContractRead({
-  //   address: CONTRACTS.DealerAddress,
-  //   abi: Dealer.abi,
-  //   functionName: 'dealerToDeadline',
-  //   args: [createDealerId],
-  //   enabled: !!createDealerId,
-  // });
-
-  const { data, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate, error } = useSWR(
     poolAddress
       ? ['getPoolInfo', (poolAddress as Address).toLowerCase(), playerNFTId]
       : null,
@@ -127,33 +107,39 @@ export const usePoolInfo = (playerNFTId: number) => {
           }
           `
       );
+
       // TODO: 处理 players
       const { pools, mergePositions, positions, players } = res;
 
+      const poolInfo = pools[0];
+
       const fomattedMargin = ethers.utils.formatUnits(
-        pools[0]?.margin,
-        +pools[0]?.pay_token_decimal
+        +poolInfo?.margin,
+        +poolInfo?.pay_token_decimal
       );
 
       //FIXME: remove mock data
       return {
         poolInfo: {
-          ...pools[0],
+          ...poolInfo,
+          shortId: poolInfo.id.slice(-4),
           token0: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6' as Address,
           token1: '0x07865c6e87b9f70255377e024ace6630c1eaa37f' as Address,
           token1Decimal: 18,
           token1Symbol: 'USD',
           trade_pair: 'ETH/USD',
-          token_price: +ethers.utils.formatEther(pools[0]?.token_price),
-          lp_price: +ethers.utils.formatEther(pools[0]?.lp_price),
+          token_price: +ethers.utils.formatEther(poolInfo?.token_price),
+          lp_price: +ethers.utils.formatEther(poolInfo?.lp_price),
           // deadline: deadline?.toString(),
           fomattedMargin,
-          level: pools[0]?.level.map(item => item.toString()),
+          level: poolInfo?.level.map(item => item.toString()),
         },
         positions,
         mergePositions,
-        players: players[0],
-        fee: +ethers.utils.formatEther(res.settings[0]?.liq_protocol_fee),
+        players: players[0].user,
+        // TODO: fee 请求不到
+        // fee: +ethers.utils.formatEther(res.settings[0]?.liq_protocol_fee),
+        fee: 0,
       };
     }
   );
@@ -185,7 +171,7 @@ export const usePoolInfo = (playerNFTId: number) => {
   // 未开仓前 使用这里的数据获取 mergePositions 和 positions
   const waitPositions = useWaitPositions({
     poolAddress: poolAddress as Address,
-    playerNFTId,
+    playerAmount: data?.players.length ?? 0,
   });
 
   const isSubmited = waitPositions?.some(
@@ -299,7 +285,7 @@ export const usePoolInfo = (playerNFTId: number) => {
     const marginTokenDecimal = data?.poolInfo.pay_token_decimal ?? 6;
     if (isOpend) {
       const unSubmitedPlayer =
-        data?.players.user
+        data?.players
           ?.filter(
             playerAddress =>
               !data?.positions?.some(position =>
@@ -392,7 +378,7 @@ export const usePoolInfo = (playerNFTId: number) => {
         .concat(unSubmitedPlayer as any);
     } else {
       const unSubmitedPlayer =
-        data?.players.user
+        data?.players
           ?.filter(
             playerAddress =>
               !waitPositions.some(position =>
@@ -466,7 +452,7 @@ export const usePoolInfo = (playerNFTId: number) => {
     data?.poolInfo.pay_token_decimal,
     data?.poolInfo.pay_token_symbol,
     data?.poolInfo.trade_pair,
-    data?.players.user,
+    data?.players,
     data?.positions,
     data?.fee,
     isOpend,
@@ -482,31 +468,31 @@ export const usePoolInfo = (playerNFTId: number) => {
     return (positions as any[])?.find(position => position?.isMe);
   }, [positions]);
 
-  const status = useMemo(() => {
+  const status = useMemo<'wait' | 'submit' | 'open' | 'end'>(() => {
     if (!isOpend) {
-      return 'wait';
+      return isSubmited ? 'submit' : 'wait';
     } else if (!isEnd) {
       return 'open';
     } else {
       return 'end';
     }
-  }, [isOpend, isEnd]);
+  }, [isOpend, isEnd, isSubmited]);
 
   return {
     createDealerId: createDealerId as BigNumber,
     poolAddress: poolAddress as Address,
     poolInfo: data?.poolInfo,
+    players: data?.players ?? [],
     closePrice: formattedClosePrice,
     stakePrice,
-    isSubmited,
     positions,
     mergePositions,
-    isLoading,
-    mutate,
     status,
     isOpend,
     isEnd,
+    isSubmited,
     myPosition,
+    isLoading,
     refresh: mutate,
   };
 };

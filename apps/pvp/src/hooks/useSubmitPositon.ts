@@ -116,6 +116,12 @@ export const useSubmitPositon = ({
         await res?.wait();
         await refetchAllowance?.();
       }
+      console.log([
+        poolAddress,
+        marginAmountToBN,
+        +`${form.direction === 'short' ? '-' : ''}${form.leverage}`,
+      ]);
+
       const res = await submit?.({
         recklesslySetUnpreparedArgs: [
           poolAddress,

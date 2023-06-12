@@ -1,7 +1,10 @@
+import { formatAmount } from '@qilin/utils';
 import { useRouter } from 'next/router';
+import { Fragment } from 'react';
 
 import { BackIcon } from '@/components';
-import Layout from '@/layouts/nft-layout';
+import { usePoolInfo } from '@/hooks';
+import Layout, { Header } from '@/layouts/nft-layout';
 import {
   BackLink,
   PNL,
@@ -14,27 +17,38 @@ import type { NextPageWithLayout } from '../../_app';
 
 const Positions: NextPageWithLayout = () => {
   const router = useRouter();
+  const { id } = router.query as { id: string };
   const finalSlashIndex = router.asPath.lastIndexOf('/');
   const previousPath = router.asPath.slice(0, finalSlashIndex);
+
+  const { poolInfo, mergePositions, positions } = usePoolInfo(+id);
+
   return (
     <>
+      <Header shortId={poolInfo?.shortId} />
       <BackLink href={previousPath}>
         <BackIcon />
       </BackLink>
-      <PositionPercent longSize={60} shortSize={40} />
+      <PositionPercent
+        longSize={mergePositions?.long.asset ?? 0}
+        shortSize={mergePositions?.short.asset ?? 0}
+      />
       <PositionsList>
-        <div>1</div>
-        <div>3412</div>
-        <Size leverage={20} direction="long">
-          132.12
-        </Size>
-        <PNL type="profit">+12.21(1.2%)</PNL>
-        <div>1</div>
-        <div>3412</div>
-        <Size leverage={20} direction="short">
-          132.12
-        </Size>
-        <PNL type="loss">+12.21(1.2%)</PNL>
+        {positions?.map((position, index) => {
+          return (
+            <Fragment key={index}>
+              <div>{index+1}</div>
+              <div>{position.user.slice(-4)}</div>
+              <Size
+                leverage={position.level}
+                direction={position.direction as 'long' | 'short'}
+              >
+                {formatAmount(position.fomattedMargin)}
+              </Size>
+              <PNL type="profit">+12.21(1.2%)</PNL>
+            </Fragment>
+          );
+        })}
       </PositionsList>
     </>
   );

@@ -1,8 +1,14 @@
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { useMemo, useState } from 'react';
+import type { FC} from 'react';
+import { useMemo } from 'react';
 dayjs.extend(duration);
+
+type TimeInputPropsType = {
+  value: number;
+  onChange: (value: number) => void;
+};
 
 const TimeContainer = styled.div`
   display: flex;
@@ -54,19 +60,15 @@ const InputContainer = styled.div`
   }
 `;
 
-export const TimeInput = () => {
-  const [seconds, setSeconds] = useState(0);
-
+export const TimeInput: FC<TimeInputPropsType> = ({ value = 0, onChange }) => {
   const [mins, hours, days] = useMemo(() => {
-    const duration = dayjs.duration(seconds * 1000);
+    const duration = dayjs.duration(value * 1000);
     return [
       duration.minutes(),
       duration.hours(),
       Math.floor(duration.asDays()),
     ];
-  }, [seconds]);
-
-  console.log({ seconds, mins, hours, days });
+  }, [value]);
 
   const handleInput = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -89,9 +91,7 @@ export const TimeInput = () => {
       params.minutes = value;
     }
     const duration = dayjs.duration(params);
-    console.log(duration, duration.asSeconds());
-
-    setSeconds(duration.asSeconds());
+    onChange(duration.asSeconds());
   };
 
   return (
