@@ -59,10 +59,10 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
             align-items: center;
           `}
         >
-          <MenuItem href="/" data-active={router.pathname === '/'}>
+          <MenuItem href="/home" data-active={router.pathname === '/home'}>
             Flashloan(beta)
           </MenuItem>
-          <MenuItem href="/mint" data-active={router.pathname === '/mint'}>
+          <MenuItem href="/" data-active={router.pathname === '/'}>
             Mint
           </MenuItem>
         </div>

@@ -4,6 +4,7 @@ export const CONTRACTS = {
   V3FlashNft: process.env.V3FlashNft,
   AaveNext: process.env.AaveNext,
   Pair: process.env.Pair,
+  JustNFT: process.env.JustNFT,
 };
 
 export const TOKENS = {
