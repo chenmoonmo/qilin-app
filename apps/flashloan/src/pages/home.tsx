@@ -47,6 +47,34 @@ const Home: NextPageWithLayout = () => {
               deposits from Aave. Some of the deposits will be sold on Uni to
               repay the flash loan.
             </p>
+            <p>
+              If you want to use this feature, please make sure that you have:
+            </p>
+            <ol>
+              <li>
+                Minted an NFT at{' '}
+                <a href="http://unkownnft.xyz/.">http://unkownnft.xyz/</a>.
+              </li>
+              <li>
+                Deposited WETH or ETH on AAVE&apos;s Arbitrum network(
+                <a href="https://app.aave.com/">https://app.aave.com/</a>) and
+                borrowed USDC.
+                <ul>
+                  <li>
+                    USDC address: 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8
+                  </li>
+                  <li>
+                    WETH address: 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1
+                  </li>
+                </ul>
+              </li>
+              <li>
+                After completing the above steps, you can then proceed to
+                execute &quot;reclaim collateral without repayment&quot;
+                operation on the NFT interface located on the left side of this
+                page.
+              </li>
+            </ol>
           </Card>
           <Card>
             <h1>Details</h1>
