@@ -62,6 +62,9 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
           <MenuItem href="/" data-active={router.pathname === '/'}>
             Flashloan(beta)
           </MenuItem>
+          <MenuItem href="/mint" data-active={router.pathname === '/mint'}>
+            Mint
+          </MenuItem>
         </div>
         <div
           css={css`
