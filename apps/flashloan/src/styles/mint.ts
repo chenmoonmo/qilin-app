@@ -16,7 +16,7 @@ export const MintContainer = styled.div`
 
 export const NFTCard = styled.div`
   width: 292px;
-  height: 292px;
+  height: 328.66px;
 `;
 
 export const MintInfo = styled.div`
