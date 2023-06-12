@@ -1,8 +1,10 @@
+import { css } from '@emotion/react';
+import { Button } from '@qilin/component';
 import { formatAmount, formatInput } from '@qilin/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { FC } from 'react';
-import type { Address} from 'wagmi';
+import type { Address } from 'wagmi';
 import { useAccount, useBalance } from 'wagmi';
 
 import { ArrowIcon, LeverageRadio } from '@/components';
@@ -52,12 +54,31 @@ const PositionInfo: FC<
           <PositionDirection data-type={myPosition?.direction}>
             {myPosition?.direction}
           </PositionDirection>
-          <PositionSize leverage={myPosition.level}>
-            {myPosition.fomattedMargin} {myPosition.marginSymbol}
+          <PositionSize leverage={myPosition?.level}>
+            {myPosition?.fomattedMargin} {myPosition?.marginSymbol}
           </PositionSize>
         </RoomInfo>
         <PNLInfoContainer>
-          <PNLInfo>{myPosition.estPnl ?? '-'}</PNLInfo>
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+            `}
+          >
+            <PNLInfo>{formatAmount(myPosition?.estPnl) ?? '-'}</PNLInfo>
+            {myPosition?.type === 1 && (
+              <Link href={`/player/${id}/close`}>
+                <Button
+                  css={css`
+                    width: 128px;
+                    height: 38px;
+                  `}
+                >
+                  Close
+                </Button>
+              </Link>
+            )}
+          </div>
           <Link href={`/player/${id}/positions`}>
             <svg
               width="12"
@@ -76,7 +97,7 @@ const PositionInfo: FC<
         <PriceInfo>
           <PriceItem>
             <div>Open price</div>
-            <div>-</div>
+            <div>{formatAmount(poolInfo.openPrice) ?? '-'}</div>
           </PriceItem>
           <PriceItem>
             <div>Current price</div>
@@ -89,11 +110,8 @@ const PositionInfo: FC<
 };
 
 const OpenPostition: FC<
-  Pick<
-    ReturnType<typeof usePoolInfo>,
-    'poolInfo' | 'mergePositions' | 'poolAddress' | 'stakePrice' | 'isSubmited'
-  >
-> = ({ poolInfo, mergePositions, poolAddress, stakePrice, isSubmited }) => {
+  Pick<ReturnType<typeof usePoolInfo>, 'poolInfo' | 'mergePositions'>
+> = ({ poolInfo, mergePositions }) => {
   const { address } = useAccount();
 
   const { data: marginTokenInfo } = useBalance({
@@ -111,8 +129,8 @@ const OpenPostition: FC<
     enableSubmit,
     submitPosition,
   } = useSubmitPositon({
-    poolAddress,
-    stakePrice,
+    poolAddress: poolInfo.poolAddress,
+    stakePrice: poolInfo.stakePrice,
     marginTokenInfo,
     marginTokenAddress: poolInfo?.pay_token as Address,
   });
@@ -192,17 +210,9 @@ const OpenPostition: FC<
 const Player: NextPageWithLayout = () => {
   const router = useRouter();
   const { id } = router.query as { id: string };
-  const {
-    poolInfo,
-    myPosition,
-    stakePrice,
-    poolAddress,
-    mergePositions,
-    status,
-    isSubmited,
-  } = usePoolInfo(+id);
+  const { poolInfo, myPosition, mergePositions } = usePoolInfo(+id);
 
-  console.log({ id, poolInfo, mergePositions, status, myPosition });
+  console.log({ id, poolInfo, mergePositions, myPosition });
   return (
     <>
       <Header shortId={poolInfo?.shortId} />
@@ -220,13 +230,7 @@ const Player: NextPageWithLayout = () => {
       </XsCard>
       <MdCard>
         {status === 'wait' ? (
-          <OpenPostition
-            poolInfo={poolInfo}
-            mergePositions={mergePositions}
-            stakePrice={stakePrice}
-            poolAddress={poolAddress}
-            isSubmited={isSubmited}
-          />
+          <OpenPostition poolInfo={poolInfo} mergePositions={mergePositions} />
         ) : (
           <PositionInfo poolInfo={poolInfo} myPosition={myPosition} />
         )}

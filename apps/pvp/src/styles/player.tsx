@@ -88,29 +88,24 @@ export const PNLInfo = styled.div<{ children: ReactNode }>`
   font-style: normal;
   font-weight: 600;
   font-size: 36px;
+  margin-right: 20px;
   color: ${props => {
-    const pnl = Number(props.children);
-    if (props.children === 'Not joined') {
+    const pnl = props.children?.toString();
+    if (pnl === 'Not joined') {
       return '#4bd787';
     }
-    if (isNaN(pnl)) {
+    if (pnl === '-') {
       return '#FFFFFF';
     }
-    if (pnl < 0) {
-      return '#f45e68';
-    } else {
-      return '#4bd787';
-    }
+    return pnl?.startsWith('-') ? '#f45e68' : '#4bd787';
   }};
   &::before {
     content: ${props => {
-      const pnl = Number(props.children);
-      if (isNaN(pnl)) {
+      const pnl = props.children?.toString();
+      if (pnl === '-') {
         return null;
       }
-      if (pnl < 0) {
-        return null;
-      } else {
+      if (!pnl?.startsWith('-') && pnl !== 'Not joined') {
         return '+';
       }
     }};

@@ -157,7 +157,6 @@ export const usePoolInfo = (playerNFTId: number) => {
     address: poolAddress as Address,
     abi: Pool.abi,
     functionName: 'endPrice',
-    enabled: !!poolAddress && isEnd,
   });
 
   // TODO: closePrice 和 open price 的精度是否固定
@@ -166,7 +165,6 @@ export const usePoolInfo = (playerNFTId: number) => {
     return +ethers.utils.formatUnits(closePrice as BigNumber);
   }, [closePrice]);
 
-  console.log('formattedClosePrice', formattedClosePrice);
 
   // 未开仓前 使用这里的数据获取 mergePositions 和 positions
   const waitPositions = useWaitPositions({
@@ -245,6 +243,16 @@ export const usePoolInfo = (playerNFTId: number) => {
     waitPositions,
   ]);
 
+  const openPrice = useMemo(
+    () =>
+      isOpend
+        ? +ethers.utils.formatUnits(
+            BigNumber.from(mergePositions?.long?.open_price ?? 0)
+          )
+        : null,
+    [isOpend, mergePositions?.long?.open_price]
+  );
+
   const stakePrice = useMemo(() => {
     const stratPrice = 1;
     if (!isOpend) {
@@ -254,31 +262,40 @@ export const usePoolInfo = (playerNFTId: number) => {
         ? formattedClosePrice
         : +ethers.utils.formatUnits(nowPrice as BigNumber);
 
-      const openPrice = +ethers.utils.formatUnits(
-        BigNumber.from(mergePositions?.long?.open_price ?? 0)
-      );
-
       const longLp =
-        (currentPrice / openPrice) * +(mergePositions?.long?.open_lp ?? 0);
+        (currentPrice / openPrice!) * +(mergePositions?.long?.open_lp ?? 0);
 
       const shortLp = +(mergePositions?.short.open_lp ?? 0);
 
       const fakeLp =
-        (currentPrice / openPrice) * +(mergePositions?.short?.open_lp ?? 0);
+        (currentPrice / openPrice!) * +(mergePositions?.short?.open_lp ?? 0);
 
       const totalLp = longLp + 2 * shortLp - fakeLp;
 
       const totalMargin = +(data?.poolInfo?.margin ?? 0);
 
+      console.log({
+        currentPrice,
+        formattedClosePrice,
+        openPrice,
+        mergePositions,
+        longLp,
+        shortLp,
+        fakeLp,
+        totalMargin,
+        totalLp,
+      });
+
       return totalMargin / totalLp;
     }
   }, [
-    data?.poolInfo,
-    mergePositions,
     isOpend,
-    nowPrice,
-    formattedClosePrice,
     isEnd,
+    formattedClosePrice,
+    nowPrice,
+    openPrice,
+    mergePositions,
+    data,
   ]);
 
   const positions = useMemo(() => {
@@ -479,18 +496,21 @@ export const usePoolInfo = (playerNFTId: number) => {
   }, [isOpend, isEnd, isSubmited]);
 
   return {
-    createDealerId: createDealerId as BigNumber,
-    poolAddress: poolAddress as Address,
-    poolInfo: data?.poolInfo,
+    poolInfo: {
+      ...data?.poolInfo,
+      openPrice,
+      closePrice: formattedClosePrice,
+      stakePrice,
+      poolAddress: poolAddress as Address,
+      createDealerId: createDealerId as BigNumber,
+      status,
+      isOpend,
+      isEnd,
+      isSubmited,
+    },
     players: data?.players ?? [],
-    closePrice: formattedClosePrice,
-    stakePrice,
-    positions,
     mergePositions,
-    status,
-    isOpend,
-    isEnd,
-    isSubmited,
+    positions,
     myPosition,
     isLoading,
     refresh: mutate,

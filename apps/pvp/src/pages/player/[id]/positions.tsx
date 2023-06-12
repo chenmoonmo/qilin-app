@@ -45,7 +45,7 @@ const Positions: NextPageWithLayout = () => {
               >
                 {formatAmount(position.fomattedMargin)}
               </Size>
-              <PNL type="profit">+12.21(1.2%)</PNL>
+              <PNL type="profit">+{position.estPnl}({position.ROE}%)</PNL>
             </Fragment>
           );
         })}
