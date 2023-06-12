@@ -10,7 +10,7 @@ import {
 } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
-import JustNFT from '@/constant/abis/justNFT.json';
+import JustNFT from '@/constant/abis/JustNFT.json';
 
 const contractInfo = {
   address: CONTRACTS.JustNFT as Address,
