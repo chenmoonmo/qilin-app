@@ -3,7 +3,7 @@ import { Button, Tooltip } from '@qilin/component';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import type { FC, ReactNode } from 'react';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useAccount, useConnect } from 'wagmi';
 import { useNetwork } from 'wagmi';
 import { useSwitchNetwork } from 'wagmi';
@@ -26,7 +26,7 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
 
   const isErrorNetwork = !chains.find(item => item.id === chain?.id);
 
-  const handleConnect = async () => {
+  const handleConnect = useCallback(async () => {
     await connectAsync({
       connector: connectors[0],
     });
@@ -34,15 +34,16 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
     ifrmaes?.forEach(item => {
       (item?.contentWindow as any)?.connectRefetch?.();
     });
-  };
+  }, [connectAsync, connectors]);
 
   const handleSwitchNetwork = (id: number) => {
     switchNetwork?.(id);
+    1;
   };
 
   useEffect(() => {
     handleConnect();
-  }, []);
+  }, [handleConnect]);
 
   return (
     <>
