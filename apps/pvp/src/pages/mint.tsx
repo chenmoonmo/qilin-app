@@ -1,16 +1,12 @@
 import { css } from '@emotion/react';
 import { Button, useToast } from '@qilin/component';
-import type { BigNumber } from 'ethers';
 import Image from 'next/image';
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi';
+import { useMemo } from 'react';
+import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 import Dealer from '@/constant/abis/Dealer.json';
+import { useNFTList } from '@/hooks';
 import HomeLayout from '@/layouts/home-layout';
 import {
   Main,
@@ -23,16 +19,19 @@ import {
 import type { NextPageWithLayout } from './_app';
 
 const Index: NextPageWithLayout = () => {
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const { showWalletToast, closeWalletToast } = useToast();
+  const { data, mutate: refetch } = useNFTList();
 
-  // 玩家拥有的 dealer ID
-  const { data: dealerId, refetch } = useContractRead({
-    address: CONTRACTS.DealerAddress,
-    abi: Dealer.abi,
-    functionName: 'dealerToId',
-    args: [address],
-  });
+  const dealerId = useMemo(() => data?.dealer?.id, [data?.dealer]);
+
+  // // 玩家拥有的 dealer ID
+  // const { data: dealerId, refetch } = useContractRead({
+  //   address: CONTRACTS.DealerAddress,
+  //   abi: Dealer.abi,
+  //   functionName: 'dealerToId',
+  //   args: [address],
+  // });
 
   const { config } = usePrepareContractWrite({
     address: CONTRACTS.DealerAddress,
@@ -40,9 +39,8 @@ const Index: NextPageWithLayout = () => {
     functionName: 'mint',
     // TODO: 请求默克尔根 和 获得最新的可mint id
     args: [1, []],
-    enabled: (dealerId as BigNumber)?.eq(0),
+    enabled: !dealerId,
   });
-
   const { writeAsync } = useContractWrite(config);
 
   const mint = async () => {
@@ -90,7 +88,7 @@ const Index: NextPageWithLayout = () => {
                 width: 332px;
                 height: 40px;
               `}
-              disabled={!isConnected || (dealerId as BigNumber)?.gt(0)}
+              disabled={!isConnected || !!dealerId}
               onClick={mint}
             >
               Mint NFT

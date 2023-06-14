@@ -31,7 +31,7 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
       connector: connectors[0],
     });
     const ifrmaes = document.querySelectorAll('iframe');
-    ifrmaes.forEach(item => {
+    ifrmaes?.forEach(item => {
       (item?.contentWindow as any)?.connectRefetch?.();
     });
   };

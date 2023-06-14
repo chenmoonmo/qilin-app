@@ -31,17 +31,17 @@ html[data-theme='light'] {
 html[data-theme='dark'] {
 }
 
+button,
+input {
+  all: unset;
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: var(--background-color);
   color: var(--text-color);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-button,
-input {
-  all: unset;
+  * {
+    box-sizing: border-box;
+  }
 }

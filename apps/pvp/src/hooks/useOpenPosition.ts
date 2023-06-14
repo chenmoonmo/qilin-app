@@ -1,33 +1,30 @@
 import { useToast } from '@qilin/component';
 import { useCallback } from 'react';
 import type { Address } from 'wagmi';
-import { useContractWrite, usePrepareContractWrite } from 'wagmi';
+import { useContractWrite, useProvider } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 import Router from '@/constant/abis/Router.json';
 
 type OpenPositionPropsType = {
   poolAddress: Address;
-  endTime: number;
-  enabled: boolean;
+  duration: number;
 };
 
 export const useOpenPosition = ({
   poolAddress,
-  endTime,
-  enabled = false,
+  duration,
 }: OpenPositionPropsType) => {
+  const provider = useProvider();
+
   const { showWalletToast, closeWalletToast } = useToast();
 
-  const { config } = usePrepareContractWrite({
+  const { writeAsync } = useContractWrite({
     address: CONTRACTS.RouterAddress,
     abi: Router.abi,
     functionName: 'open',
-    args: [poolAddress, endTime],
-    enabled,
+    mode: 'recklesslyUnprepared',
   });
-
-  const { writeAsync } = useContractWrite(config);
 
   return useCallback(async () => {
     try {
@@ -36,7 +33,13 @@ export const useOpenPosition = ({
         message: 'Please confirm the transaction in your wallet',
         type: 'loading',
       });
-      const res = await writeAsync?.();
+      const lastBolck = await provider.getBlockNumber();
+      const nowTimestamp = await provider
+        .getBlock(lastBolck)
+        .then(res => res?.timestamp);
+      const res = await writeAsync?.({
+        recklesslySetUnpreparedArgs: [poolAddress, nowTimestamp + duration],
+      });
       showWalletToast({
         title: 'Transaction Confirmation',
         message: 'Transaction Pending',
@@ -57,5 +60,12 @@ export const useOpenPosition = ({
       });
     }
     setTimeout(closeWalletToast, 3000);
-  }, [writeAsync]);
+  }, [
+    closeWalletToast,
+    duration,
+    poolAddress,
+    provider,
+    showWalletToast,
+    writeAsync,
+  ]);
 };
