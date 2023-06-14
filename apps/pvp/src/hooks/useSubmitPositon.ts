@@ -84,6 +84,9 @@ export const useSubmitPositon = ({
     abi: erc20ABI,
     functionName: 'approve',
     args: [CONTRACTS.RouterAddress, BigNumber.from(2).pow(256).sub(1)],
+    overrides: {
+      gasLimit: BigNumber.from(3500000),
+    },
   });
 
   const { writeAsync: approve } = useContractWrite(approveConfig);

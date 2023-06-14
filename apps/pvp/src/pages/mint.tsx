@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import { Button, useToast } from '@qilin/component';
+import { BigNumber } from 'ethers';
 import Image from 'next/image';
 import { useMemo } from 'react';
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
@@ -40,6 +41,9 @@ const Index: NextPageWithLayout = () => {
     // TODO: 请求默克尔根 和 获得最新的可mint id
     args: [1, []],
     enabled: !dealerId,
+    overrides: {
+      gasLimit: BigNumber.from(3500000),
+    },
   });
   const { writeAsync } = useContractWrite(config);
 

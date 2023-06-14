@@ -1,11 +1,9 @@
 import { useToast } from '@qilin/component';
+import { BigNumber } from 'ethers';
 import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
-import {
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi';
+import { useContractWrite, usePrepareContractWrite } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 import Dealer from '@/constant/abis/Dealer.json';
@@ -38,6 +36,9 @@ export const useAddPlayers = (id: number, restSeats: number) => {
     functionName: 'addPlayers',
     args: [dealerId, playerSeats.filter(address => address !== '')],
     enabled: seatsAddressValid,
+    overrides: {
+      gasLimit: BigNumber.from(3500000),
+    },
   });
 
   const { writeAsync } = useContractWrite(config);

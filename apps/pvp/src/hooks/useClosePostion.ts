@@ -28,8 +28,7 @@ export const useClosePostion = ({
     functionName: isNeedLiquidate ? 'liquidate' : 'close',
     args: [poolAddress, position?.index, address],
     overrides: {
-      gasPrice: BigNumber.from(8000000000),
-      gasLimit: BigNumber.from(7000000),
+      gasLimit: BigNumber.from(3500000),
     },
   });
 
