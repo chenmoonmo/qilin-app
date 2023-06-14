@@ -3,12 +3,20 @@ import { Button } from '@qilin/component';
 import { formatAmount, formatInput } from '@qilin/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import type { FC } from 'react';
+import {
+  type FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Address } from 'wagmi';
 import { useAccount, useBalance } from 'wagmi';
 
-import { ArrowIcon, LeverageRadio } from '@/components';
-import { usePoolInfo, useSubmitPositon } from '@/hooks';
+import { ArrowIcon, LeverageRadio, TimeInput } from '@/components';
+import { useClosePostion, usePoolInfo, useSubmitPositon } from '@/hooks';
+import { useNow } from '@/hooks/useNow';
 import Layout, {
   ExternalInfo,
   Header,
@@ -36,18 +44,39 @@ import {
   PriceItem,
   RoomInfo,
   SubmitButton,
+  TimerTitle,
+  XsPNLInfo,
 } from '@/styles/player';
 
 import type { NextPageWithLayout } from '../../_app';
 
 const PositionInfo: FC<
-  Pick<ReturnType<typeof usePoolInfo>, 'poolInfo' | 'myPosition'>
-> = ({ poolInfo, myPosition }) => {
+  Pick<ReturnType<typeof usePoolInfo>, 'poolInfo' | 'myPosition'> & {
+    duration: number;
+  }
+> = ({ poolInfo, myPosition, duration }) => {
   const router = useRouter();
   const { id } = router.query;
+
+  const { isNeedLiquidate } = useClosePostion({
+    position: myPosition?.index,
+    poolAddress: poolInfo?.poolAddress,
+  });
+
+  const ButtonText = useMemo(() => {
+    return isNeedLiquidate ? 'Liquidate' : 'Close';
+  }, [isNeedLiquidate]);
+
   return (
     <>
-      <NotOpen />
+      {poolInfo?.isOpend ? (
+        <>
+          <TimerTitle>Trading Ends in</TimerTitle>
+          <TimeInput value={duration} disabled />
+        </>
+      ) : (
+        <NotOpen />
+      )}
       <PositionInfoContainer>
         <RoomInfo>
           <Pair>{poolInfo?.trade_pair}</Pair>
@@ -66,7 +95,7 @@ const PositionInfo: FC<
             `}
           >
             <PNLInfo>{formatAmount(myPosition?.estPnl) ?? '-'}</PNLInfo>
-            {myPosition?.type === 1 && (
+            {poolInfo.isEnd && myPosition?.type === 1 && (
               <Link href={`/player/${id}/close`}>
                 <Button
                   css={css`
@@ -74,7 +103,7 @@ const PositionInfo: FC<
                     height: 38px;
                   `}
                 >
-                  Close
+                  {ButtonText}
                 </Button>
               </Link>
             )}
@@ -110,8 +139,11 @@ const PositionInfo: FC<
 };
 
 const OpenPostition: FC<
-  Pick<ReturnType<typeof usePoolInfo>, 'poolInfo' | 'mergePositions'>
-> = ({ poolInfo, mergePositions }) => {
+  Pick<
+    ReturnType<typeof usePoolInfo>,
+    'poolInfo' | 'mergePositions' | 'refetch'
+  >
+> = ({ poolInfo, refetch, mergePositions }) => {
   const { address } = useAccount();
 
   const { data: marginTokenInfo } = useBalance({
@@ -134,6 +166,14 @@ const OpenPostition: FC<
     marginTokenInfo,
     marginTokenAddress: poolInfo?.pay_token as Address,
   });
+
+  const handleSubmit = useCallback(
+    async (direction: 'long' | 'short') => {
+      await submitPosition(direction);
+      refetch();
+    },
+    [submitPosition, refetch]
+  );
 
   return (
     <>
@@ -188,15 +228,15 @@ const OpenPostition: FC<
           <FormButtonContainer>
             <SubmitButton
               backgroundColor="#4BD787"
-              disabled={!enableSubmit || isSubmited}
-              onClick={submitPosition}
+              disabled={!enableSubmit || poolInfo?.isSubmited}
+              onClick={() => handleSubmit('long')}
             >
               Long
             </SubmitButton>
             <SubmitButton
               backgroundColor="#F45E68"
-              disabled={!enableSubmit || isSubmited}
-              onClick={submitPosition}
+              disabled={!enableSubmit || poolInfo?.isSubmited}
+              onClick={() => handleSubmit('short')}
             >
               Short
             </SubmitButton>
@@ -210,29 +250,108 @@ const OpenPostition: FC<
 const Player: NextPageWithLayout = () => {
   const router = useRouter();
   const { id } = router.query as { id: string };
-  const { poolInfo, myPosition, mergePositions } = usePoolInfo(+id);
+  const { poolInfo, myPosition, mergePositions, refetch } = usePoolInfo(+id);
+
+  const now = useNow();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [duration, setDuration] = useState(0);
+
+  const cardStatus = useMemo(() => {
+    const { isEnd, isOpend, isSubmited } = poolInfo;
+    let statusMessage = 'Open Position';
+    let showArrow = true;
+
+    if (!isSubmited) {
+      statusMessage = 'Open Position';
+      showArrow = true;
+    }
+    if (isSubmited && !isOpend) {
+      statusMessage = 'Not Open';
+      showArrow = false;
+    }
+    if (isOpend && !isEnd && !myPosition) {
+      statusMessage = 'Not Joined';
+      showArrow = false;
+    }
+    if (isOpend && !isEnd && myPosition) {
+      statusMessage = 'Close Position';
+      showArrow = true;
+    }
+    return (
+      <>
+        <XsPNLInfo>{myPosition?.estPnl}</XsPNLInfo>
+        <XsCardStatus>
+          <span>{statusMessage}</span>
+          {showArrow && <ArrowIcon />}
+        </XsCardStatus>
+      </>
+    );
+  }, [poolInfo, myPosition]);
+
+  // 倒计时
+  const countdown = useCallback(() => {
+    timerRef.current && clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setDuration(pre => {
+        const newValue = pre - 60;
+        console.log({
+          pre,
+          newValue,
+        });
+        if (newValue <= 0) {
+          clearTimeout(timerRef.current!);
+          return 0;
+        }
+        countdown();
+        return newValue;
+      });
+    }, 60000);
+  }, []);
+
+  useEffect(() => {
+    if (poolInfo.isOpend && !poolInfo.isEnd) {
+      setDuration(+poolInfo.deadline! - +now / 1000);
+      countdown();
+    } else if (poolInfo.isEnd) {
+      setDuration(0);
+    }
+    return () => {
+      timerRef.current && clearTimeout(timerRef.current);
+    };
+  }, [poolInfo, now, countdown]);
 
   console.log({ id, poolInfo, mergePositions, myPosition });
   return (
     <>
-      <Header shortId={poolInfo?.shortId} />
+      <Header shortId={poolInfo?.shortId} isOwner={poolInfo.isOwner} />
       <XsCard>
         <XsCardContent>
-          <div />
+          <div
+            css={css`
+              margin-top: 20px;
+            `}
+          >
+            {poolInfo?.isOpend && <TimeInput disabled value={duration} />}
+          </div>
           <div>
-            <ExternalInfo>Trading Room ID : {poolInfo?.shortId}</ExternalInfo>
-            <XsCardStatus>
-              <span>Create a room</span>
-              <ArrowIcon />
-            </XsCardStatus>
+            <ExternalInfo>{poolInfo?.trade_pair}</ExternalInfo>
+            {cardStatus}
           </div>
         </XsCardContent>
       </XsCard>
       <MdCard>
-        {status === 'wait' ? (
-          <OpenPostition poolInfo={poolInfo} mergePositions={mergePositions} />
+        {poolInfo.status === 'wait' ? (
+          <OpenPostition
+            poolInfo={poolInfo}
+            mergePositions={mergePositions}
+            refetch={refetch}
+          />
         ) : (
-          <PositionInfo poolInfo={poolInfo} myPosition={myPosition} />
+          <PositionInfo
+            poolInfo={poolInfo}
+            myPosition={myPosition}
+            duration={duration}
+          />
         )}
       </MdCard>
     </>

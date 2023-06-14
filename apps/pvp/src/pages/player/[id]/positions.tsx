@@ -25,7 +25,7 @@ const Positions: NextPageWithLayout = () => {
 
   return (
     <>
-      <Header shortId={poolInfo?.shortId} />
+      <Header shortId={poolInfo?.shortId} isOwner={poolInfo.isOwner} />
       <BackLink href={previousPath}>
         <BackIcon />
       </BackLink>
@@ -37,7 +37,7 @@ const Positions: NextPageWithLayout = () => {
         {positions?.map((position, index) => {
           return (
             <Fragment key={index}>
-              <div>{index+1}</div>
+              <div>{index + 1}</div>
               <div>{position.user.slice(-4)}</div>
               <Size
                 leverage={position.level}
@@ -45,7 +45,9 @@ const Positions: NextPageWithLayout = () => {
               >
                 {formatAmount(position.fomattedMargin)}
               </Size>
-              <PNL type="profit">+{position.estPnl}({position.ROE}%)</PNL>
+              <PNL type="profit">
+                +{position.estPnl}({position.ROE}%)
+              </PNL>
             </Fragment>
           );
         })}

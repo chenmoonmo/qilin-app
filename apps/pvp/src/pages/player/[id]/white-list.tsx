@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import { useRouter } from 'next/router';
+import { useCallback } from 'react';
 
 import { BackIcon } from '@/components';
 import { useAddPlayers, usePoolInfo } from '@/hooks';
@@ -21,10 +22,15 @@ const WhiteList: NextPageWithLayout = () => {
   const finalSlashIndex = router.asPath.lastIndexOf('/');
   const previousPath = router.asPath.slice(0, finalSlashIndex);
 
-  const { poolInfo, players, status } = usePoolInfo(+id);
+  const { poolInfo, players, refetch } = usePoolInfo(+id);
 
   const { playerSeats, setSeats, seatsAddressValid, addPlayers } =
     useAddPlayers(+id, 6 - players?.length);
+
+  const handleAddPlayer = useCallback(async () => {
+    await addPlayers();
+    refetch();
+  }, [addPlayers, refetch]);
 
   return (
     <>
@@ -82,7 +88,9 @@ const WhiteList: NextPageWithLayout = () => {
           <WhiteTip>Only whitelist can join</WhiteTip>
         </WhiteItemContainer>
       </PositionInfoItem>
-      <MintButton disabled={!seatsAddressValid}>Mint NFT</MintButton>
+      <MintButton disabled={!seatsAddressValid} onClick={handleAddPlayer}>
+        Mint NFT
+      </MintButton>
     </>
   );
 };

@@ -1,4 +1,5 @@
 import { useToast } from '@qilin/component';
+import { BigNumber } from 'ethers';
 import { useCallback } from 'react';
 import type { Address } from 'wagmi';
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
@@ -26,6 +27,10 @@ export const useClosePostion = ({
     abi: Router.abi,
     functionName: isNeedLiquidate ? 'liquidate' : 'close',
     args: [poolAddress, position?.index, address],
+    overrides: {
+      gasPrice: BigNumber.from(8000000000),
+      gasLimit: BigNumber.from(7000000),
+    },
   });
 
   const { writeAsync } = useContractWrite(config);

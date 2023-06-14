@@ -1,16 +1,15 @@
-import { BigNumber } from 'ethers';
 import type { Address } from 'wagmi';
-import { erc721ABI, useContractRead } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 
 export const useNFTInfo = (address: Address, tokenId: number) => {
-  const { data } = useContractRead({
-    address,
-    abi: erc721ABI,
-    functionName: 'tokenURI',
-    args: [BigNumber.from(tokenId)],
-  });
+  // const { data } = useContractRead({
+  //   address,
+  //   abi: erc721ABI,
+  //   functionName: 'tokenURI',
+  //   args: [BigNumber.from(tokenId)],
+  //   enabled: !!tokenId,
+  // });
 
   // 暂时返回
   return {

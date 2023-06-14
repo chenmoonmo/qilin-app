@@ -1,7 +1,7 @@
 import { useToast } from '@qilin/component';
 import { useCallback } from 'react';
 import type { Address } from 'wagmi';
-import { useContractWrite, usePrepareContractWrite, useProvider } from 'wagmi';
+import { useContractWrite, useProvider } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 import Router from '@/constant/abis/Router.json';
@@ -60,5 +60,12 @@ export const useOpenPosition = ({
       });
     }
     setTimeout(closeWalletToast, 3000);
-  }, [writeAsync]);
+  }, [
+    closeWalletToast,
+    duration,
+    poolAddress,
+    provider,
+    showWalletToast,
+    writeAsync,
+  ]);
 };

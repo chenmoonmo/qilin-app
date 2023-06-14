@@ -29,14 +29,11 @@ export type SubmitPositionForm = {
   marginAmount: string;
   // 杠杆倍数
   leverage: string;
-  // 多或者空
-  direction?: 'long' | 'short';
 };
 
 const submitFormAtom = atom<SubmitPositionForm>({
   marginAmount: '',
   leverage: '2',
-  direction: undefined,
 });
 
 export const useSubmitPositon = ({
@@ -74,18 +71,6 @@ export const useSubmitPositon = ({
     args: [address!, CONTRACTS.RouterAddress],
   });
 
-  // const { config, refetch } = usePrepareContractWrite({
-  //   address: CONTRACTS.RouterAddress,
-  //   abi: Router.abi,
-  //   functionName: 'submit',
-  //   args: [
-  //     poolAddress,
-  //     marginAmountToBN,
-  //     `${form.direction === 'short' ? '-' : ''}${form.leverage}`,
-  //   ],
-  //   enabled: !allowance?.lt(marginAmountToBN),
-  // });
-
   // TODO: 测试这个
   const { writeAsync: submit } = useContractWrite({
     address: CONTRACTS.RouterAddress,
@@ -103,7 +88,7 @@ export const useSubmitPositon = ({
 
   const { writeAsync: approve } = useContractWrite(approveConfig);
 
-  const submitPosition = async () => {
+  const submitPosition = async (direction: 'long' | 'short') => {
     // TODO: 处理完成后的情况 数据刷新 和 状态显示
     try {
       showWalletToast({
@@ -119,14 +104,14 @@ export const useSubmitPositon = ({
       console.log([
         poolAddress,
         marginAmountToBN,
-        +`${form.direction === 'short' ? '-' : ''}${form.leverage}`,
+        +`${direction === 'short' ? '-' : ''}${form.leverage}`,
       ]);
 
       const res = await submit?.({
         recklesslySetUnpreparedArgs: [
           poolAddress,
           marginAmountToBN,
-          `${form.direction === 'short' ? '-' : ''}${form.leverage}`,
+          `${direction === 'short' ? '-' : ''}${form.leverage}`,
         ],
       });
       showWalletToast({
@@ -143,7 +128,6 @@ export const useSubmitPositon = ({
       setForm({
         marginAmount: '',
         leverage: '2',
-        direction: undefined,
       });
     } catch (e) {
       console.error(e);

@@ -10,7 +10,10 @@ import type { NextPageWithLayout } from '../_app';
 
 const NFTDetail: NextPageWithLayout = () => {
   const router = useRouter();
-  const [cotractAddress, tokenId] = router.query.nft as [Address, number];
+  const [cotractAddress, tokenId] = (router.query.nft ?? []) as [
+    Address,
+    number
+  ];
 
   const { animation_url } = useNFTInfo(cotractAddress, tokenId);
 

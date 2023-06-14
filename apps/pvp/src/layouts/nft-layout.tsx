@@ -1,3 +1,4 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -6,7 +7,6 @@ import { type FC, type PropsWithChildren, useMemo } from 'react';
 import { useAccount } from 'wagmi';
 
 import { OwnerIcon } from '@/components';
-import { css } from '@emotion/react';
 
 type NFTLayoutProps = PropsWithChildren;
 
@@ -116,7 +116,6 @@ export const XsCardContent = styled.div`
 `;
 
 export const ExternalInfo = styled.div`
-  margin-bottom: 12px;
   font-style: normal;
   font-weight: 500;
   font-size: 12px;
@@ -126,6 +125,7 @@ export const ExternalInfo = styled.div`
 export const XsCardStatus = styled.div`
   display: flex;
   align-items: center;
+  margin-top: 12px;
   font-style: normal;
   font-weight: 600;
   font-size: 14px;
@@ -150,9 +150,11 @@ export const MdCard = styled.div`
 export const Header: FC<{
   title?: ReactNode;
   shortId?: string;
-}> = ({ title, shortId }) => {
+  isOwner?: boolean;
+}> = ({ title, shortId, isOwner = false }) => {
   const router = useRouter();
   const id = router.query.id as string;
+
   const { address } = useAccount();
   const shortAddress = useMemo(() => {
     return address ? address?.slice(0, 6) + '...' + address?.slice(-4) : '';
@@ -182,12 +184,14 @@ export const Header: FC<{
             >
               ID ：{shortId}
             </span>
-            <Owner
-              href={`/player/${id}/white-list`}
-              data-active={router.asPath.endsWith('/white-list')}
-            >
-              <OwnerIcon />
-            </Owner>
+            {isOwner && (
+              <Owner
+                href={`/player/${id}/white-list`}
+                data-active={router.asPath.endsWith('/white-list')}
+              >
+                <OwnerIcon />
+              </Owner>
+            )}
           </>
         )}
       </Title>

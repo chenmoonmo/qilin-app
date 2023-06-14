@@ -70,19 +70,6 @@ export const useDealerId = () => {
     }
   );
 
-  const { data } = useSWR(
-    dealerId ? ['queryDealer', dealerId] : null,
-    async ([_, dealerId]) => {
-      console.log(1111);
-      const res = await graphFetcher(
-        gql`{
-          dealerOracles(where:{dealer_id:"${dealerId}"}){id,dealer_id,pool_address,user}
-        }`
-      );
-      console.log(res);
-    }
-  );
-
   const { data: dealerStatus, refetch } = useContractRead({
     ...DealerContract,
     functionName: 'dealerToStatus',
@@ -95,9 +82,22 @@ export const useDealerId = () => {
     [dealerStatus]
   );
 
+  const canOpen = useMemo(
+    () => (dealerStatus as BigNumber)?.eq?.(1),
+    [dealerStatus]
+  );
+
+  const canClose = useMemo(
+    () => (dealerStatus as BigNumber)?.eq?.(2),
+    [dealerStatus]
+  );
+
   return {
     dealerId,
     canCreateRoom,
+    canOpen,
+    canClose,
+    refetch,
   };
 };
 
@@ -108,10 +108,10 @@ export const useCreateRoom = () => {
   const canSendCreate = useAtomValue(canSendCreateAtom);
   const { showWalletToast, closeWalletToast } = useToast();
 
-  const { dealerId, canCreateRoom } = useDealerId();
+  const { dealerId, canCreateRoom, canOpen, canClose, refetch } = useDealerId();
 
   // 创建房间
-  const { config, error } = usePrepareContractWrite({
+  const { config } = usePrepareContractWrite({
     ...DealerContract,
     functionName: 'createPool',
     args: [
@@ -135,23 +135,8 @@ export const useCreateRoom = () => {
     },
   });
 
-  console.log(config, error);
-
   // 设置玩家 mint nft2
   const { writeAsync: createRoomWrite } = useContractWrite(config);
-
-  // const { config: setPlayersConfig } = usePrepareContractWrite({
-  //   ...DealerContract,
-  //   functionName: 'initPlayer',
-  //   args: [
-  //     dealerId,
-  //     6,
-  //     [address, ...players.filter(address => isAddress(address))],
-  //   ],
-  //   enabled: canCreateRoom as boolean,
-  // });
-
-  // const { writeAsync: setPlayersWrite } = useContractWrite(setPlayersConfig);
 
   const createRoom = useCallback(async () => {
     try {
@@ -167,14 +152,12 @@ export const useCreateRoom = () => {
         type: 'loading',
       });
       await res?.wait();
-      // const res2 = await setPlayersWrite?.();
-      // await res2?.wait();
+
       showWalletToast({
         title: 'Transaction Confirmation',
         message: 'Transaction Confirmed',
         type: 'success',
       });
-      // refetch();
     } catch (e) {
       console.error(e);
       showWalletToast({
@@ -184,15 +167,29 @@ export const useCreateRoom = () => {
       });
     }
     setTimeout(closeWalletToast, 3000);
-  }, [createRoomWrite]);
+  }, [closeWalletToast, createRoomWrite, showWalletToast]);
+
+  const mutate = useCallback(() => {
+    setPlayers(new Array(5).fill(''));
+    setForm({
+      payToken: undefined,
+      oracle: undefined,
+      targetToken: undefined,
+    });
+
+    refetch();
+  }, [refetch, setForm, setPlayers]);
 
   return {
     canCreateRoom,
+    canOpen,
+    canClose,
     form,
     setForm,
     players,
     setPlayers,
     canSendCreate,
     createRoom,
+    refetch: mutate,
   };
 };

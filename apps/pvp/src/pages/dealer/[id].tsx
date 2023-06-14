@@ -5,12 +5,13 @@ import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom } from 'jotai';
 import uniqBy from 'lodash/uniqBy';
 import { useRouter } from 'next/router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAccount, useChainId, useToken } from 'wagmi';
 
 import { ArrowIcon, TimeInput } from '@/components';
 import { PAIRS, PAY_TOKENS } from '@/constant';
 import { useCreateRoom, useDealerPoolInfo, useOpenPosition } from '@/hooks';
+import { useNow } from '@/hooks/useNow';
 import Layout, {
   ExternalInfo,
   Header,
@@ -47,17 +48,29 @@ const Dealer: NextPageWithLayout = () => {
     return address ? address?.slice(0, 6) + '...' + address?.slice(-4) : '';
   }, [address]);
 
-  const { poolInfo, poolAddress } = useDealerPoolInfo(id);
+  const now = useNow();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { poolInfo, refetch: refetchPoolInfo } = useDealerPoolInfo(id);
 
   const {
     canCreateRoom,
+    canClose,
+    canOpen,
     canSendCreate,
     form,
     setForm,
     createRoom,
     players,
     setPlayers,
+    refetch,
   } = useCreateRoom();
+
+  const handleCreateRoom = useCallback(async () => {
+    await createRoom();
+    refetchPoolInfo();
+    refetch();
+  }, [createRoom, refetch, refetchPoolInfo]);
 
   const [searchInfo, setSearchInfo] = useState<string>('');
   const [marginSearchInfo, setMarginSearchInfo] = useState<string>('');
@@ -65,9 +78,15 @@ const Dealer: NextPageWithLayout = () => {
   const [duration, setDuration] = useState(hoursToSeconds(3));
 
   const openPosition = useOpenPosition({
-    poolAddress,
+    poolAddress: poolInfo.poolAddress,
     duration,
   });
+
+  const handleOpenPosition = useCallback(async () => {
+    await openPosition();
+    refetchPoolInfo();
+    refetch();
+  }, [openPosition, refetch, refetchPoolInfo]);
 
   const [lastMarginSelection, setLastMarginSelection] = useAtom(
     lastMarginSelectionAtom
@@ -113,24 +132,82 @@ const Dealer: NextPageWithLayout = () => {
     [marginSearchInfo]
   );
 
-  const handleCreateRoom = async () => {
-    await createRoom();
-  };
+  const cardStatus = useMemo(() => {
+    if (canCreateRoom) {
+      return (
+        <div>
+          <XsCardStatus>
+            <span>Create a room</span>
+            <ArrowIcon />
+          </XsCardStatus>
+        </div>
+      );
+    }
+    if (canOpen) {
+      return (
+        <div>
+          <ExternalInfo>Trading Room ID : {poolInfo?.shortId}</ExternalInfo>
+          <XsCardStatus>
+            <span>To Open</span>
+            <ArrowIcon />
+          </XsCardStatus>
+        </div>
+      );
+    }
+    if (canClose) {
+      return (
+        <div>
+          <XsCardStatus>Trading Room ID : {poolInfo?.shortId}</XsCardStatus>
+        </div>
+      );
+    }
+  }, [poolInfo, canCreateRoom, canOpen, canClose]);
 
-  console.log({ shortAddress, canCreateRoom });
+  const countdown = useCallback(() => {
+    timerRef.current && clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setDuration(pre => {
+        const newValue = pre - 60;
+        console.log({
+          pre,
+          newValue,
+        });
+        if (newValue <= 0) {
+          clearTimeout(timerRef.current!);
+          return 0;
+        }
+        countdown();
+        return newValue;
+      });
+    }, 60000);
+  }, []);
+
+  useEffect(() => {
+    if (poolInfo.isOpend && !poolInfo.isEnd) {
+      setDuration(+poolInfo.deadline! - +now / 1000);
+      countdown();
+    } else if (poolInfo.isEnd) {
+      setDuration(0);
+    }
+    return () => {
+      timerRef.current && clearTimeout(timerRef.current);
+    };
+  }, [countdown, now, poolInfo]);
+
+  console.log({ poolInfo, shortAddress, canCreateRoom });
   return (
     <>
       <Header title="Room Card" />
       <XsCard>
         <XsCardContent>
-          <div></div>
-          <div>
-            <ExternalInfo>Trading Room ID : {poolInfo?.shortId}</ExternalInfo>
-            <XsCardStatus>
-              <span>Create a room</span>
-              <ArrowIcon />
-            </XsCardStatus>
+          <div
+            css={css`
+              margin-top: 20px;
+            `}
+          >
+            {poolInfo?.isOpend && <TimeInput disabled value={duration} />}
           </div>
+          {cardStatus}
         </XsCardContent>
       </XsCard>
       {/* 可以创建房卡时 */}
@@ -259,19 +336,25 @@ const Dealer: NextPageWithLayout = () => {
               </InfoItem>
             </InfoContainer>
             <TraddingEndTitle />
-            <TimeInput value={duration} onChange={setDuration} />
-            <Button
-              css={css`
-                box-sizing: border-box;
-                display: flex;
-                width: 100%;
-                height: 40px;
-                margin: 42px auto 0;
-              `}
-              onClick={openPosition}
-            >
-              Open
-            </Button>
+            <TimeInput
+              value={duration}
+              disabled={poolInfo?.isOpend}
+              onChange={setDuration}
+            />
+            {!poolInfo?.isOpend && (
+              <Button
+                css={css`
+                  box-sizing: border-box;
+                  display: flex;
+                  width: 100%;
+                  height: 40px;
+                  margin: 42px auto 0;
+                `}
+                onClick={handleOpenPosition}
+              >
+                Open
+              </Button>
+            )}
           </>
         )}
       </MdCard>

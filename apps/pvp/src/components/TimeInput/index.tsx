@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import { useMemo } from 'react';
 dayjs.extend(duration);
 
 type TimeInputPropsType = {
   value: number;
-  onChange: (value: number) => void;
+  disabled?: boolean;
+  onChange?: (value: number) => void;
 };
 
 const TimeContainer = styled.div`
@@ -60,7 +61,11 @@ const InputContainer = styled.div`
   }
 `;
 
-export const TimeInput: FC<TimeInputPropsType> = ({ value = 0, onChange }) => {
+export const TimeInput: FC<TimeInputPropsType> = ({
+  value = 0,
+  disabled = false,
+  onChange,
+}) => {
   const [mins, hours, days] = useMemo(() => {
     const duration = dayjs.duration(value * 1000);
     return [
@@ -91,7 +96,7 @@ export const TimeInput: FC<TimeInputPropsType> = ({ value = 0, onChange }) => {
       params.minutes = value;
     }
     const duration = dayjs.duration(params);
-    onChange(duration.asSeconds());
+    onChange?.(duration.asSeconds());
   };
 
   return (
@@ -101,6 +106,7 @@ export const TimeInput: FC<TimeInputPropsType> = ({ value = 0, onChange }) => {
           type="text"
           value={days}
           placeholder="00"
+          disabled={disabled}
           onChange={e => handleInput(e, 'days')}
         />
       </InputContainer>
@@ -110,6 +116,7 @@ export const TimeInput: FC<TimeInputPropsType> = ({ value = 0, onChange }) => {
           type="text"
           value={hours}
           placeholder="00"
+          disabled={disabled}
           onChange={e => handleInput(e, 'hours')}
         />
       </InputContainer>
@@ -119,6 +126,7 @@ export const TimeInput: FC<TimeInputPropsType> = ({ value = 0, onChange }) => {
           type="text"
           value={mins}
           placeholder="00"
+          disabled={disabled}
           onChange={e => handleInput(e, 'mins')}
         />
       </InputContainer>

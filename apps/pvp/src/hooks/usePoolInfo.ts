@@ -11,6 +11,7 @@ import Player from '@/constant/abis/Player.json';
 import Pool from '@/constant/abis/Pool.json';
 import { graphFetcher } from '@/hleper';
 
+import { useDealerId } from './useCreateRoom';
 import { useNow } from './useNow';
 import { useWaitPositions } from './useWaitPositions';
 
@@ -71,6 +72,8 @@ export const usePoolInfo = (playerNFTId: number) => {
   const { address } = useAccount();
   const now = useNow();
 
+  const { dealerId } = useDealerId();
+
   const { data: createDealerId } = useContractRead({
     address: CONTRACTS.PlayerAddress,
     abi: Player.abi,
@@ -91,7 +94,7 @@ export const usePoolInfo = (playerNFTId: number) => {
     functionName: 'getPrice',
   });
 
-  const { data, isLoading, mutate, error } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     poolAddress
       ? ['getPoolInfo', (poolAddress as Address).toLowerCase(), playerNFTId]
       : null,
@@ -146,10 +149,11 @@ export const usePoolInfo = (playerNFTId: number) => {
 
   const isOpend = +(data?.poolInfo?.deadline ?? 0) > 0;
 
-  const isEnd =
-    isOpend &&
-    !!data?.poolInfo?.deadline &&
-    isAfter(now, new Date(+data?.poolInfo?.deadline * 1000));
+  const isEnd = useMemo(() => {
+    if (!data?.poolInfo?.deadline || data?.poolInfo?.deadline === '0')
+      return false;
+    return isAfter(now, new Date(+data?.poolInfo?.deadline * 1000));
+  }, [data?.poolInfo?.deadline, now]);
 
   // 结束时的价格
   // TODO: 还取不到
@@ -159,12 +163,17 @@ export const usePoolInfo = (playerNFTId: number) => {
     functionName: 'endPrice',
   });
 
+  console.log({ closePrice });
+
   // TODO: closePrice 和 open price 的精度是否固定
   const formattedClosePrice = useMemo(() => {
     if (!closePrice) return 0;
     return +ethers.utils.formatUnits(closePrice as BigNumber);
   }, [closePrice]);
 
+  // const formattedClosePrice = useMemo(() => {
+  //   return data?.poolInfo.token_price;
+  // }, [data]);
 
   // 未开仓前 使用这里的数据获取 mergePositions 和 positions
   const waitPositions = useWaitPositions({
@@ -263,28 +272,30 @@ export const usePoolInfo = (playerNFTId: number) => {
         : +ethers.utils.formatUnits(nowPrice as BigNumber);
 
       const longLp =
-        (currentPrice / openPrice!) * +(mergePositions?.long?.open_lp ?? 0);
+        (currentPrice! / openPrice!) * +(mergePositions?.long?.open_lp ?? 0);
 
       const shortLp = +(mergePositions?.short.open_lp ?? 0);
 
       const fakeLp =
-        (currentPrice / openPrice!) * +(mergePositions?.short?.open_lp ?? 0);
+        (currentPrice! / openPrice!) * +(mergePositions?.short?.open_lp ?? 0);
 
       const totalLp = longLp + 2 * shortLp - fakeLp;
 
       const totalMargin = +(data?.poolInfo?.margin ?? 0);
 
-      console.log({
-        currentPrice,
-        formattedClosePrice,
-        openPrice,
-        mergePositions,
-        longLp,
-        shortLp,
-        fakeLp,
-        totalMargin,
-        totalLp,
-      });
+      // console.log({
+      //   isEnd,
+      //   nowPrice: ethers.utils.formatUnits(nowPrice as BigNumber),
+      //   currentPrice,
+      //   formattedClosePrice,
+      //   openPrice,
+      //   mergePositions,
+      //   longLp,
+      //   shortLp,
+      //   fakeLp,
+      //   totalMargin,
+      //   totalLp,
+      // });
 
       return totalMargin / totalLp;
     }
@@ -330,6 +341,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           const currentPrice = isEnd
             ? formattedClosePrice
             : +ethers.utils.formatUnits(nowPrice as BigNumber);
+
           const openPrice = +ethers.utils.formatUnits(position?.open_price);
           const direction = position.level > 0 ? 'long' : 'short';
           const fomattedMargin = +ethers.utils.formatUnits(
@@ -353,6 +365,7 @@ export const usePoolInfo = (playerNFTId: number) => {
 
           // 仓位价值：current Value = stake amount * stake price
           let currentValue = fotmattedStakeAmount * stakePrice;
+
           // 仓位收益：profit = current Value - Value
           const estPnl =
             position.type === 1
@@ -495,6 +508,11 @@ export const usePoolInfo = (playerNFTId: number) => {
     }
   }, [isOpend, isEnd, isSubmited]);
 
+  const isOwner = useMemo(() => {
+    if (!dealerId || !createDealerId) return false;
+    return (createDealerId as BigNumber).eq(BigNumber.from(dealerId));
+  }, [dealerId, createDealerId]);
+
   return {
     poolInfo: {
       ...data?.poolInfo,
@@ -503,6 +521,7 @@ export const usePoolInfo = (playerNFTId: number) => {
       stakePrice,
       poolAddress: poolAddress as Address,
       createDealerId: createDealerId as BigNumber,
+      isOwner,
       status,
       isOpend,
       isEnd,
@@ -513,6 +532,6 @@ export const usePoolInfo = (playerNFTId: number) => {
     positions,
     myPosition,
     isLoading,
-    refresh: mutate,
+    refetch: mutate,
   };
 };

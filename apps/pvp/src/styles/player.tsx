@@ -106,7 +106,7 @@ export const PNLInfo = styled.div<{ children: ReactNode }>`
         return null;
       }
       if (!pnl?.startsWith('-') && pnl !== 'Not joined') {
-        return '+';
+        return `"+"`;
       }
     }};
     margin-right: 6px;
@@ -141,6 +141,16 @@ export const NotOpen = styled.div`
 NotOpen.defaultProps = {
   children: 'Not Open',
 };
+
+export const TimerTitle = styled.div`
+  margin-top: 48px;
+  margin-bottom: 23px;
+  text-align: center;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 20px;
+`;
 
 // Open price 相关
 export const PairInfo = styled.div`
@@ -281,6 +291,7 @@ export const MintButton = styled(Button)`
   margin-top: 18px;
   width: 100%;
   height: 44px;
+  flex-shrink: 0;
 `;
 
 const PositionPercentContainer = styled.div<{
@@ -431,4 +442,68 @@ export const PNL = styled.div<{
   type: 'profit' | 'loss';
 }>`
   color: ${props => (props.type === 'profit' ? '#4bd787' : '#f45e68')};
+`;
+
+export const CloseContainer = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  h1 {
+    all: unset;
+    display: flex;
+    align-items: center;
+    margin-bottom: 27px;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 12px;
+    svg {
+      width: 9px;
+      height: 14px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+  }
+`;
+
+export const CloseCard = styled.div`
+  padding: 20px 20px 80px;
+  border: 1px solid rgba(139, 162, 212, 0.5);
+  border-radius: 6px;
+`;
+
+export const CloseInfoItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 12px;
+  &:not(:first-of-type) {
+    margin-top: 14px;
+  }
+  > div:first-of-type {
+    color: #d0d0d0;
+  }
+`;
+
+export const SplitLine = styled.div`
+  width: 436px;
+  height: 1px;
+  margin-top: 19px;
+  background-color: rgba(69, 95, 144, 0.6);
+`;
+
+export const CloseButton = styled(MintButton)`
+  margin-top: 37px;
+`;
+
+export const XsPNLInfo = styled(PNLInfo)`
+  margin-top: 12px;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 12px;
 `;
