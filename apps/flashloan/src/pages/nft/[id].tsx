@@ -5,7 +5,7 @@ import { useAccount, useConnect } from 'wagmi';
 
 // import { useToast } from '@/component';
 import { ArrowIcon, FlashIcon, ToastProvider } from '@/component';
-import { useFlashlona } from '@/hooks';
+import { useFlashlona, useNFT } from '@/hooks';
 import {
   AbsoluteArrow,
   ActionButton,
@@ -22,8 +22,8 @@ import {
 import type { NextPageWithLayout } from '../_app';
 
 const Index: NextPageWithLayout = () => {
+  const { hasNFT } = useNFT();
   const { connect, connectors } = useConnect();
-
   // const { showToast, closeToast } = useToast();
   const { address, isConnected } = useAccount();
 
@@ -44,6 +44,9 @@ const Index: NextPageWithLayout = () => {
   }, [connect, connectors]);
 
   const button = useMemo(() => {
+    if (!hasNFT) {
+      return <ActionButton disabled>Account lacks current NFT</ActionButton>;
+    }
     if (!isConnected) {
       return (
         <ActionButton onClick={handleConnect}>Connect Wallet</ActionButton>
@@ -58,6 +61,7 @@ const Index: NextPageWithLayout = () => {
       return <ActionButton disabled>Nothing borrowed in AAVE</ActionButton>;
     }
   }, [
+    hasNFT,
     isConnected,
     handleConnect,
     isNeedApprove,

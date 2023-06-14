@@ -1,7 +1,10 @@
 export const CONTRACTS = {
   MultiNftFlashLoan: process.env.MultiNftFlashLoan,
-  NftUniV2FlashAndExec: process.env.NftUniV2FlashAndExec,
+  V3SwapNft: process.env.V3SwapNft,
+  V3FlashNft: process.env.V3FlashNft,
   AaveNext: process.env.AaveNext,
+  Pair: process.env.Pair,
+  JustNFT: process.env.JustNFT,
 };
 
 export const TOKENS = {
@@ -9,5 +12,4 @@ export const TOKENS = {
   USDC: process.env.USDC,
   WETHAToken: process.env.WETHAToken,
   USDCVariableDebt: process.env.USDCVariableDebt,
-  PairAddress: process.env.PairAddress,
 };

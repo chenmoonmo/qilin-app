@@ -61,17 +61,22 @@ export const Card = styled.div`
   margin-top: 24px;
   border: 1px solid #363a45;
   border-radius: 6px;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 18px;
+  color: #737884;
+  margin-top: 12px;
   h1 {
     all: unset;
     font-weight: 500;
     font-size: 14px;
     line-height: 20px;
   }
-  p {
-    font-weight: 400;
-    font-size: 10px;
-    line-height: 18px;
-    color: #737884;
-    margin-top: 12px;
+  a {
+    text-decoration: underline;
+  }
+  ol,
+  ul {
+    padding-inline-start: 20px;
   }
 `;

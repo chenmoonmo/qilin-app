@@ -1,70 +1,50 @@
+import { css } from '@emotion/react';
+import { Button } from '@qilin/component';
+import Image from 'next/image';
+
+import { useNFT } from '@/hooks';
 import HomeLayout from '@/layouts/home-layout';
 import {
-  Card,
-  DetailItem,
-  HomeTitle,
-  InfoLayout,
   Main,
+  MintContainer,
+  MintInfo,
+  MintInfoBottom,
   NFTCard,
-  NFTInfo,
-} from '@/styles/home';
+} from '@/styles/mint';
 
 import type { NextPageWithLayout } from './_app';
 
-const Home: NextPageWithLayout = () => {
-  const NFTDetail = [
-    {
-      key: 'Contract Address',
-      value: '0xak...1o9d',
-    },
-    {
-      key: 'Token ID',
-      value: '123',
-    },
-    {
-      key: 'Token Standard',
-      value: 'ERC-721',
-    },
-    {
-      key: 'Chain',
-      value: 'Arbitrum Goerli',
-    },
-  ];
+const Index: NextPageWithLayout = () => {
+  const { hasNFT, mint } = useNFT();
 
   return (
     <Main>
-      <HomeTitle>Your NFTs</HomeTitle>
-      <InfoLayout>
-        <NFTCard src="/nft/1" />
-        <NFTInfo>
-          <HomeTitle>Reclaim collateral #1123</HomeTitle>
-          <Card>
-            <h1>Description</h1>
-            <p>
-              By utilizing flash loans, the current NFT can reclaim collateral
-              without repayment. The process involves borrowing assets from Uni
-              through a flash loan, repaying them to Aave, and withdrawing
-              deposits from Aave. Some of the deposits will be sold on Uni to
-              repay the flash loan.
-            </p>
-          </Card>
-          <Card>
-            <h1>Details</h1>
-            {NFTDetail.map((item, index) => (
-              <DetailItem key={index}>
-                <div>{item.key}</div>
-                <div>{item.value}</div>
-              </DetailItem>
-            ))}
-          </Card>
-        </NFTInfo>
-      </InfoLayout>
+      <MintContainer>
+        <NFTCard>
+          <Image src="/nft-card1.png" width={292} height={328.66} alt="NFT" />
+        </NFTCard>
+        <MintInfo>
+          <h1>Mint NFT - Limited Time</h1>
+          <MintInfoBottom>
+            <Button
+              css={css`
+                width: 332px;
+                height: 40px;
+              `}
+              disabled={hasNFT}
+              onClick={mint}
+            >
+              Mint NFT
+            </Button>
+          </MintInfoBottom>
+        </MintInfo>
+      </MintContainer>
     </Main>
   );
 };
 
-Home.getLayout = page => {
+Index.getLayout = page => {
   return <HomeLayout>{page}</HomeLayout>;
 };
 
-export default Home;
+export default Index;

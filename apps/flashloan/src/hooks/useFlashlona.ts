@@ -38,21 +38,25 @@ export const useFlashlona = () => {
     if (!supplie || !borrow) return null;
     const abi = new ethers.utils.AbiCoder();
 
-    const ethWithDrawAmount = supplie.value;
-    const usdcOutAmount = borrow.value;
+    const returnBalance = borrow.value.mul(1000650).div(1000000);
+    const debtBalance = borrow.value;
+    const aTokenBlance = supplie.value;
 
-    // BigNumber.from(
-    //   (+supplie.formatted * 0.9 * 10 ** supplie.decimals).toFixed()
-    // );
+    //赎回以后去SWAP
+    const swapWithIn = abi.encode(
+      ['uint256', 'address', 'address', 'uint24', 'string'],
+      [returnBalance, TOKENS.WETH, TOKENS.USDC, 500, 'final']
+    );
 
-    console.log({
-      ethWithDrawAmount: ethWithDrawAmount.toString(),
-      usdcOutAmount: usdcOutAmount.toString(),
-    });
+    const swap = abi.encode(
+      ['address', 'address', 'uint256', 'bytes'],
+      [address, CONTRACTS.V3SwapNft, 2, swapWithIn]
+    );
 
+    //将所有WETH赎回
     const withDrawParam = abi.encode(
-      ['address', 'uint256', 'string'],
-      [TOKENS.WETH, ethWithDrawAmount, 'final']
+      ['address', 'uint256', 'bytes'],
+      [TOKENS.WETH, aTokenBlance, swap]
     );
 
     const withDraw = abi.encode(
@@ -60,9 +64,10 @@ export const useFlashlona = () => {
       [address, CONTRACTS.AaveNext, 2, withDrawParam]
     );
 
+    //还到AAVE上面
     const relayParam = abi.encode(
       ['address', 'uint256', 'uint256', 'bytes'],
-      [TOKENS.USDC, usdcOutAmount, 2, withDraw]
+      [TOKENS.USDC, debtBalance, 2, withDraw]
     );
 
     const relay = abi.encode(
@@ -70,14 +75,15 @@ export const useFlashlona = () => {
       [address, CONTRACTS.AaveNext, 1, relayParam]
     );
 
-    const flashLoanParam = abi.encode(
+    //贷款相关
+    const flashParam = abi.encode(
       ['address', 'uint256', 'uint256', 'bytes'],
-      [TOKENS.PairAddress, usdcOutAmount, 0, relay]
+      [CONTRACTS.Pair, 0, debtBalance, relay]
     );
 
     return abi.encode(
       ['address', 'address', 'uint256', 'bytes'],
-      [address, CONTRACTS.NftUniV2FlashAndExec, 1, flashLoanParam]
+      [address, CONTRACTS.V3FlashNft, 1, flashParam]
     );
   }, [supplie, borrow, address]);
 
