@@ -102,7 +102,7 @@ export const PNLInfo = styled.div<{ children: ReactNode }>`
   &::before {
     content: ${props => {
       const pnl = props.children?.toString();
-      if (pnl === '-') {
+      if (pnl === '-' || !pnl) {
         return null;
       }
       if (!pnl?.startsWith('-') && pnl !== 'Not joined') {
@@ -438,12 +438,6 @@ export const Size = styled.div<{
   }
 `;
 
-export const PNL = styled.div<{
-  type: 'profit' | 'loss';
-}>`
-  color: ${props => (props.type === 'profit' ? '#4bd787' : '#f45e68')};
-`;
-
 export const CloseContainer = styled.div`
   flex: 1;
   display: flex;
@@ -505,5 +499,12 @@ export const XsPNLInfo = styled(PNLInfo)`
   font-style: normal;
   font-weight: 600;
   font-size: 14px;
+  line-height: 12px;
+`;
+
+export const PositionPNL = styled(PNLInfo)`
+  font-style: normal;
+  font-weight: 600;
+  font-size: 12px;
   line-height: 12px;
 `;
