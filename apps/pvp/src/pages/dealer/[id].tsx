@@ -205,7 +205,9 @@ const Dealer: NextPageWithLayout = () => {
               margin-top: 20px;
             `}
           >
-            {poolInfo?.isOpend && <TimeInput disabled value={duration} />}
+            {poolInfo.isOpend && !canCreateRoom && (
+              <TimeInput disabled value={duration} />
+            )}
           </div>
           {cardStatus}
         </XsCardContent>

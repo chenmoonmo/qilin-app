@@ -7,8 +7,8 @@ import { usePoolInfo } from '@/hooks';
 import Layout, { Header } from '@/layouts/nft-layout';
 import {
   BackLink,
-  PNL,
   PositionPercent,
+  PositionPNL,
   PositionsList,
   Size,
 } from '@/styles/player';
@@ -45,9 +45,9 @@ const Positions: NextPageWithLayout = () => {
               >
                 {formatAmount(position.fomattedMargin)}
               </Size>
-              <PNL type="profit">
-                +{position.estPnl}({position.ROE}%)
-              </PNL>
+              <PositionPNL>
+                {position.estPnl}({position.ROE}%)
+              </PositionPNL>
             </Fragment>
           );
         })}
