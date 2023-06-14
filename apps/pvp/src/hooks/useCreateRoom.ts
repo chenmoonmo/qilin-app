@@ -131,7 +131,7 @@ export const useCreateRoom = () => {
       form.targetToken
     ),
     overrides: {
-      gasLimit: BigNumber.from(1000000),
+      gasLimit: BigNumber.from(3500000),
     },
   });
 

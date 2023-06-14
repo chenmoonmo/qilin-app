@@ -6,6 +6,7 @@ import type { FC, ReactNode } from 'react';
 import { useMemo } from 'react';
 
 export const PositionInfoContainer = styled.div`
+  margin-top: 16px;
   padding: 20px;
   border: 1px solid rgba(139, 162, 212, 0.5);
   border-radius: 6px;
@@ -130,7 +131,7 @@ export const PriceItem = styled.div`
 `;
 
 export const NotOpen = styled.div`
-  margin: 80px 0 32px;
+  margin: 80px 0 0;
   text-align: center;
   font-style: normal;
   font-weight: 600;
