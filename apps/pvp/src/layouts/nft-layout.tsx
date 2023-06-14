@@ -10,7 +10,9 @@ import { OwnerIcon } from '@/components';
 
 type NFTLayoutProps = PropsWithChildren;
 
-const Main = styled.main`
+const Main = styled.main<{
+  type: 'dealer' | 'player';
+}>`
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -25,7 +27,13 @@ const Main = styled.main`
     width: 100%;
     height: 100%;
     border-radius: 6px;
-    background-image: url('/nft-bg.png');
+    /* background-image: url('/nft-bg.png'); */
+    background-image: ${props => {
+      if (props.type === 'dealer') {
+        return `url('/nft-dealer-bg.png')`;
+      }
+      return `url('/nft-bg.png')`;
+    }};
     background-size: 108% 108%;
     background-repeat: no-repeat;
     background-position: center center;
@@ -200,8 +208,12 @@ export const Header: FC<{
   );
 };
 
-const Layout: FC<NFTLayoutProps> = ({ children }) => {
-  return <Main>{children}</Main>;
+const Layout: FC<
+  NFTLayoutProps & {
+    type: 'dealer' | 'player';
+  }
+> = ({ children, type }) => {
+  return <Main type={type}>{children}</Main>;
 };
 
 export default Layout;

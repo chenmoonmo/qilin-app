@@ -57,7 +57,7 @@ const Positions: NextPageWithLayout = () => {
 };
 
 Positions.getLayout = (page: any) => {
-  return <Layout>{page}</Layout>;
+  return <Layout type="player">{page}</Layout>;
 };
 
 export default Positions;

@@ -359,7 +359,7 @@ const Player: NextPageWithLayout = () => {
 };
 
 Player.getLayout = (page: any) => {
-  return <Layout>{page}</Layout>;
+  return <Layout type="player">{page}</Layout>;
 };
 
 export default Player;
