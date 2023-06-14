@@ -15,7 +15,7 @@ export const useNFTInfo = (address: Address, tokenId: number) => {
   return {
     // 系列名称
     // metadate
-    name: 'Room Card',
+    name: address === CONTRACTS.PlayerAddress ? 'Trading Room' : 'Room Card',
     description:
       'Friendly OpenSea Creature that enjoys long swims in the ocean.',
     animation_url:

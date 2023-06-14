@@ -365,7 +365,7 @@ const Dealer: NextPageWithLayout = () => {
 };
 
 Dealer.getLayout = (page: any) => {
-  return <Layout>{page}</Layout>;
+  return <Layout type="dealer">{page}</Layout>;
 };
 
 export default Dealer;

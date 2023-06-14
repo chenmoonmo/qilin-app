@@ -84,7 +84,10 @@ export const PNLInfoContainer = styled.div`
 `;
 
 export const PNLInfo = styled.div<{ children: ReactNode }>`
-  display: flex;
+  display: ${props => {
+    const pnl = props.children?.toString();
+    return pnl ? 'flex' : 'none';
+  }};
   align-items: center;
   font-style: normal;
   font-weight: 600;
