@@ -1,6 +1,6 @@
 import type { Address } from 'wagmi';
 
-import { CONTRACTS } from '@/constant';
+import { CONTRACTS, NFTBaseUrl } from '@/constant';
 
 export const useNFTInfo = (address: Address, tokenId: number) => {
   // const { data } = useContractRead({
@@ -20,7 +20,7 @@ export const useNFTInfo = (address: Address, tokenId: number) => {
       'Friendly OpenSea Creature that enjoys long swims in the ocean.',
     animation_url:
       address === CONTRACTS.PlayerAddress
-        ? `http://localhost:3000/player/${tokenId}`
-        : `http://localhost:3000/dealer/${tokenId}`,
+        ? `${NFTBaseUrl}player/${tokenId}`
+        : `${NFTBaseUrl}dealer/${tokenId}`,
   };
 };
