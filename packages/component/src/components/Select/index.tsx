@@ -21,7 +21,7 @@ const Trigger = styled(RadixSelect.Trigger)`
   border-radius: 2px;
   cursor: pointer;
   &:disabled {
-    background: #536193;
+    background-color: var(--disabled-input-color);
     cursor: not-allowed;
   }
 `;

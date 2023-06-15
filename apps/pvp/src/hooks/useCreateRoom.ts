@@ -92,13 +92,10 @@ export const useDealerId = () => {
     [dealerStatus]
   );
 
-  return {
-    dealerId,
-    canCreateRoom,
-    canOpen,
-    canClose,
-    refetch,
-  };
+  return useMemo(
+    () => ({ dealerId, canCreateRoom, canOpen, canClose, refetch }),
+    [canClose, canCreateRoom, canOpen, dealerId, refetch]
+  );
 };
 
 export const useCreateRoom = () => {

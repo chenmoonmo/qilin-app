@@ -41,7 +41,7 @@ export const SeatItem = styled.input`
   color: #d0d0d0;
   cursor: not-allowed;
   &:disabled {
-    background: #536193;
+    background-color: var(--disabled-input-color);
   }
 `;
 
@@ -52,15 +52,13 @@ export const WhielistContainer = styled.div`
 export const WhielistItem = styled.div`
   display: block;
   border: 1px solid #546293;
-
   border-radius: 2px;
-
   margin-top: 10px;
   &:first-of-type {
     margin-top: 0;
   }
   &:focus-within {
-    border-color: var(--border-active-color);
+    border-color: var(--active-border-color);
   }
   input {
     all: unset;
@@ -73,7 +71,7 @@ export const WhielistItem = styled.div`
     line-height: 12px;
     color: #d0d0d0;
     &:disabled {
-      background: #536193;
+      background-color: var(--disabled-input-color);
     }
   }
 `;

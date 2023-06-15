@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useProvider } from 'wagmi';
 
 // 获取当前区块的最新时间
@@ -16,5 +16,7 @@ export const useNow = () => {
     });
   }, [provider]);
 
-  return now;
+  return useMemo(() => {
+    return now;
+  }, [now]);
 };

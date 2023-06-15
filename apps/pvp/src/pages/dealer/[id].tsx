@@ -5,7 +5,7 @@ import { atom, useAtom } from 'jotai';
 import uniqBy from 'lodash/uniqBy';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAccount, useChainId, useToken } from 'wagmi';
+import { useChainId, useToken } from 'wagmi';
 
 import { ArrowIcon, TimeInput } from '@/components';
 import { PAIRS, PAY_TOKENS } from '@/constant';
@@ -41,11 +41,6 @@ const Dealer: NextPageWithLayout = () => {
   const router = useRouter();
   const id = +(router.query.id as string);
   const chainId = useChainId();
-
-  const { address } = useAccount();
-  const shortAddress = useMemo(() => {
-    return address ? address?.slice(0, 6) + '...' + address?.slice(-4) : '';
-  }, [address]);
 
   const now = useNow();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -166,38 +161,35 @@ const Dealer: NextPageWithLayout = () => {
     }
   }, [poolInfo, canCreateRoom, canOpen, canClose]);
 
-  const countdown = useCallback(() => {
-    timerRef.current && clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      setDuration(pre => {
-        const newValue = pre - 60;
-        console.log({
-          pre,
-          newValue,
-        });
-        if (newValue <= 0) {
-          clearTimeout(timerRef.current!);
-          return 0;
-        }
-        countdown();
-        return newValue;
-      });
-    }, 60000);
-  }, []);
-
   useEffect(() => {
     if (poolInfo.isOpend && !poolInfo.isEnd) {
       setDuration(+poolInfo.deadline! - +now / 1000);
-      countdown();
     } else if (poolInfo.isEnd) {
       setDuration(0);
     }
+  }, [poolInfo, now]);
+
+  useEffect(() => {
+    // 倒计时
+    const countdown = () => {
+      timerRef.current && clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setDuration(pre => {
+          const newValue = pre - 60;
+          if (newValue <= 0) {
+            clearTimeout(timerRef.current!);
+            return 0;
+          }
+          countdown();
+          return newValue;
+        });
+      }, 60000);
+    };
+    countdown();
     return () => {
       timerRef.current && clearTimeout(timerRef.current);
     };
-  }, [countdown, now, poolInfo]);
-
-  console.log({ poolInfo, shortAddress, canCreateRoom });
+  }, [duration]);
   return (
     <>
       <Header title="Room Card" />

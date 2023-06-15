@@ -98,7 +98,11 @@ const PositionInfo: FC<
               align-items: center;
             `}
           >
-            <PNLInfo>{formatAmount(myPosition?.estPnl) ?? '-'}</PNLInfo>
+            <PNLInfo>
+              {poolInfo.isSubmited
+                ? formatAmount(myPosition?.estPnl) ?? '-'
+                : 'Not Joined'}
+            </PNLInfo>
             {poolInfo.isEnd && myPosition?.type === 1 && (
               <Link href={`/player/${id}/close`}>
                 <Button
@@ -131,7 +135,8 @@ const PositionInfo: FC<
           <PriceItem>
             <div>Open price</div>
             <div>
-              {formatAmount(poolInfo.openPrice) ?? '-'} {poolInfo?.token1Symbol}
+              {poolInfo.openPrice ? formatAmount(poolInfo.openPrice) : '-'}{' '}
+              {poolInfo?.token1Symbol}
             </div>
           </PriceItem>
           <PriceItem>
@@ -192,8 +197,8 @@ const OpenPostition: FC<
         </div>
       </PairInfo>
       <PositionPercent
-        longSize={mergePositions?.long?.asset ?? 0}
-        shortSize={mergePositions?.short?.asset ?? 0}
+        longSize={mergePositions?.long?.lp ?? 0}
+        shortSize={mergePositions?.short?.lp ?? 0}
       />
       <OpenPositionOuter>
         <OpenPositionForm>
@@ -263,11 +268,10 @@ const Player: NextPageWithLayout = () => {
   const now = useNow();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [duration, setDuration] = useState(0);
-
   const cardStatus = useMemo(() => {
     const { isEnd, isOpend, isSubmited } = poolInfo;
-    let statusMessage: string | null = 'Open Position';
-    let showArrow = true;
+    let statusMessage: string | null = null;
+    let showArrow = false;
 
     if (!isSubmited && !isOpend) {
       statusMessage = 'Open Position';
@@ -291,7 +295,9 @@ const Player: NextPageWithLayout = () => {
     }
     return (
       <>
-        <XsPNLInfo>{myPosition?.estPnl}</XsPNLInfo>
+        {myPosition?.estPnl && (
+          <XsPNLInfo>{formatAmount(myPosition?.estPnl)}</XsPNLInfo>
+        )}
         {statusMessage && (
           <XsCardStatus>
             <span>{statusMessage}</span>
@@ -302,39 +308,36 @@ const Player: NextPageWithLayout = () => {
     );
   }, [poolInfo, myPosition]);
 
-  // 倒计时
-  const countdown = useCallback(() => {
-    timerRef.current && clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      setDuration(pre => {
-        const newValue = pre - 60;
-        console.log({
-          pre,
-          newValue,
-        });
-        if (newValue <= 0) {
-          clearTimeout(timerRef.current!);
-          return 0;
-        }
-        countdown();
-        return newValue;
-      });
-    }, 60000);
-  }, []);
-
   useEffect(() => {
     if (poolInfo.isOpend && !poolInfo.isEnd) {
       setDuration(+poolInfo.deadline! - +now / 1000);
-      countdown();
     } else if (poolInfo.isEnd) {
       setDuration(0);
     }
+  }, [poolInfo, now]);
+
+  useEffect(() => {
+    // 倒计时
+    const countdown = () => {
+      timerRef.current && clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setDuration(pre => {
+          const newValue = pre - 60;
+          if (newValue <= 0) {
+            clearTimeout(timerRef.current!);
+            return 0;
+          }
+          countdown();
+          return newValue;
+        });
+      }, 60000);
+    };
+    countdown();
     return () => {
       timerRef.current && clearTimeout(timerRef.current);
     };
-  }, [poolInfo, now, countdown]);
+  }, [duration]);
 
-  console.log({ id, poolInfo, mergePositions, myPosition });
   return (
     <>
       <Header shortId={poolInfo?.shortId} isOwner={poolInfo.isOwner} />

@@ -37,7 +37,6 @@ const slideIn = keyframes`
   }
   to {
     transform: translateX(50%);
-
   }
 `;
 
@@ -47,8 +46,8 @@ const Root = styled(RadixToast.Root)`
   left: 50%;
   display: flex;
   align-items: stretch;
-  width: 468px;
-  height: 100px;
+  width: 426px;
+  height: 64px;
   background: #5e6169;
   border-radius: 12px;
   overflow: hidden;
@@ -75,11 +74,11 @@ const Status = styled.div`
   align-items: center;
   justify-content: center;
   width: 66px;
-  height: 100px;
+  height: 64px;
   background: #2781ff;
   svg {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
   }
 `;
 
@@ -98,7 +97,6 @@ const Title = styled(RadixToast.Title)`
 `;
 
 const Description = styled(RadixToast.Description)`
-  margin-top: 6px;
   font-size: 16px;
   line-height: 16px;
   font-weight: 500;

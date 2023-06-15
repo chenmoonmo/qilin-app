@@ -71,7 +71,6 @@ type PoolGraph = {
 export const usePoolInfo = (playerNFTId: number) => {
   const { address } = useAccount();
   const now = useNow();
-
   const { dealerId } = useDealerId();
 
   const { data: createDealerId } = useContractRead({
@@ -145,7 +144,10 @@ export const usePoolInfo = (playerNFTId: number) => {
     }
   );
 
-  const isOpend = +(data?.poolInfo?.deadline ?? 0) > 0;
+  const isOpend = useMemo(
+    () => +(data?.poolInfo?.deadline ?? 0) > 0,
+    [data?.poolInfo?.deadline]
+  );
 
   const isEnd = useMemo(() => {
     if (!data?.poolInfo?.deadline || data?.poolInfo?.deadline === '0')
@@ -161,9 +163,6 @@ export const usePoolInfo = (playerNFTId: number) => {
     functionName: 'endPrice',
   });
 
-  console.log({ closePrice });
-
-  // TODO: closePrice 和 open price 的精度是否固定
   const formattedClosePrice = useMemo(() => {
     if (!closePrice) return 0;
     return +ethers.utils.formatUnits(closePrice as BigNumber);
@@ -217,56 +216,64 @@ export const usePoolInfo = (playerNFTId: number) => {
           short: {} as MergePositionItem,
         }
       );
-    } else if (isEnd) {
-      return data?.positions?.reduce(
-        (pre, cur) => {
-          const direction = cur.level > 0 ? 'long' : 'short';
-          const formattedLp = ethers.utils.formatUnits(
-            Math.abs(+cur.asset * cur.level),
-            marginTokenDecimal
-          );
-          return {
-            ...pre,
-            [direction]: {
-              ...cur,
-              direction,
-              formattedLp,
-            },
-          };
-        },
-        {
-          long: {} as MergePositionItem,
-          short: {} as MergePositionItem,
-        }
-      );
     } else {
-      return data?.mergePositions?.reduce(
-        (pre, cur) => {
-          const direction = cur.id.split('-')[1];
-          const formattedLp = ethers.utils.formatUnits(
-            cur.lp,
-            +marginTokenDecimal
-          );
-          return {
-            ...pre,
-            [direction]: {
-              ...cur,
-              direction,
-              formattedLp,
-            },
-          };
-        },
-        {
-          long: {} as MergePositionItem,
-          short: {} as MergePositionItem,
-        }
-      );
+      const isPostionEnded = data?.mergePositions.every(item => +item.lp === 0);
+      if (!isPostionEnded) {
+        return data?.mergePositions?.reduce(
+          (pre, cur) => {
+            const direction = cur.id.split('-')[1];
+            const formattedLp = ethers.utils.formatUnits(
+              cur.lp,
+              +marginTokenDecimal
+            );
+            return {
+              ...pre,
+              [direction]: {
+                ...cur,
+                direction,
+                formattedLp,
+              },
+            };
+          },
+          {
+            long: {} as MergePositionItem,
+            short: {} as MergePositionItem,
+          }
+        );
+      } else {
+        return data?.positions?.reduce(
+          (pre, cur) => {
+            const direction = cur.level > 0 ? 'long' : 'short';
+            const lp = BigNumber.from(cur.asset).mul(cur.level).abs();
+            const formattedLp = ethers.utils.formatUnits(
+              lp,
+              marginTokenDecimal
+            );
+            const currentPositon = pre[direction];
+
+            return {
+              ...pre,
+              [direction]: {
+                ...currentPositon,
+                direction,
+                formattedLp: +(currentPositon?.formattedLp ?? 0) + formattedLp,
+                lp: BigNumber.from(currentPositon?.lp ?? 0)
+                  .add(lp)
+                  .toString(),
+              },
+            };
+          },
+          {
+            long: {} as MergePositionItem,
+            short: {} as MergePositionItem,
+          }
+        );
+      }
     }
   }, [
     data?.mergePositions,
     data?.poolInfo.pay_token_decimal,
     data?.positions,
-    isEnd,
     isOpend,
     waitPositions,
   ]);
@@ -280,6 +287,8 @@ export const usePoolInfo = (playerNFTId: number) => {
         : null,
     [isOpend, mergePositions?.long?.open_price]
   );
+
+  console.log({ openPrice });
 
   const stakePrice = useMemo(() => {
     const stratPrice = 1;
@@ -300,19 +309,13 @@ export const usePoolInfo = (playerNFTId: number) => {
 
       const totalMargin = +(data?.poolInfo?.margin ?? 0);
 
-      // console.log({
-      //   isEnd,
-      //   nowPrice: ethers.utils.formatUnits(nowPrice as BigNumber),
-      //   currentPrice,
-      //   formattedClosePrice,
-      //   openPrice,
-      //   mergePositions,
-      //   longLp,
-      //   shortLp,
-      //   fakeLp,
-      //   totalMargin,
-      //   totalLp,
-      // });
+      console.log({
+        longLp,
+        shortLp,
+        fakeLp,
+        totalLp,
+        totalMargin,
+      });
 
       return totalMargin / totalLp;
     }
@@ -358,7 +361,6 @@ export const usePoolInfo = (playerNFTId: number) => {
         ?.map(position => {
           const currentPrice = isEnd ? formattedClosePrice : formattedNowPrice;
 
-          const openPrice = +ethers.utils.formatUnits(position?.open_price);
           const direction = position.level > 0 ? 'long' : 'short';
           const fomattedMargin = +ethers.utils.formatUnits(
             position.margin,
@@ -371,12 +373,16 @@ export const usePoolInfo = (playerNFTId: number) => {
           );
           // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
           let fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
+
           if (direction === 'short') {
-            const fakeLp = (currentPrice / openPrice) * fotmattedStakeAmount;
+            const fakeLp = openPrice
+              ? (currentPrice / openPrice) * fotmattedStakeAmount
+              : 0;
             fotmattedStakeAmount = 2 * fotmattedStakeAmount - fakeLp;
           } else {
-            fotmattedStakeAmount =
-              (currentPrice / openPrice) * fotmattedStakeAmount;
+            fotmattedStakeAmount = openPrice
+              ? (currentPrice / openPrice) * fotmattedStakeAmount
+              : fotmattedStakeAmount;
           }
 
           // 仓位价值：current Value = stake amount * stake price
@@ -391,6 +397,17 @@ export const usePoolInfo = (playerNFTId: number) => {
                   +marginTokenDecimal
                 );
 
+          console.log({
+            currentPrice,
+            openPrice,
+            position,
+            fomattedMargin,
+            level: position.level,
+            fotmattedStakeAmount,
+            stakePrice,
+            currentValue,
+            estPnl,
+          });
           if (position.type !== 1) {
             currentValue = estPnl + fomattedMargin;
           }
@@ -507,13 +524,15 @@ export const usePoolInfo = (playerNFTId: number) => {
     formattedClosePrice,
     formattedNowPrice,
     stakePrice,
+    openPrice,
     waitPositions,
   ]);
 
   const isSubmited = useMemo(() => {
-    return [...waitPositions, ...(positions ?? [])]?.some(
+    const currentPositon = [...waitPositions, ...(positions ?? [])]?.find(
       (position: any) => position.user === address
     );
+    return currentPositon && !!currentPositon.asset;
   }, [waitPositions, positions, address]);
 
   const myPosition = useMemo(() => {
@@ -535,26 +554,47 @@ export const usePoolInfo = (playerNFTId: number) => {
     return (createDealerId as BigNumber).eq(BigNumber.from(dealerId));
   }, [dealerId, createDealerId]);
 
-  return {
-    poolInfo: {
-      ...data?.poolInfo,
-      openPrice,
-      nowPrice: formattedNowPrice,
-      closePrice: formattedClosePrice,
-      stakePrice,
-      poolAddress: poolAddress as Address,
-      createDealerId: createDealerId as BigNumber,
-      isOwner,
-      status,
-      isOpend,
-      isEnd,
-      isSubmited,
-    },
-    players: data?.players ?? [],
-    mergePositions,
-    positions,
-    myPosition,
+  return useMemo(() => {
+    return {
+      poolInfo: {
+        ...data?.poolInfo,
+        openPrice,
+        nowPrice: formattedNowPrice,
+        closePrice: formattedClosePrice,
+        stakePrice,
+        poolAddress: poolAddress as Address,
+        createDealerId: createDealerId as BigNumber,
+        isOwner,
+        status,
+        isOpend,
+        isEnd,
+        isSubmited,
+      },
+      players: data?.players ?? [],
+      mergePositions,
+      positions,
+      myPosition,
+      isLoading,
+      refetch: mutate,
+    };
+  }, [
+    createDealerId,
+    data?.players,
+    data?.poolInfo,
+    formattedClosePrice,
+    formattedNowPrice,
+    isEnd,
     isLoading,
-    refetch: mutate,
-  };
+    isOpend,
+    isOwner,
+    isSubmited,
+    mergePositions,
+    mutate,
+    myPosition,
+    openPrice,
+    poolAddress,
+    positions,
+    stakePrice,
+    status,
+  ]);
 };

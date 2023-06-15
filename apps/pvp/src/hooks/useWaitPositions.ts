@@ -1,4 +1,5 @@
 import { BigNumber } from 'ethers';
+import { useMemo } from 'react';
 import type { Address } from 'wagmi';
 import { useContractReads } from 'wagmi';
 
@@ -33,9 +34,11 @@ export const useWaitPositions = ({
     contracts: positonQuerys,
   });
 
-  return (
-    (waitPositions as WaitPositionItem[])?.filter((position: any) => {
-      return position?.user && !BigNumber.from(position?.user).eq(0);
-    }) ?? []
-  );
+  return useMemo(() => {
+    return (
+      (waitPositions as WaitPositionItem[])?.filter((position: any) => {
+        return position?.user && !BigNumber.from(position?.user).eq(0);
+      }) ?? []
+    );
+  }, [waitPositions]);
 };

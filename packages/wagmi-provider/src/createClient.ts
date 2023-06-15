@@ -21,7 +21,7 @@ export async function createClient<TChain extends Chain = Chain>(
 
   const connectorsFactory: Promise<Connector>[] = [];
 
-  connectorNames.forEach(connectorName => {
+  connectorNames?.forEach(connectorName => {
     if (connectorName === 'MetaMask') {
       connectorsFactory.push(
         import('wagmi/connectors/metaMask').then(({ MetaMaskConnector }) => {

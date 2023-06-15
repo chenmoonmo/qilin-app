@@ -44,6 +44,7 @@ export const useAddPlayers = (id: number, restSeats: number) => {
   const { writeAsync } = useContractWrite(config);
 
   const addPlayers = async () => {
+    console.log(config);
     try {
       showWalletToast({
         title: 'Transaction Confirmation',
