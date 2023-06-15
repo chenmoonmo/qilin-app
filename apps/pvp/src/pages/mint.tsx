@@ -82,7 +82,15 @@ const Index: NextPageWithLayout = () => {
     <Main>
       <MintContainer>
         <NFTCard>
-          <Image src="/nft-card.png" width={292} height={292} alt="NFT" />
+          <Image
+            src="/nft-card.png"
+            width={292}
+            height={292}
+            alt="NFT"
+            loading="eager"
+            priority
+            unoptimized
+          />
         </NFTCard>
         <MintInfo>
           <h1>Mint NFT - Limited Time</h1>
