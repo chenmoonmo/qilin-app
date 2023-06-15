@@ -56,12 +56,18 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
             align-items: center;
           `}
         >
-          <Logo css={css`
-            margin-right: 86px;
-          `} />
-          <MenuItem href="/" data-active={router.pathname === '/'}>Collections</MenuItem>
+          <Logo
+            css={css`
+              margin-right: 86px;
+            `}
+          />
+          <MenuItem href="/" data-active={router.pathname === '/'}>
+            Collections
+          </MenuItem>
           {/* TODO: 白名单显示 */}
-          <MenuItem href="/mint" data-active={router.pathname === '/mint'}>Mint</MenuItem>
+          <MenuItem href="/mint" data-active={router.pathname === '/mint'}>
+            Mint
+          </MenuItem>
         </div>
         <div
           css={css`
@@ -99,7 +105,7 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
                   <MetaMaskIcon
                     css={css`
                       position: relative;
-                      padding-right: 11px;
+                      margin-right: 11px;
                     `}
                   />
                   <Tooltip text={address}>

@@ -80,12 +80,16 @@ const PositionInfo: FC<
       <PositionInfoContainer>
         <RoomInfo>
           <Pair>{poolInfo?.trade_pair}</Pair>
-          <PositionDirection data-type={myPosition?.direction}>
-            {myPosition?.direction}
-          </PositionDirection>
-          <PositionSize leverage={myPosition?.level}>
-            {myPosition?.fomattedMargin} {myPosition?.marginSymbol}
-          </PositionSize>
+          {myPosition?.direction && (
+            <PositionDirection data-type={myPosition.direction}>
+              {myPosition.direction}
+            </PositionDirection>
+          )}
+          {myPosition?.fomattedMargin && (
+            <PositionSize leverage={myPosition?.level}>
+              {myPosition?.fomattedMargin} {myPosition?.marginSymbol}
+            </PositionSize>
+          )}
         </RoomInfo>
         <PNLInfoContainer>
           <div
@@ -126,11 +130,15 @@ const PositionInfo: FC<
         <PriceInfo>
           <PriceItem>
             <div>Open price</div>
-            <div>{formatAmount(poolInfo.openPrice) ?? '-'}</div>
+            <div>
+              {formatAmount(poolInfo.openPrice) ?? '-'} {poolInfo?.token1Symbol}
+            </div>
           </PriceItem>
           <PriceItem>
             <div>Current price</div>
-            <div>{formatAmount(poolInfo?.token_price)}</div>
+            <div>
+              {formatAmount(poolInfo?.nowPrice)} {poolInfo?.token1Symbol}
+            </div>
           </PriceItem>
         </PriceInfo>
       </PositionInfoContainer>
@@ -180,7 +188,7 @@ const OpenPostition: FC<
       <PairInfo>
         <div>{poolInfo?.trade_pair}</div>
         <div>
-          {formatAmount(poolInfo?.token_price)} {poolInfo?.token1Symbol}
+          {formatAmount(poolInfo?.nowPrice)} {poolInfo?.token1Symbol}
         </div>
       </PairInfo>
       <PositionPercent
@@ -258,10 +266,10 @@ const Player: NextPageWithLayout = () => {
 
   const cardStatus = useMemo(() => {
     const { isEnd, isOpend, isSubmited } = poolInfo;
-    let statusMessage = 'Open Position';
+    let statusMessage: string | null = 'Open Position';
     let showArrow = true;
 
-    if (!isSubmited) {
+    if (!isSubmited && !isOpend) {
       statusMessage = 'Open Position';
       showArrow = true;
     }
@@ -269,21 +277,27 @@ const Player: NextPageWithLayout = () => {
       statusMessage = 'Not Open';
       showArrow = false;
     }
-    if (isOpend && !isEnd && !myPosition) {
+    if (!isSubmited && isEnd) {
       statusMessage = 'Not Joined';
       showArrow = false;
     }
-    if (isOpend && !isEnd && myPosition) {
+    if (isSubmited && isEnd && myPosition.type === 1) {
       statusMessage = 'Close Position';
       showArrow = true;
+    }
+    if (isSubmited && isEnd) {
+      statusMessage = null;
+      showArrow = false;
     }
     return (
       <>
         <XsPNLInfo>{myPosition?.estPnl}</XsPNLInfo>
-        <XsCardStatus>
-          <span>{statusMessage}</span>
-          {showArrow && <ArrowIcon />}
-        </XsCardStatus>
+        {statusMessage && (
+          <XsCardStatus>
+            <span>{statusMessage}</span>
+            {showArrow && <ArrowIcon />}
+          </XsCardStatus>
+        )}
       </>
     );
   }, [poolInfo, myPosition]);

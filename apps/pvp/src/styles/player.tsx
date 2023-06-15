@@ -315,8 +315,19 @@ const PositionPercentContainer = styled.div<{
   > div {
     padding: 2px 12px;
     &:first-of-type {
-      display: ${props => (props.long === 0 ? 'none' : 'block')};
-      width: calc(${props => props.long}% - 2px);
+      display: ${({ long, short }) => {
+        return [long, short].every(item => item === 0)
+          ? 'block'
+          : long
+          ? 'block'
+          : 'none';
+      }};
+      width: calc(
+        ${({ long, short }) =>
+            [long, short].every(item => item === 0) ? 50 : long}% - 2px
+      );
+      max-width: 85%;
+      min-width: 15%;
       background: #4bd787;
     }
     &:nth-of-type(2) {
@@ -325,8 +336,19 @@ const PositionPercentContainer = styled.div<{
       background: #ffffff;
     }
     &:last-of-type {
-      display: ${props => (props.short === 0 ? 'none' : 'block')};
-      width: calc(${props => props.short}% - 2px);
+      display: ${({ long, short }) => {
+        return [long, short].every(item => item === 0)
+          ? 'block'
+          : short
+          ? 'block'
+          : 'none';
+      }};
+      width: calc(
+        ${({ long, short }) =>
+            [long, short].every(item => item === 0) ? 50 : short}% - 2px
+      );
+      max-width: 85%;
+      min-width: 15%;
       background: #f45e68;
       text-align: right;
     }
@@ -377,7 +399,7 @@ export const PositionPercent: FC<{
 }> = ({ longSize, shortSize }) => {
   const [longPercent, shortPrecent] = useMemo(() => {
     const total = +longSize + +shortSize;
-    if (total === 0 || isNaN(total)) return [50, 50];
+    if (total === 0 || isNaN(total)) return [0, 0];
     return [(+longSize / total) * 100, (+shortSize / total) * 100];
   }, [longSize, shortSize]);
 
@@ -414,13 +436,14 @@ export const PositionsList = styled.div`
 `;
 
 export const Size = styled.div<{
-  leverage: number;
-  direction: 'long' | 'short';
+  leverage?: number;
+  direction?: 'long' | 'short';
 }>`
   display: flex;
   align-items: center;
   &::before {
     content: '';
+    display: ${props => (props.direction ? 'block' : 'none')};
     width: 14px;
     height: 9px;
     margin-right: 8px;
@@ -430,7 +453,7 @@ export const Size = styled.div<{
   }
   &::after {
     content: ${props => `'${props.leverage}x'`};
-    display: block;
+    display: ${props => (props.leverage ? 'block' : 'none')};
     padding: 0 3px;
     margin-left: 4px;
     background: rgba(83, 97, 147, 0.5);
