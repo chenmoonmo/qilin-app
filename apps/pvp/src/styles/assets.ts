@@ -35,6 +35,11 @@ export const InfoCard = styled.div`
   border: 1px solid #363a45;
   border-radius: 6px;
   height: max-content;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 20px;
+  color: #737884;
   > h1 {
     font-style: normal;
     font-weight: 500;
@@ -43,11 +48,9 @@ export const InfoCard = styled.div`
   }
   > p {
     margin-top: 12px;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 10px;
-    line-height: 18px;
-    color: #737884;
+  }
+  > ol {
+    padding-inline-start: 20px;
   }
   > div {
     display: flex;
