@@ -67,6 +67,8 @@ const Dealer: NextPageWithLayout = () => {
 
   const handleCreateRoom = useCallback(async () => {
     await createRoom();
+    refetchPoolInfo();
+    refetch();
     setTimeout(() => {
       refetchPoolInfo();
       refetch();
@@ -339,7 +341,7 @@ const Dealer: NextPageWithLayout = () => {
               </InfoItem>
             </InfoContainer>
             <TraddingEndTitle>
-              {poolInfo?.isOpend ? 'Enter Countdown' : 'Trading Ends In'}
+              {!poolInfo?.isOpend ? 'Enter Countdown' : 'Trading Ends In'}
             </TraddingEndTitle>
             <TimeInput
               value={duration}
