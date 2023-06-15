@@ -1,6 +1,5 @@
 import { css } from '@emotion/react';
 import { Button, Select, SelectToken } from '@qilin/component';
-import { hoursToSeconds } from 'date-fns';
 import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom } from 'jotai';
 import uniqBy from 'lodash/uniqBy';
@@ -68,14 +67,16 @@ const Dealer: NextPageWithLayout = () => {
 
   const handleCreateRoom = useCallback(async () => {
     await createRoom();
-    refetchPoolInfo();
-    refetch();
+    setTimeout(() => {
+      refetchPoolInfo();
+      refetch();
+    }, 3000);
   }, [createRoom, refetch, refetchPoolInfo]);
 
   const [searchInfo, setSearchInfo] = useState<string>('');
   const [marginSearchInfo, setMarginSearchInfo] = useState<string>('');
 
-  const [duration, setDuration] = useState(hoursToSeconds(3));
+  const [duration, setDuration] = useState(0);
 
   const openPosition = useOpenPosition({
     poolAddress: poolInfo.poolAddress,
@@ -337,7 +338,9 @@ const Dealer: NextPageWithLayout = () => {
                 <div>{poolInfo?.shortId}</div>
               </InfoItem>
             </InfoContainer>
-            <TraddingEndTitle />
+            <TraddingEndTitle>
+              {poolInfo?.isOpend ? 'Enter Countdown' : 'Trading Ends In'}
+            </TraddingEndTitle>
             <TimeInput
               value={duration}
               disabled={poolInfo?.isOpend}
@@ -352,6 +355,7 @@ const Dealer: NextPageWithLayout = () => {
                   height: 40px;
                   margin: 42px auto 0;
                 `}
+                disabled={duration <= 0}
                 onClick={handleOpenPosition}
               >
                 Open

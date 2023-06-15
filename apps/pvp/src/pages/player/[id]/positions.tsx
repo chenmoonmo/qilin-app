@@ -23,6 +23,8 @@ const Positions: NextPageWithLayout = () => {
 
   const { poolInfo, mergePositions, positions } = usePoolInfo(+id);
 
+  console.log(positions);
+
   return (
     <>
       <Header shortId={poolInfo?.shortId} isOwner={poolInfo.isOwner} />
@@ -41,13 +43,18 @@ const Positions: NextPageWithLayout = () => {
               <div>{position.user.slice(-4)}</div>
               <Size
                 leverage={position.level}
-                direction={position.direction as 'long' | 'short'}
+                direction={position.direction as 'long' | 'short' | undefined}
               >
                 {formatAmount(position.fomattedMargin)}
               </Size>
-              <PositionPNL>
-                {position.estPnl}({position.ROE}%)
-              </PositionPNL>
+              {position.estPnl ? (
+                <PositionPNL>
+                  {formatAmount(position.estPnl)}(
+                  {formatAmount(position.ROE, 2)}%)
+                </PositionPNL>
+              ) : (
+                <div></div>
+              )}
             </Fragment>
           );
         })}

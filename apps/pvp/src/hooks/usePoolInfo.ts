@@ -106,7 +106,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           positions(first:1000, where:{pool_address:"${poolAddress}"}){index, pool_address, open_price, margin, asset, level, lp,user,type,fact_pnl}
           mergePositions(where:{id_in:["${poolAddress}-long", "${poolAddress}-short"]}){id, lp, fake_lp, asset,open_lp,open_price}
           players(where:{id:"${playerNFTId}"}){user}
-          settings(where:{id:"${CONTRACTS.FactoryAddress.toLocaleLowerCase()}"}){liq_protocol_fee}
+          settings(where:{id:"${CONTRACTS.DealerAddress.toLocaleLowerCase()}"}){liq_protocol_fee}
           }
           `
       );
@@ -140,9 +140,7 @@ export const usePoolInfo = (playerNFTId: number) => {
         positions,
         mergePositions,
         players: players[0].user,
-        // TODO: fee 请求不到
-        // fee: +ethers.utils.formatEther(res.settings[0]?.liq_protocol_fee),
-        fee: 0,
+        fee: +ethers.utils.formatEther(res.settings[0]?.liq_protocol_fee),
       };
     }
   );
@@ -171,19 +169,16 @@ export const usePoolInfo = (playerNFTId: number) => {
     return +ethers.utils.formatUnits(closePrice as BigNumber);
   }, [closePrice]);
 
-  // const formattedClosePrice = useMemo(() => {
-  //   return data?.poolInfo.token_price;
-  // }, [data]);
+  const formattedNowPrice = useMemo(() => {
+    if (!nowPrice) return 0;
+    return +ethers.utils.formatUnits(nowPrice as BigNumber);
+  }, [nowPrice]);
 
   // 未开仓前 使用这里的数据获取 mergePositions 和 positions
   const waitPositions = useWaitPositions({
     poolAddress: poolAddress as Address,
     playerAmount: data?.players.length ?? 0,
   });
-
-  const isSubmited = waitPositions?.some(
-    (position: any) => position.user === address
-  );
 
   type MergePositionItem = {
     id: `${string}-${'long' | 'short'}`;
@@ -206,6 +201,28 @@ export const usePoolInfo = (playerNFTId: number) => {
           const direction = cur.level > 0 ? 'long' : 'short';
           const formattedLp = ethers.utils.formatUnits(
             cur.asset.mul(cur.level).abs(),
+            marginTokenDecimal
+          );
+          return {
+            ...pre,
+            [direction]: {
+              ...cur,
+              direction,
+              formattedLp,
+            },
+          };
+        },
+        {
+          long: {} as MergePositionItem,
+          short: {} as MergePositionItem,
+        }
+      );
+    } else if (isEnd) {
+      return data?.positions?.reduce(
+        (pre, cur) => {
+          const direction = cur.level > 0 ? 'long' : 'short';
+          const formattedLp = ethers.utils.formatUnits(
+            Math.abs(+cur.asset * cur.level),
             marginTokenDecimal
           );
           return {
@@ -248,6 +265,8 @@ export const usePoolInfo = (playerNFTId: number) => {
   }, [
     data?.mergePositions,
     data?.poolInfo.pay_token_decimal,
+    data?.positions,
+    isEnd,
     isOpend,
     waitPositions,
   ]);
@@ -267,9 +286,7 @@ export const usePoolInfo = (playerNFTId: number) => {
     if (!isOpend) {
       return stratPrice;
     } else {
-      const currentPrice = isEnd
-        ? formattedClosePrice
-        : +ethers.utils.formatUnits(nowPrice as BigNumber);
+      const currentPrice = isEnd ? formattedClosePrice : formattedNowPrice;
 
       const longLp =
         (currentPrice! / openPrice!) * +(mergePositions?.long?.open_lp ?? 0);
@@ -303,10 +320,11 @@ export const usePoolInfo = (playerNFTId: number) => {
     isOpend,
     isEnd,
     formattedClosePrice,
-    nowPrice,
+    formattedNowPrice,
     openPrice,
-    mergePositions,
-    data,
+    mergePositions?.long?.open_lp,
+    mergePositions?.short.open_lp,
+    data?.poolInfo?.margin,
   ]);
 
   const positions = useMemo(() => {
@@ -338,9 +356,7 @@ export const usePoolInfo = (playerNFTId: number) => {
 
       return data?.positions
         ?.map(position => {
-          const currentPrice = isEnd
-            ? formattedClosePrice
-            : +ethers.utils.formatUnits(nowPrice as BigNumber);
+          const currentPrice = isEnd ? formattedClosePrice : formattedNowPrice;
 
           const openPrice = +ethers.utils.formatUnits(position?.open_price);
           const direction = position.level > 0 ? 'long' : 'short';
@@ -489,10 +505,16 @@ export const usePoolInfo = (playerNFTId: number) => {
     address,
     isEnd,
     formattedClosePrice,
-    nowPrice,
+    formattedNowPrice,
     stakePrice,
     waitPositions,
   ]);
+
+  const isSubmited = useMemo(() => {
+    return [...waitPositions, ...(positions ?? [])]?.some(
+      (position: any) => position.user === address
+    );
+  }, [waitPositions, positions, address]);
 
   const myPosition = useMemo(() => {
     return (positions as any[])?.find(position => position?.isMe);
@@ -517,6 +539,7 @@ export const usePoolInfo = (playerNFTId: number) => {
     poolInfo: {
       ...data?.poolInfo,
       openPrice,
+      nowPrice: formattedNowPrice,
       closePrice: formattedClosePrice,
       stakePrice,
       poolAddress: poolAddress as Address,

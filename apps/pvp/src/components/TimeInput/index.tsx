@@ -68,6 +68,7 @@ export const TimeInput: FC<TimeInputPropsType> = ({
 }) => {
   const [mins, hours, days] = useMemo(() => {
     const duration = dayjs.duration(value * 1000);
+
     return [
       duration.minutes(),
       duration.hours(),
