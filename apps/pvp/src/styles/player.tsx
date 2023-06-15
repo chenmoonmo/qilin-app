@@ -109,11 +109,10 @@ export const PNLInfo = styled.div<{ children: ReactNode }>`
       if (pnl === '-' || !pnl) {
         return null;
       }
-      if (!pnl?.startsWith('-') && pnl !== 'Not joined') {
+      if (!pnl?.startsWith('-') && pnl !== 'Not Joined') {
         return `"+"`;
       }
     }};
-    margin-right: 6px;
   }
 `;
 
@@ -322,12 +321,11 @@ const PositionPercentContainer = styled.div<{
           ? 'block'
           : 'none';
       }};
-      width: calc(
+      flex: calc(
         ${({ long, short }) =>
             [long, short].every(item => item === 0) ? 50 : long}% - 2px
       );
-      max-width: 85%;
-      min-width: 15%;
+
       background: #4bd787;
     }
     &:nth-of-type(2) {
@@ -343,12 +341,10 @@ const PositionPercentContainer = styled.div<{
           ? 'block'
           : 'none';
       }};
-      width: calc(
+      flex: calc(
         ${({ long, short }) =>
             [long, short].every(item => item === 0) ? 50 : short}% - 2px
       );
-      max-width: 85%;
-      min-width: 15%;
       background: #f45e68;
       text-align: right;
     }

@@ -32,15 +32,17 @@ const Positions: NextPageWithLayout = () => {
         <BackIcon />
       </BackLink>
       <PositionPercent
-        longSize={mergePositions?.long.asset ?? 0}
-        shortSize={mergePositions?.short.asset ?? 0}
+        longSize={mergePositions?.long.lp ?? 0}
+        shortSize={mergePositions?.short.lp ?? 0}
       />
       <PositionsList>
         {positions?.map((position, index) => {
           return (
             <Fragment key={index}>
               <div>{index + 1}</div>
-              <div>{position.user.slice(-4)}</div>
+              <div>
+                {position.user.slice(-4)} {position.isMe && '(I)'}
+              </div>
               <Size
                 leverage={position.level}
                 direction={position.direction as 'long' | 'short' | undefined}

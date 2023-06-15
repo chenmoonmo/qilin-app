@@ -1,5 +1,6 @@
 import { isAddress } from 'ethers/lib/utils.js';
 import { useRouter } from 'next/router';
+import { useMemo } from 'react';
 import type { Address } from 'wagmi';
 
 import { useNFTInfo } from '@/hooks';
@@ -15,11 +16,11 @@ const NFTDetail: NextPageWithLayout = () => {
     number
   ];
 
-  const shortAddress =
-    cotractAddress.slice(0, 6) + '...' + cotractAddress.slice(-4);
-
+  const shortAddress = useMemo(() => {
+    if (!cotractAddress) return '';
+    return cotractAddress.slice(0, 6) + '...' + cotractAddress.slice(-4);
+  }, [cotractAddress]);
   const { animation_url } = useNFTInfo(cotractAddress, tokenId);
-
   if (!isAddress(cotractAddress) || !tokenId) {
     return null;
   }

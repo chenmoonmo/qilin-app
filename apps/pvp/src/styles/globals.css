@@ -2,7 +2,9 @@
   /* colors */
   --background-color: #1f2127;
   --border-color: #363a45;
-  --active-border-color: #636363;
+  --active-border-color: #7686c0;
+
+  --disabled-input-color: #394363;
 
   /* text */
   --text-color: #ffffff;

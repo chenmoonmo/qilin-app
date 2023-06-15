@@ -89,7 +89,6 @@ const Index: NextPageWithLayout = () => {
             alt="NFT"
             loading="eager"
             priority
-            unoptimized
           />
         </NFTCard>
         <MintInfo>

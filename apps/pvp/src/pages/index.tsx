@@ -35,7 +35,6 @@ const NFTContainer = styled.div`
 
 const Home: NextPageWithLayout = () => {
   const { data } = useNFTList();
-
   return (
     <StyledMain>
       <HomeInfo>
