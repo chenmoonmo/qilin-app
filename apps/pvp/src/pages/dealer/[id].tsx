@@ -3,12 +3,13 @@ import { Button, Select, SelectToken } from '@qilin/component';
 import { isAddress } from 'ethers/lib/utils.js';
 import { atom, useAtom } from 'jotai';
 import uniqBy from 'lodash/uniqBy';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChainId, useToken } from 'wagmi';
 
 import { ArrowIcon, TimeInput } from '@/components';
-import { PAIRS, PAY_TOKENS } from '@/constant';
+import { CONTRACTS, PAIRS, PAY_TOKENS } from '@/constant';
 import { useCreateRoom, useDealerPoolInfo, useOpenPosition } from '@/hooks';
 import { useNow } from '@/hooks/useNow';
 import Layout, {
@@ -20,6 +21,8 @@ import Layout, {
   XsCardStatus,
 } from '@/layouts/nft-layout';
 import {
+  CreateButton,
+  CreateButtonContainer,
   FormContainer,
   FromItem,
   InfoContainer,
@@ -45,7 +48,11 @@ const Dealer: NextPageWithLayout = () => {
   const now = useNow();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { poolInfo, refetch: refetchPoolInfo } = useDealerPoolInfo(id);
+  const {
+    playerNFTId,
+    poolInfo,
+    refetch: refetchPoolInfo,
+  } = useDealerPoolInfo(id);
 
   const {
     canCreateRoom,
@@ -190,6 +197,7 @@ const Dealer: NextPageWithLayout = () => {
       timerRef.current && clearTimeout(timerRef.current);
     };
   }, [duration]);
+
   return (
     <>
       <Header title="Room Card" />
@@ -209,7 +217,7 @@ const Dealer: NextPageWithLayout = () => {
       </XsCard>
       {/* 可以创建房卡时 */}
       <MdCard>
-        {canCreateRoom ? (
+        {!canCreateRoom ? (
           <FormContainer>
             <FromItem>
               <label>Pricing Source</label>
@@ -296,7 +304,15 @@ const Dealer: NextPageWithLayout = () => {
                 ))}
               </WhielistContainer>
             </FromItem>
-            <Button
+            <CreateButtonContainer>
+              <CreateButton
+                disabled={!canSendCreate}
+                onClick={handleCreateRoom}
+              >
+                Create Room & Mint NFT
+              </CreateButton>
+            </CreateButtonContainer>
+            {/* <Button
               css={css`
                 box-sizing: border-box;
                 display: flex;
@@ -308,13 +324,22 @@ const Dealer: NextPageWithLayout = () => {
               onClick={handleCreateRoom}
             >
               Create Room & Mint NFT
-            </Button>
+            </Button> */}
           </FormContainer>
         ) : (
           <>
             {/* 已创建房间 可以开盘时 */}
             <InfoContainer>
-              <h1>Trading Room info</h1>
+              <h1>
+                <span>Trading Room info</span>
+                <Link
+                  href={`/assets/${CONTRACTS.PlayerAddress}/${playerNFTId}`}
+                  target="_blank"
+                >
+                  To Trading Room
+                  <ArrowIcon />
+                </Link>
+              </h1>
               <InfoItem>
                 <div>Pricing Source：</div>
                 <div>Chainlink</div>
@@ -347,7 +372,7 @@ const Dealer: NextPageWithLayout = () => {
                   display: flex;
                   width: 100%;
                   height: 40px;
-                  margin: 42px auto 0;
+                  margin: 40px auto 0;
                 `}
                 disabled={duration <= 0}
                 onClick={handleOpenPosition}

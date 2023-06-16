@@ -280,6 +280,15 @@ export const WhiteItem = styled.input`
   &:not(:first-of-type) {
     margin-top: 10px;
   }
+  &:last-of-type {
+    margin-bottom: 44px;
+  }
+  &:focus-within {
+    border: 1px solid var(--active-border-color);
+  }
+  &:disabled {
+    background-color: var(--disabled-input-color);
+  }
 `;
 
 export const WhiteTip = styled.div`
@@ -290,11 +299,25 @@ export const WhiteTip = styled.div`
   color: #d0d0d0;
 `;
 
+export const MintButtonContainer = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #01144e;
+  background-blend-mode: color-burn;
+`;
+
 export const MintButton = styled(Button)`
-  margin-top: 18px;
   width: 100%;
   height: 44px;
   flex-shrink: 0;
+  &:disabled {
+    background-color: #083288;
+    color: rgba(255, 255, 255, 0.3);
+    opacity: 1;
+  }
 `;
 
 const PositionPercentContainer = styled.div<{

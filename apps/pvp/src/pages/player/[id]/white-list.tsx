@@ -8,6 +8,7 @@ import Layout, { Header } from '@/layouts/nft-layout';
 import {
   BackLink,
   MintButton,
+  MintButtonContainer,
   PositionInfoItem,
   WhiteItem,
   WhiteItemContainer,
@@ -88,9 +89,11 @@ const WhiteList: NextPageWithLayout = () => {
           <WhiteTip>Only whitelist can join</WhiteTip>
         </WhiteItemContainer>
       </PositionInfoItem>
-      <MintButton disabled={!seatsAddressValid} onClick={handleAddPlayer}>
-        Mint NFT
-      </MintButton>
+      <MintButtonContainer>
+        <MintButton disabled={!seatsAddressValid} onClick={handleAddPlayer}>
+          Mint NFT
+        </MintButton>
+      </MintButtonContainer>
     </>
   );
 };
