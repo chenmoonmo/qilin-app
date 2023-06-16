@@ -59,7 +59,7 @@ export const NFTCard: FC<NFTCardPropsType> = ({
 }) => {
   // TODO 根据合约和 URI 获取 NFT 信息
 
-  const { name, animation_url } = useNFTInfo(address, tokenId);
+  const { seriesName, name, animation_url } = useNFTInfo(address, tokenId);
 
   return (
     <NFTContainer onClick={onClick}>
@@ -67,10 +67,8 @@ export const NFTCard: FC<NFTCardPropsType> = ({
         <iframe src={animation_url} />
       </NFTMedia>
       <NFTInfo>
+        <div>{seriesName}</div>
         <div>{name}</div>
-        <div>
-          {name} #{tokenId}
-        </div>
       </NFTInfo>
     </NFTContainer>
   );

@@ -59,7 +59,10 @@ const Home: NextPageWithLayout = () => {
         {NFTs && NFTs?.length > 0 ? (
           NFTs?.map(nft => {
             return (
-              <Link key={nft.id} href={`/assets/${nft.contract}/${nft.id}`}>
+              <Link
+                key={`${nft.id}-${nft.contract}`}
+                href={`/assets/${nft.contract}/${nft.id}`}
+              >
                 <NFTCard address={nft.contract} tokenId={+nft.id} />
               </Link>
             );

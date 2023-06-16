@@ -11,6 +11,7 @@ import type { NextPageWithLayout } from '../_app';
 
 const NFTDetail: NextPageWithLayout = () => {
   const router = useRouter();
+
   const [cotractAddress, tokenId] = (router.query.nft ?? []) as [
     Address,
     number
@@ -20,7 +21,9 @@ const NFTDetail: NextPageWithLayout = () => {
     if (!cotractAddress) return '';
     return cotractAddress.slice(0, 6) + '...' + cotractAddress.slice(-4);
   }, [cotractAddress]);
-  const { animation_url } = useNFTInfo(cotractAddress, tokenId);
+
+  const { name, animation_url } = useNFTInfo(cotractAddress, tokenId);
+
   if (!isAddress(cotractAddress) || !tokenId) {
     return null;
   }
@@ -30,7 +33,7 @@ const NFTDetail: NextPageWithLayout = () => {
       <MediaContainer>
         <iframe src={animation_url} />
       </MediaContainer>
-      <h1>Trading Room #1123</h1>
+      <h1>{name}</h1>
       <InfoCard>
         <h1>Description</h1>
         <p>
