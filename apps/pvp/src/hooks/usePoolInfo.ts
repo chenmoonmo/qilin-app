@@ -556,6 +556,7 @@ export const usePoolInfo = (playerNFTId: number) => {
 
   return useMemo(() => {
     return {
+      playerNFTId,
       poolInfo: {
         ...data?.poolInfo,
         openPrice,
@@ -578,6 +579,7 @@ export const usePoolInfo = (playerNFTId: number) => {
       refetch: mutate,
     };
   }, [
+    playerNFTId,
     createDealerId,
     data?.players,
     data?.poolInfo,
