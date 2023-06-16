@@ -217,7 +217,7 @@ const Dealer: NextPageWithLayout = () => {
       </XsCard>
       {/* 可以创建房卡时 */}
       <MdCard>
-        {!canCreateRoom ? (
+        {canCreateRoom ? (
           <FormContainer>
             <FromItem>
               <label>Pricing Source</label>
