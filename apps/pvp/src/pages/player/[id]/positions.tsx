@@ -49,7 +49,7 @@ const Positions: NextPageWithLayout = () => {
               >
                 {formatAmount(position.fomattedMargin)}
               </Size>
-              {position.estPnl ? (
+              {position.estPnl || position.estPnl === 0 ? (
                 <PositionPNL>
                   {formatAmount(position.estPnl)}(
                   {formatAmount(position.ROE, 2)}%)

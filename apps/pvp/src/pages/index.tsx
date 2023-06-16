@@ -2,7 +2,6 @@ import styled from '@emotion/styled';
 import Link from 'next/link';
 
 import { NFTCard } from '@/components';
-import { CONTRACTS } from '@/constant';
 import { useNFTList } from '@/hooks';
 import HomeLayout from '@/layouts/home-layout';
 
@@ -28,34 +27,46 @@ const HomeInfo = styled.div`
 const NFTContainer = styled.div`
   all: unset;
   display: grid;
+  height: 100%;
   grid-template-columns: repeat(5, 256px);
   grid-template-rows: auto;
   gap: 18px;
 `;
 
+const NoData = styled.div`
+  grid-column: 1 / 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30vh;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: #737884;
+  text-align: center;
+`;
+
 const Home: NextPageWithLayout = () => {
-  const { data } = useNFTList();
+  const { data: NFTs } = useNFTList();
+
   return (
     <StyledMain>
       <HomeInfo>
         <div>Your NFTs</div>
       </HomeInfo>
       <NFTContainer>
-        {data?.dealer && (
-          <Link href={`/assets/${CONTRACTS.DealerAddress}/${data.dealer.id}`}>
-            <NFTCard
-              address={CONTRACTS.DealerAddress}
-              tokenId={+data.dealer.id}
-            />
-          </Link>
+        {NFTs && NFTs?.length > 0 ? (
+          NFTs?.map(nft => {
+            return (
+              <Link key={nft.id} href={`/assets/${nft.contract}/${nft.id}`}>
+                <NFTCard address={nft.contract} tokenId={+nft.id} />
+              </Link>
+            );
+          })
+        ) : (
+          <NoData>No NFTs To Display.</NoData>
         )}
-
-        {/* player nft */}
-        {data?.player?.map(({ id }) => (
-          <Link key={id} href={`/assets/${CONTRACTS.PlayerAddress}/${id}`}>
-            <NFTCard address={CONTRACTS.PlayerAddress} tokenId={+id} />
-          </Link>
-        ))}
       </NFTContainer>
     </StyledMain>
   );

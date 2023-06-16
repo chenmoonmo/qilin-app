@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import type { Address } from 'wagmi';
 import { useAccount } from 'wagmi';
 
+import { CONTRACTS } from '@/constant';
 import { graphFetcher } from '@/hleper';
 
 export const useNFTList = () => {
@@ -27,10 +28,27 @@ export const useNFTList = () => {
                 }
                 `
       );
-      return {
-        dealer: res.dealers?.[0] ?? null,
-        player: res.players,
-      };
+
+      const dealer = res.dealers?.[0] ?? null;
+      const players = res.players;
+
+      return players
+        .map(({ id }) => {
+          return {
+            contract: CONTRACTS.PlayerAddress,
+            id,
+          };
+        })
+        .concat(
+          dealer
+            ? [
+                {
+                  id: dealer.id,
+                  contract: CONTRACTS.DealerAddress,
+                },
+              ]
+            : []
+        );
     }
   );
 };

@@ -93,6 +93,12 @@ export const usePoolInfo = (playerNFTId: number) => {
     functionName: 'getPrice',
   });
 
+  const { data: totalPosition } = useContractRead({
+    address: poolAddress as Address,
+    abi: Pool.abi,
+    functionName: 'totalPosition',
+  });
+
   const { data, isLoading, mutate } = useSWR(
     poolAddress
       ? ['getPoolInfo', (poolAddress as Address).toLowerCase(), playerNFTId]
@@ -288,37 +294,34 @@ export const usePoolInfo = (playerNFTId: number) => {
     [isOpend, mergePositions?.long?.open_price]
   );
 
-  console.log({ openPrice });
-
   const stakePrice = useMemo(() => {
-    const stratPrice = 1;
     if (!isOpend) {
-      return stratPrice;
-    } else {
-      const currentPrice = isEnd ? formattedClosePrice : formattedNowPrice;
-
-      const longLp =
-        (currentPrice! / openPrice!) * +(mergePositions?.long?.open_lp ?? 0);
-
-      const shortLp = +(mergePositions?.short.open_lp ?? 0);
-
-      const fakeLp =
-        (currentPrice! / openPrice!) * +(mergePositions?.short?.open_lp ?? 0);
-
-      const totalLp = longLp + 2 * shortLp - fakeLp;
-
-      const totalMargin = +(data?.poolInfo?.margin ?? 0);
-
-      console.log({
-        longLp,
-        shortLp,
-        fakeLp,
-        totalLp,
-        totalMargin,
-      });
-
-      return totalMargin / totalLp;
+      return 1;
     }
+
+    const currentPrice = isEnd ? formattedClosePrice : formattedNowPrice;
+
+    const priceRate = currentPrice / openPrice!;
+
+    const longOpenLP = +(mergePositions?.long?.open_lp ?? 0);
+
+    const shortLp = +(mergePositions?.short.open_lp ?? 0);
+    const longLp = priceRate * longOpenLP;
+    const fakeLp = priceRate * shortLp;
+
+    const totalLp = longLp + 2 * shortLp - fakeLp;
+
+    const totalSize = +totalPosition?.toString();
+
+    console.log({
+      longLp,
+      shortLp,
+      fakeLp,
+      totalLp,
+      totalSize,
+    });
+
+    return totalSize / totalLp;
   }, [
     isOpend,
     isEnd,
@@ -327,8 +330,14 @@ export const usePoolInfo = (playerNFTId: number) => {
     openPrice,
     mergePositions?.long?.open_lp,
     mergePositions?.short.open_lp,
-    data?.poolInfo?.margin,
+    totalPosition,
   ]);
+
+  console.log({
+    stakePrice,
+    openPrice,
+    totalPosition: totalPosition.toString(),
+  });
 
   const positions = useMemo(() => {
     const marginTokenDecimal = data?.poolInfo.pay_token_decimal ?? 6;
@@ -362,6 +371,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           const currentPrice = isEnd ? formattedClosePrice : formattedNowPrice;
 
           const direction = position.level > 0 ? 'long' : 'short';
+
           const fomattedMargin = +ethers.utils.formatUnits(
             position.margin,
             +marginTokenDecimal
@@ -371,18 +381,17 @@ export const usePoolInfo = (playerNFTId: number) => {
             position.lp,
             +marginTokenDecimal
           );
+
+          const priceRate = openPrice ? currentPrice / openPrice : 1;
+
           // 初始仓位 Value = margin * leverage = stake amount * stake price(初始未开盘前stake price都为1)
           let fotmattedStakeAmount = Math.abs(+fomattedMargin * position.level);
 
           if (direction === 'short') {
-            const fakeLp = openPrice
-              ? (currentPrice / openPrice) * fotmattedStakeAmount
-              : 0;
+            const fakeLp = priceRate * fotmattedStakeAmount;
             fotmattedStakeAmount = 2 * fotmattedStakeAmount - fakeLp;
           } else {
-            fotmattedStakeAmount = openPrice
-              ? (currentPrice / openPrice) * fotmattedStakeAmount
-              : fotmattedStakeAmount;
+            fotmattedStakeAmount = priceRate * fotmattedStakeAmount;
           }
 
           // 仓位价值：current Value = stake amount * stake price
@@ -391,7 +400,7 @@ export const usePoolInfo = (playerNFTId: number) => {
           // 仓位收益：profit = current Value - Value
           const estPnl =
             position.type === 1
-              ? currentValue - fomattedMargin
+              ? currentValue - fotmattedStakeAmount
               : +ethers.utils.formatUnits(
                   position.fact_pnl,
                   +marginTokenDecimal
@@ -408,8 +417,9 @@ export const usePoolInfo = (playerNFTId: number) => {
             currentValue,
             estPnl,
           });
+
           if (position.type !== 1) {
-            currentValue = estPnl + fomattedMargin;
+            currentValue = estPnl + fomattedMargin * position.level;
           }
 
           const realizedPnl = estPnl - data?.fee;
