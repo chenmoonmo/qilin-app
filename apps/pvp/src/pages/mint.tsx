@@ -2,12 +2,11 @@ import { css } from '@emotion/react';
 import { Button, useToast } from '@qilin/component';
 import { BigNumber } from 'ethers';
 import Image from 'next/image';
-import { useMemo } from 'react';
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
 
 import { CONTRACTS } from '@/constant';
 import Dealer from '@/constant/abis/Dealer.json';
-import { useNFTList } from '@/hooks';
+import { useDealerId } from '@/hooks';
 import HomeLayout from '@/layouts/home-layout';
 import {
   Main,
@@ -22,9 +21,7 @@ import type { NextPageWithLayout } from './_app';
 const Index: NextPageWithLayout = () => {
   const { isConnected } = useAccount();
   const { showWalletToast, closeWalletToast } = useToast();
-  const { data, mutate: refetch } = useNFTList();
-
-  const dealerId = useMemo(() => data?.dealer?.id, [data?.dealer]);
+  const { dealerId, refetch } = useDealerId();
 
   // // 玩家拥有的 dealer ID
   // const { data: dealerId, refetch } = useContractRead({
