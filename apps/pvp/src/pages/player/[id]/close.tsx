@@ -31,7 +31,8 @@ const ClostPosition: NextPageWithLayout = () => {
   const handleClosePosition = useCallback(async () => {
     await closePostion();
     refetch();
-  }, [closePostion, refetch]);
+    router.back();
+  }, [closePostion, refetch, router]);
 
   const Title = useMemo(() => {
     return isNeedLiquidate ? 'Liquidate' : 'Close Postion';

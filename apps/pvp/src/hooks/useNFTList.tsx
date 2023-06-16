@@ -32,23 +32,23 @@ export const useNFTList = () => {
       const dealer = res.dealers?.[0] ?? null;
       const players = res.players;
 
-      return players
-        .map(({ id }) => {
+      const dealers = dealer
+        ? [
+            {
+              id: dealer.id,
+              contract: CONTRACTS.DealerAddress,
+            },
+          ]
+        : [];
+
+      return dealers.concat(
+        players.map(({ id }) => {
           return {
             contract: CONTRACTS.PlayerAddress,
             id,
           };
         })
-        .concat(
-          dealer
-            ? [
-                {
-                  id: dealer.id,
-                  contract: CONTRACTS.DealerAddress,
-                },
-              ]
-            : []
-        );
+      );
     }
   );
 };

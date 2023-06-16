@@ -70,11 +70,20 @@ export const useDealerId = () => {
     }
   );
 
-  const { data: dealerStatus, refetch } = useContractRead({
+  const {
+    data: dealerStatus,
+    isLoading,
+    refetch,
+  } = useContractRead({
     ...DealerContract,
     functionName: 'dealerToStatus',
     args: [dealerId],
     enabled: !!dealerId && dealerId?.gt?.(0),
+  });
+
+  console.log({
+    isLoading,
+    dealerStatus,
   });
 
   const canCreateRoom = useMemo(
