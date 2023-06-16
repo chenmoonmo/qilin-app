@@ -311,7 +311,7 @@ export const usePoolInfo = (playerNFTId: number) => {
 
     const totalLp = longLp + 2 * shortLp - fakeLp;
 
-    const totalSize = +totalPosition?.toString();
+    const totalSize = totalPosition ? +totalPosition?.toString() : 0;
 
     console.log({
       longLp,
@@ -336,7 +336,7 @@ export const usePoolInfo = (playerNFTId: number) => {
   console.log({
     stakePrice,
     openPrice,
-    totalPosition: totalPosition.toString(),
+    totalPosition: totalPosition?.toString(),
   });
 
   const positions = useMemo(() => {
