@@ -33,6 +33,33 @@ export const useNFTInfo = (address: Address, tokenId: number) => {
     functionName: 'name',
   });
 
+  const { data: is1155, error } = useContractRead({
+    address,
+    abi: [
+      {
+        inputs: [
+          {
+            internalType: 'bytes4',
+            name: 'interfaceId',
+            type: 'bytes4',
+          },
+        ],
+        name: 'supportsInterface',
+        outputs: [
+          {
+            internalType: 'bool',
+            name: '',
+            type: 'bool',
+          },
+        ],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ],
+    functionName: 'supportsInterface',
+    args: [BigNumber.from('0xd9b67a26')],
+  });
+
   const { data: NFTInfo } = useSWR(
     tokenURI as string | null,
     (tokenURI: string) => {
