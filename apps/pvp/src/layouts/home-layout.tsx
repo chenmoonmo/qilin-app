@@ -134,7 +134,6 @@ const HomeLayout: FC<HomeLayoutType> = ({ children }) => {
         </div>
       </Header>
       {children}
-      {/* <main></main> */}
     </>
   );
 };

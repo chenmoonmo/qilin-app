@@ -1,0 +1,20 @@
+{
+  "name": "@qilin/v3",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@qilin/component": "workspace:*",
+    "@qilin/hooks": "workspace:*",
+    "@qilin/utils": "workspace:*",
+    "@qilin/wagmi-provider": "workspace:*"
+  }
+}

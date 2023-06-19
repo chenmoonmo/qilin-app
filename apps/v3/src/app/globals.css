@@ -1,0 +1,47 @@
+:root {
+  /* colors */
+  --background-color: #1f2127;
+  --border-color: #363a45;
+  --active-border-color: #636363;
+
+  /* text */
+  --text-color: #ffffff;
+  --text-color-sub: #737884;
+  --text-l: 14px;
+  --text-xl: 16px;
+
+  /* Dialog */
+  --dialog-overlay-color: rgba(0, 0, 0, 0.7);
+  --dialog-background-color: #242730;
+  --dialog-radius: 24px;
+  --dialog-border-color: #363a45;
+  --dialog-title-color: var(--text-color);
+  --dialog-title-font-size: var(--text-l);
+
+  /* tooltip */
+  --tooltip-content-background-color: var(--background-color);
+  --tooltip-content-border-color: #585d6c;
+
+  --rs-bg-overlay: var(--background-color);
+}
+
+html[data-theme='light'] {
+}
+
+html[data-theme='dark'] {
+}
+
+body {
+  margin: 0;
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  all: unset;
+}
