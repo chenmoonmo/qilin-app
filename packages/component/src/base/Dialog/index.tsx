@@ -39,6 +39,7 @@ const Overlay = styled.div`
   place-items: center;
   overflow-y: auto;
   animation: ${overlayShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
 `;
 
 const Content = styled(RadixDialog.Content)`
@@ -56,6 +57,7 @@ const Content = styled(RadixDialog.Content)`
   max-height: 85vh;
   padding: 20px;
   animation: ${contentShow} 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
 `;
 
 const Title = styled(RadixDialog.Title)`
