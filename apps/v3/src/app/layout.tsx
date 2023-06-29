@@ -2,12 +2,16 @@
 import './globals.css';
 
 import Web3Provider from '@qilin/wagmi-provider';
-import { Inter } from 'next/font/google';
-import { goerli } from 'wagmi/chains';
+import { Poppins } from 'next/font/google';
+import { arbitrumGoerli } from 'wagmi/chains';
 
 import { Header } from '@/components';
+import { useChainInfo } from '@/hooks';
 
-const inter = Inter({ subsets: ['latin'] });
+const poppins = Poppins({
+  weight: ['300', '400', '500', '600', '700', '800'],
+  subsets: ['latin'],
+});
 
 // export const metadata = {
 //   title: 'Create Next App',
@@ -30,10 +34,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+  useChainInfo();
+  
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Web3Provider defaultChains={[goerli]} connectorNames={['MetaMask']}>
+      <body className={poppins.className}>
+        <Web3Provider
+          defaultChains={[arbitrumGoerli]}
+          connectorNames={['MetaMask']}
+        >
           <Header routes={routes} />
           {children}
         </Web3Provider>

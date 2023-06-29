@@ -3,12 +3,14 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
+import { formatAmount } from '@qilin/utils';
 
 import {
   AddLiquidityDialog,
   PoolTable,
   RemoveLiquidityDialog,
 } from '@/components';
+import { usePoolList } from '@/hooks';
 
 const Main = styled.main`
   padding: 16px 12.5% 0;
@@ -21,6 +23,10 @@ const TableTitle = styled.div`
 `;
 
 export default function Pool() {
+  const { data: poolList } = usePoolList();
+
+  console.log(poolList);
+
   const LiquidityColumns = [
     {
       title: 'Pool',
@@ -47,15 +53,17 @@ export default function Pool() {
   const PoolsColumns = [
     {
       title: 'Pool',
-      key: 'pool',
+      key: 'pairName',
     },
     {
       title: 'Liquidity',
       key: 'liquidity',
+      render: (value: any) => formatAmount(value),
     },
     {
       title: 'LP Price',
-      key: 'lpPrice',
+      key: 'futurePrice',
+      render: (value: any) => formatAmount(value),
     },
     {
       title: 'APY',
@@ -63,7 +71,6 @@ export default function Pool() {
     },
     {
       title: 'Operation',
-      key: 'operation',
     },
   ];
 
@@ -90,7 +97,7 @@ export default function Pool() {
       >
         Pools
       </TableTitle>
-      <PoolTable columns={PoolsColumns} />
+      <PoolTable columns={PoolsColumns} dataSource={poolList} />
       <RemoveLiquidityDialog></RemoveLiquidityDialog>
     </Main>
   );

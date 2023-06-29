@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NEXT_PUBLIC_DOMAIN_ENV=development next dev",
+    "dev": "NEXT_PUBLIC_DOMAIN_ENV=development next dev -p 3002",
     "build:dev": "NEXT_PUBLIC_DOMAIN_ENV=development next build",
     "build": "NEXT_PUBLIC_DOMAIN_ENV=productionnext build",
-    "start": "next start"
+    "start": "next start -p 3002"
   },
   "dependencies": {
     "@emotion/babel-plugin": "^11.11.0",
@@ -21,7 +21,11 @@
     "@radix-ui/react-radio-group": "^1.1.2",
     "@radix-ui/react-slider": "^1.1.2",
     "@radix-ui/react-tabs": "^1.0.4",
+    "ethers": "^5",
+    "jotai": "^2.1.0",
     "lightweight-charts": "^4.0.1",
+    "querystring": "^0.2.1",
+    "swr": "^2.1.5",
     "wagmi": "0.12.13"
   }
 }

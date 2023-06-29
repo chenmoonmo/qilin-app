@@ -15,6 +15,7 @@ const Content = styled(Dialog.Content)`
   border-radius: 24px;
   border: 2px solid #323640;
   background: #262930;
+  overscroll-behavior: contain;
 `;
 
 const Title = styled(Dialog.Title)`
@@ -25,6 +26,7 @@ const Title = styled(Dialog.Title)`
     cursor: pointer;
   }
 `;
+
 const Contianer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -118,12 +120,7 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
-        <Content
-          css={css`
-            width: 858px;
-            max-width: 858px;
-          `}
-        >
+        <Content>
           <Title>
             <Dialog.Close asChild>
               <svg
@@ -199,13 +196,12 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                 <span>Share Of Pool</span>
                 <span>0.15%</span>
               </InfoItem>
-
               <SubTitle
                 css={css`
                   margin-top: 40px;
                 `}
               >
-                Select Oracle
+                Parameters
               </SubTitle>
               <InfoItem>
                 <span>Fee</span>

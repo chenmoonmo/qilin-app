@@ -1,10 +1,24 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Icon } from '@qilin/component';
+import { useMutationObserver } from '@qilin/hooks';
 import * as Popover from '@radix-ui/react-popover';
-import { useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useRef, useState } from 'react';
 
-const InputContainer = styled(Popover.Trigger)`
+type PoolSelectorPropsType = {
+  value?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  hasSearch?: boolean;
+  searchInfo?: string;
+  onSearchInfoChange?: (value: string) => void;
+  selections?: string[];
+  renderSelection?: (value: string) => React.ReactNode;
+};
+
+const TriggerContainer = styled(Popover.Trigger)`
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -43,7 +57,7 @@ const Content = styled(Popover.Content)`
   border: 1px solid #323640;
   border-top: none;
   border-radius: 0 0 6px 6px;
-  z-index: 10;
+  z-index: 100;
 `;
 
 const SearchContainer = styled.div`
@@ -67,9 +81,10 @@ const SearchContainer = styled.div`
 const SelectContainer = styled.div`
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
 `;
 
-const SelectItem = styled.div`
+const SelectItem = styled.div<{ active: boolean }>`
   padding: 16px 14px;
   color: #fff;
   font-size: 12px;
@@ -81,20 +96,31 @@ const SelectItem = styled.div`
   }
 `;
 
-export const PoolSelector = () => {
-  const inputRef = useRef<HTMLButtonElement>(null);
+export const PoolSelector: React.FC<PoolSelectorPropsType> = ({
+  value,
+  onValueChange,
+  placeholder,
+  hasSearch,
+  disabled,
+  searchInfo,
+  onSearchInfoChange,
+  selections,
+  renderSelection,
+}) => {
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const [inputWidth, setInputWidth] = useState(0);
 
-  useEffect(() => {
-    if (inputRef.current) {
-      setInputWidth(inputRef.current.offsetWidth);
+  useMutationObserver(triggerRef, () => {
+    if (triggerRef.current) {
+      setInputWidth(triggerRef.current.offsetWidth);
     }
-  }, [inputRef]);
+  });
 
   return (
     <Popover.Root>
-      <InputContainer ref={inputRef}>
-        <span></span>
+      <TriggerContainer ref={triggerRef} disabled={disabled}>
+        {/* TODO:  placeholder*/}
+        <span>{value ?? placeholder}</span>
         <svg
           width="11"
           height="7"
@@ -107,23 +133,39 @@ export const PoolSelector = () => {
             fill="#737884"
           />
         </svg>
-      </InputContainer>
+      </TriggerContainer>
       <Popover.Portal>
         <Content
           sideOffset={-1}
+          alignOffset={0}
+          side="bottom"
+          align="start"
           css={css`
             width: ${inputWidth}px;
           `}
         >
           <SearchContainer>
             <Icon.SearchIcon />
-            <input type="text" placeholder="Search name or paste address" />
+            <input
+              type="text"
+              value={searchInfo}
+              placeholder="Search name or paste address"
+              onChange={e => onSearchInfoChange?.(e.target.value)}
+            />
           </SearchContainer>
           <SelectContainer>
-            <SelectItem>1111</SelectItem>
-            <SelectItem>1111</SelectItem>
-            <SelectItem>1111</SelectItem>
-            <SelectItem>1111</SelectItem>
+            {/* TODO: no data */}
+            {selections?.map(item => {
+              return (
+                <SelectItem
+                  key={item}
+                  active={item === value}
+                  onClick={() => onValueChange?.(item)}
+                >
+                  {renderSelection ? renderSelection(item) : item}
+                </SelectItem>
+              );
+            })}
           </SelectContainer>
         </Content>
       </Popover.Portal>

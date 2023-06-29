@@ -2,6 +2,7 @@ export * from './AddLiquidityDialog';
 export * from './Checkbox';
 export * from './Header';
 export * from './LeverageRadio';
+export * from './OpenPositionDialog'
 export * from './PairSelector';
 export * from './RemoveLiquidityDialog';
 export * from './SwapRadio';

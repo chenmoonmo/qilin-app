@@ -1,8 +1,12 @@
 const developmentENV = {
+  CHAIN_IDS: [],
   SERVICE_API_URL: 'http://192.168.3.21:8888/',
+  ARBITRUM_GOERLI_FACTORY_ADDRESS: '0x67eEF41A86Ca7b411207B9aF7c6698f6DBAA5261',
 };
 
-const productionENV = {};
+const productionENV = {
+  ARBITRUM_GOERLI_FACTORY_ADDRESS: '0x67eEF41A86Ca7b411207B9aF7c6698f6DBAA5261',
+};
 
 const isDevelopment = process.env.NEXT_PUBLIC_DOMAIN_ENV === 'development';
 
@@ -15,7 +19,7 @@ const nextConfig = {
   env,
   rewrites: async () => [
     {
-      source: '/request:path*',
+      source: '/request/:path*',
       destination: `${env.SERVICE_API_URL}/:path*`,
     },
   ],

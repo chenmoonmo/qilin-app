@@ -2,12 +2,14 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
+import { formatAmount } from '@qilin/utils';
 import Link from 'next/link';
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 
 import {
   Checkbox,
   LeverageRadio,
+  OpenPositionDialog,
   PairSelector,
   SwapRadio,
   TabContent,
@@ -18,6 +20,7 @@ import {
   TokenIcon,
   TradingView,
 } from '@/components';
+import { useHistoryPositions, usePoolInfo, usePositions } from '@/hooks';
 
 const HistoryColumns = [
   {
@@ -59,7 +62,6 @@ const HistoryColumns = [
 ];
 
 const PosiditonColumns = [
-  // Trading-Pair Margin Size Open-Price Margin-Ratio Funding-Fee PNL Operation
   {
     title: 'Trading Pair',
     key: 'tradingPair',
@@ -132,7 +134,7 @@ const PairIcon = styled.div`
   display: flex;
   align-items: center;
   margin-right: 10px;
-  > :nth-child(2) {
+  > :nth-of-type(2) {
     margin-left: -12px;
   }
 `;
@@ -148,6 +150,13 @@ const PairInfo = styled.div`
   svg {
     margin-left: 5px;
   }
+`;
+
+const PairPrice = styled.div`
+  padding: 0 21px;
+  color: #fff;
+  font-size: 14px;
+  line-height: 21px;
 `;
 
 const PairDataItem = styled.div`
@@ -363,32 +372,39 @@ const LiquidateLink = styled(Link)`
   }
 `;
 
-const PositionTable = () => {
+const PositionTable = forwardRef<any>((_, ref) => {
   const data: any[] = [];
-  return <Table columns={PosiditonColumns} dataSource={data} />;
-};
+  usePositions();
+  return <Table ref={ref} columns={PosiditonColumns} dataSource={data} />;
+});
 
-const HistoryTable = () => {
+PositionTable.displayName = 'PositionTable';
+
+const HistoryTable = forwardRef<any>((_, ref) => {
   const data: any[] = [];
-  return <Table columns={HistoryColumns} dataSource={data} />;
-};
+  useHistoryPositions();
+  return <Table ref={ref} columns={HistoryColumns} dataSource={data} />;
+});
+
+HistoryTable.displayName = 'HistoryTable';
 
 export default function Home() {
   // 多空方向
   const [direction, setDirection] = useState('1');
   const [tableTab, setTableTab] = useState<string>('1');
 
+  const { data: poolInfo } = usePoolInfo();
+
   return (
     <Main>
       <PairInfoContainer>
-        <PairSelector>
+        <PairSelector value={poolInfo?.ID}>
           <PairInfo>
             <PairIcon>
               <TokenIcon size={36} />
               <TokenIcon size={36} />
             </PairIcon>
-
-            <span>ETH / USDC</span>
+            <span>{poolInfo?.pairName}</span>
             <svg
               width="14"
               height="10"
@@ -403,31 +419,26 @@ export default function Home() {
             </svg>
           </PairInfo>
         </PairSelector>
-
+        <PairPrice>{formatAmount(poolInfo?.spotPrice)}</PairPrice>
         <PairDataItem>
-          <div>Future Price</div>
-          <div>23456.24 USDC</div>
-          <div>23456.24 USDC</div>
+          <div>Chainlink Price</div>
+          <div>$ {formatAmount(poolInfo?.spotPrice)}</div>
         </PairDataItem>
         <PairDataItem>
-          <div>Spot Price</div>
-          <div>23456.24 USDC</div>
-          <div>23456.24 USDC</div>
+          <div>24h Change</div>
+          <div>{formatAmount(poolInfo?.change, 2)}%</div>
         </PairDataItem>
         <PairDataItem>
           <div>24h Volume</div>
-          <div>23456.24 USDC</div>
-          <div>23456.24 USDC</div>
+          <div>{formatAmount(poolInfo?.volume)} USDC</div>
         </PairDataItem>
         <PairDataItem>
           <div>Fuding</div>
-          <div>23456.24 USDC</div>
-          <div>23456.24 USDC</div>
+          <div>{formatAmount(poolInfo?.funding)} USDC</div>
         </PairDataItem>
         <PairDataItem>
-          <div>Naked positions</div>
-          <div>23456.24 USDC</div>
-          <div>23456.24 USDC</div>
+          <div>Naked Positions</div>
+          <div>{formatAmount(poolInfo?.nakePosition)} USDC</div>
         </PairDataItem>
         <LiquidateLink href="/liquidate">
           <div>
@@ -466,20 +477,22 @@ export default function Home() {
           <Token2>ETH</Token2>
         </FormInputContainer>
         <FormLeverageLabel>Leverage</FormLeverageLabel>
-        <LeverageRadio />
+        <LeverageRadio leverages={poolInfo?.levels} />
         <BudgetResultItem>
-          <div>Est.Open Price</div>
-          <div>1 ETH = 123.12 USDC</div>
+          <span>Est.Open Price</span>
+          <span>1 ETH = 123.12 USDC</span>
         </BudgetResultItem>
         <BudgetResultItem>
-          <div>Slippage</div>
-          <div>0.2%</div>
+          <span>Slippage</span>
+          <span>0.2%</span>
         </BudgetResultItem>
         <BudgetResultItem>
-          <div>Est.Liq Price</div>
-          <div>1 ETH = 123.12 USDC</div>
+          <span>Est.Liq Price</span>
+          <span>1 ETH = 123.12 USDC</span>
         </BudgetResultItem>
-        <OpenButton>Short</OpenButton>
+        <OpenPositionDialog>
+          <OpenButton>Short</OpenButton>
+        </OpenPositionDialog>
       </div>
       {/* table */}
       <TableContainer>

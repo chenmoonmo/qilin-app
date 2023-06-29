@@ -1,11 +1,11 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import type { FC } from 'react';
+import { type FC, forwardRef } from 'react';
 
 type ColumnType = {
   title: string;
-  key: string;
-  render?: (value: any) => JSX.Element;
+  key?: string;
+  render?: (value: any, data: any) => JSX.Element;
 };
 
 type TableType = {
@@ -36,37 +36,46 @@ const Th = styled.th`
 
 const Td = Th.withComponent('td');
 
-export const Table: FC<TableType> = ({ columns, dataSource }) => {
-  return (
-    <TableLayout>
-      <thead>
-        <Tr>
-          {columns?.map(column => {
-            return <Th key={column.key}>{column.title}</Th>;
-          })}
-        </Tr>
-      </thead>
+export const Table = forwardRef<any, TableType>(
+  ({ columns, dataSource }, ref) => {
+    return (
+      <TableLayout ref={ref}>
+        <thead>
+          <Tr>
+            {columns?.map(column => {
+              return <Th key={column.key}>{column.title}</Th>;
+            })}
+          </Tr>
+        </thead>
 
-      <tbody>
-        {dataSource?.map((data, index) => {
-          return (
-            <Tr key={index}>
-              {columns?.map(column => {
-                return (
-                  <Td key={column.key}>
-                    {column.render
-                      ? column.render(data[column.key])
-                      : data[column.key]}
-                  </Td>
-                );
-              })}
-            </Tr>
-          );
-        })}
-      </tbody>
-    </TableLayout>
-  );
-};
+        <tbody>
+          {dataSource?.map((data, index) => {
+            return (
+              <Tr key={index}>
+                {columns?.map(column => {
+                  const vlaue = column.key ? data[column.key] : undefined;
+
+                  return (
+                    <Td key={column.key}>
+                      {column.render
+                        ? column.render(
+                            vlaue ? data[column.key!] : undefined,
+                            data
+                          )
+                        : vlaue}
+                    </Td>
+                  );
+                })}
+              </Tr>
+            );
+          })}
+        </tbody>
+      </TableLayout>
+    );
+  }
+);
+
+Table.displayName = 'Table';
 
 const PoolTableLayout = styled(TableLayout)`
   background: #262930;
@@ -95,17 +104,20 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
           })}
         </PoolTr>
       </thead>
-
       <tbody>
         {dataSource?.map((data, index) => {
           return (
             <PoolTr key={index}>
               {columns?.map(column => {
+                const vlaue = column.key ? data[column.key] : undefined;
                 return (
                   <PoolTd key={column.key}>
                     {column.render
-                      ? column.render(data[column.key])
-                      : data[column.key]}
+                      ? column.render(
+                          vlaue ? data[column.key!] : undefined,
+                          data
+                        )
+                      : vlaue}
                   </PoolTd>
                 );
               })}
