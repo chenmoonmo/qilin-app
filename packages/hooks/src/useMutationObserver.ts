@@ -21,5 +21,5 @@ export const useMutationObserver = <TElement extends HTMLElement>(
         observer.disconnect();
       };
     }
-  }, [callback, options]);
+  }, [callback, options, ref]);
 };

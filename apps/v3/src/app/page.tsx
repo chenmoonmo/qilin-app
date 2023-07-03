@@ -2,12 +2,15 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
-import { formatAmount } from '@qilin/utils';
+import { formatAmount, formatInput } from '@qilin/utils';
 import Link from 'next/link';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useMemo, useState } from 'react';
+import { useAccount, useBalance } from 'wagmi';
 
 import {
+  AdjustMarginDialog,
   Checkbox,
+  ClosePositionDialog,
   LeverageRadio,
   OpenPositionDialog,
   PairSelector,
@@ -20,82 +23,12 @@ import {
   TokenIcon,
   TradingView,
 } from '@/components';
-import { useHistoryPositions, usePoolInfo, usePositions } from '@/hooks';
-
-const HistoryColumns = [
-  {
-    title: 'Trading Pair',
-    key: 'tradingPair',
-  },
-  {
-    title: 'Side',
-    key: 'side',
-  },
-  {
-    title: 'Type',
-    key: 'type',
-  },
-  {
-    title: 'Margin',
-    key: 'margin',
-  },
-  {
-    title: 'Price',
-    key: 'price',
-  },
-  {
-    title: 'Funding-Fee',
-    key: 'fundingFee',
-  },
-  {
-    title: 'Service-Fee',
-    key: 'serviceFee',
-  },
-  {
-    title: 'PNL',
-    key: 'pnl',
-  },
-  {
-    title: 'Time',
-    key: 'time',
-  },
-];
-
-const PosiditonColumns = [
-  {
-    title: 'Trading Pair',
-    key: 'tradingPair',
-  },
-  {
-    title: 'Margin',
-    key: 'margin',
-  },
-  {
-    title: 'Size',
-    key: 'size',
-  },
-  {
-    title: 'Open Price',
-    key: 'openPrice',
-  },
-  {
-    title: 'Margin Ratio',
-    key: 'marginRatio',
-  },
-  {
-    title: 'Funding Fee',
-    key: 'fundingFee',
-  },
-  {
-    title: 'PNL',
-    key: 'pnl',
-  },
-  {
-    title: 'Operation',
-    key: 'operation',
-    render: () => {},
-  },
-];
+import {
+  useHistoryPositions,
+  useOpenPositon,
+  usePoolInfo,
+  usePositions,
+} from '@/hooks';
 
 const Main = styled.main`
   display: grid;
@@ -217,7 +150,11 @@ const FormInput = styled.div`
     font-size: 24px;
     font-family: PT Mono;
     font-weight: bold;
-    color: #737884;
+    color: #dbdde5;
+
+    &::placeholder {
+      color: #737884;
+    }
   }
 `;
 
@@ -372,11 +309,171 @@ const LiquidateLink = styled(Link)`
   }
 `;
 
-const PositionTable = forwardRef<any>((_, ref) => {
-  const data: any[] = [];
-  usePositions();
-  return <Table ref={ref} columns={PosiditonColumns} dataSource={data} />;
-});
+const TableItem = styled.div`
+  color: #fff;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  > div:last-of-type {
+    color: #737884;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+`;
+
+const HistoryColumns = [
+  {
+    title: 'Trading Pair',
+    key: 'tradingPair',
+  },
+  {
+    title: 'Side',
+    key: 'side',
+  },
+  {
+    title: 'Type',
+    key: 'type',
+  },
+  {
+    title: 'Margin',
+    key: 'margin',
+  },
+  {
+    title: 'Price',
+    key: 'price',
+  },
+  {
+    title: 'Funding-Fee',
+    key: 'fundingFee',
+  },
+  {
+    title: 'Service-Fee',
+    key: 'serviceFee',
+  },
+  {
+    title: 'PNL',
+    key: 'pnl',
+  },
+  {
+    title: 'Time',
+    key: 'time',
+  },
+];
+
+const PosiditonColumns = [
+  {
+    title: 'Trading Pair',
+    key: 'pool_name',
+  },
+  {
+    title: 'Margin',
+    key: 'margin',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
+  },
+  {
+    title: 'Size',
+    key: 'size',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.token0Name}</div>
+      </TableItem>
+    ),
+  },
+  {
+    title: 'Open Price',
+    key: 'open_price',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.token1Name}</div>
+      </TableItem>
+    ),
+  },
+  {
+    title: 'Margin Ratio',
+    key: 'margin_ratio',
+    render: (value: string) => `${formatAmount(+value * 100, 2)}%`,
+  },
+  {
+    title: 'Funding Fee',
+    key: 'funding_fee',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
+  },
+  {
+    title: 'PNL',
+    key: 'pnl',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
+  },
+  {
+    title: 'Operation',
+    key: 'operation',
+    render: () => (
+      <>
+        <AdjustMarginDialog>
+          <Button>
+            <svg
+              width="8"
+              height="8"
+              viewBox="0 0 8 8"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              css={css`
+                margin-right: 5px;
+              `}
+            >
+              <rect y="3" width="8" height="2" fill="white" />
+              <rect
+                x="5"
+                width="8"
+                height="2"
+                transform="rotate(90 5 0)"
+                fill="white"
+              />
+            </svg>
+            Margin
+          </Button>
+        </AdjustMarginDialog>
+        <ClosePositionDialog>
+          <Button
+            backgroundColor="#464A56"
+            css={css`
+              margin-left: 8px;
+            `}
+          >
+            Close
+          </Button>
+        </ClosePositionDialog>
+      </>
+    ),
+  },
+];
+
+const PositionTable = forwardRef<any, { isFilter: boolean }>(
+  ({ isFilter }, ref) => {
+    const { data } = usePositions(isFilter);
+    console.log(data);
+    return <Table ref={ref} columns={PosiditonColumns} dataSource={data} />;
+  }
+);
 
 PositionTable.displayName = 'PositionTable';
 
@@ -389,11 +486,47 @@ const HistoryTable = forwardRef<any>((_, ref) => {
 HistoryTable.displayName = 'HistoryTable';
 
 export default function Home() {
-  // 多空方向
-  const [direction, setDirection] = useState('1');
+  const { address } = useAccount();
+
   const [tableTab, setTableTab] = useState<string>('1');
+  const [isFilter, setIsFilter] = useState<boolean>(false);
 
   const { data: poolInfo } = usePoolInfo();
+
+  console.log(poolInfo);
+
+  const {
+    margin,
+    setMargin,
+    leverage,
+    setLeverage,
+    direction,
+    setDirection,
+    size,
+    estPrice,
+    isNeedApprove,
+    hanldeOpenPosition,
+  } = useOpenPositon({
+    marginTokenAddress: poolInfo?.marginTokenAddress,
+    price: poolInfo?.spotPrice,
+    positionLong: poolInfo?.positionLong,
+    positionShort: poolInfo?.positionShort,
+    liquidity: poolInfo?.liquidity,
+  });
+
+  const { data: marginToken } = useBalance({
+    address,
+    token: poolInfo?.marginTokenAddress,
+  });
+
+  const disabledConfirm = useMemo(() => {
+    if (!marginToken?.formatted || !margin) return true;
+    return +margin > +marginToken.formatted;
+  }, [margin, marginToken]);
+
+  const [buttonText, buttonColor] = useMemo(() => {
+    return direction === '1' ? ['Long', '#44c27f'] : ['Short', '#e15c48'];
+  }, [direction]);
 
   return (
     <Main>
@@ -419,7 +552,7 @@ export default function Home() {
             </svg>
           </PairInfo>
         </PairSelector>
-        <PairPrice>{formatAmount(poolInfo?.spotPrice)}</PairPrice>
+        <PairPrice>{formatAmount(poolInfo?.futurePrice)}</PairPrice>
         <PairDataItem>
           <div>Chainlink Price</div>
           <div>$ {formatAmount(poolInfo?.spotPrice)}</div>
@@ -430,15 +563,21 @@ export default function Home() {
         </PairDataItem>
         <PairDataItem>
           <div>24h Volume</div>
-          <div>{formatAmount(poolInfo?.volume)} USDC</div>
+          <div>
+            {formatAmount(poolInfo?.volume)} {marginToken?.symbol}
+          </div>
         </PairDataItem>
         <PairDataItem>
           <div>Fuding</div>
-          <div>{formatAmount(poolInfo?.funding)} USDC</div>
+          <div>
+            {formatAmount(poolInfo?.funding)} {marginToken?.symbol}
+          </div>
         </PairDataItem>
         <PairDataItem>
           <div>Naked Positions</div>
-          <div>{formatAmount(poolInfo?.nakePosition)} USDC</div>
+          <div>
+            {formatAmount(poolInfo?.nakePosition)} {marginToken?.symbol}
+          </div>
         </PairDataItem>
         <LiquidateLink href="/liquidate">
           <div>
@@ -456,15 +595,28 @@ export default function Home() {
         <FormInputContainer>
           <FormInput>
             <label>Pay</label>
-            <input type="text" />
+            <input
+              type="text"
+              placeholder="0.0"
+              value={margin}
+              onChange={e => {
+                setMargin(formatInput(e.target.value));
+              }}
+            />
           </FormInput>
           <PayRight>
-            <div>Balance: 0</div>
+            <div>Balance: {formatAmount(marginToken?.formatted)}</div>
             <TokenInfoContainer>
-              <MaxButton>Max</MaxButton>
+              <MaxButton
+                onClick={() => {
+                  setMargin(marginToken?.formatted ?? '0');
+                }}
+              >
+                Max
+              </MaxButton>
               <TokenInfo>
                 <TokenIcon size={26} />
-                <TokenSymbol>ETH</TokenSymbol>
+                <TokenSymbol>{marginToken?.symbol}</TokenSymbol>
               </TokenInfo>
             </TokenInfoContainer>
           </PayRight>
@@ -472,15 +624,27 @@ export default function Home() {
         <FormInputContainer>
           <FormInput>
             <label>Size</label>
-            <input type="text" />
+            <input
+              type="text"
+              placeholder="0.0"
+              value={size ? formatAmount(size) : ''}
+              disabled
+            />
           </FormInput>
-          <Token2>ETH</Token2>
+          <Token2>{poolInfo?.token0Name}</Token2>
         </FormInputContainer>
         <FormLeverageLabel>Leverage</FormLeverageLabel>
-        <LeverageRadio leverages={poolInfo?.levels} />
+        <LeverageRadio
+          value={leverage}
+          leverages={poolInfo?.levels}
+          onChange={setLeverage}
+        />
         <BudgetResultItem>
           <span>Est.Open Price</span>
-          <span>1 ETH = 123.12 USDC</span>
+          <span>
+            1 {poolInfo?.token0Name} = {formatAmount(estPrice)}{' '}
+            {poolInfo?.token1Name}
+          </span>
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Slippage</span>
@@ -488,10 +652,25 @@ export default function Home() {
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Est.Liq Price</span>
-          <span>1 ETH = 123.12 USDC</span>
+          <span>
+            1 {poolInfo?.token0Name} = 123.12 {poolInfo?.token1Name}
+          </span>
         </BudgetResultItem>
-        <OpenPositionDialog>
-          <OpenButton>Short</OpenButton>
+        <OpenPositionDialog
+          margin={margin}
+          openPrice={estPrice}
+          size={size}
+          direction={direction}
+          isNeedApprove={isNeedApprove}
+          pairName={poolInfo?.pairName}
+          token0Name={poolInfo?.token0Name}
+          token1Name={poolInfo?.token1Name}
+          marginTokenName={marginToken?.symbol}
+          onConfirm={hanldeOpenPosition}
+        >
+          <OpenButton disabled={disabledConfirm} backgroundColor={buttonColor}>
+            {buttonText}
+          </OpenButton>
         </OpenPositionDialog>
       </div>
       {/* table */}
@@ -509,12 +688,15 @@ export default function Home() {
                 gap: 10px;
               `}
             >
-              <Checkbox />
+              <Checkbox
+                checked={isFilter}
+                onCheckedChange={val => setIsFilter(val as boolean)}
+              />
               Hide Other Positions
             </div>
           </TableTabTitle>
           <TabContent value="1" asChild>
-            <PositionTable />
+            <PositionTable isFilter={isFilter} />
           </TabContent>
           <TabContent value="2" asChild>
             <HistoryTable />

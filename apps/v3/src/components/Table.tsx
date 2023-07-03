@@ -5,7 +5,7 @@ import { type FC, forwardRef } from 'react';
 type ColumnType = {
   title: string;
   key?: string;
-  render?: (value: any, data: any) => JSX.Element;
+  render?: (value: any, data: any) => JSX.Element | string | number; 
 };
 
 type TableType = {

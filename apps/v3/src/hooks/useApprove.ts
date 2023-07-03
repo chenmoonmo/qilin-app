@@ -1,0 +1,68 @@
+import { BigNumber } from 'ethers';
+import { useCallback, useMemo } from 'react';
+import type { Address } from 'wagmi';
+import {
+  erc20ABI,
+  useAccount,
+  useContractRead,
+  useContractWrite,
+  usePrepareContractWrite,
+} from 'wagmi';
+
+export const useApprove = (
+  token?: Address,
+  spender?: Address,
+  amount?: number | BigNumber
+) => {
+  const { address } = useAccount();
+
+  const approveAmount = useMemo(() => {
+    return BigNumber.from(amount);
+  }, [amount]);
+
+  const { data: allowance, refetch } = useContractRead({
+    address: token,
+    abi: erc20ABI,
+    functionName: 'allowance',
+    args: [address!, spender!],
+    enabled: !!address && !!spender,
+  });
+
+  const isNeedApprove = useMemo(
+    () => (allowance as BigNumber)?.lt(approveAmount),
+    [allowance, approveAmount]
+  );
+
+  const { config } = usePrepareContractWrite({
+    address: token,
+    abi: erc20ABI,
+    functionName: 'approve',
+    args: [
+      spender!,
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      ),
+    ],
+    enabled: isNeedApprove && !!spender,
+  });
+
+  const { writeAsync: approve } = useContractWrite(config);
+
+  const handleApprove = useCallback(async () => {
+    try {
+      const res = await approve?.();
+      await res?.wait();
+      refetch();
+    } catch (e) {
+      console.error(e);
+    }
+  }, [approve, refetch]);
+
+  return useMemo(() => {
+    return {
+      isNeedApprove,
+      approve: handleApprove,
+      refetch,
+    };
+  }, [isNeedApprove, handleApprove, refetch]);
+};

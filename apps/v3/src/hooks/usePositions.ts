@@ -1,9 +1,11 @@
+import { formatUnits } from 'ethers/lib/utils.js';
 import qs from 'querystring';
 import { useMemo } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import { useAccount, useChainId } from 'wagmi';
 
 import { fetcher } from '@/helper';
+import type { PositionItem } from '@/type';
 
 import { usePoolAddress } from './usePoolAddress';
 
@@ -34,10 +36,43 @@ export const usePositions = (isFilter?: boolean) => {
         ? `/positions?${queryString}&page_size=${PAGE_SIZE}&page_index=${index}`
         : null,
     async url => {
-      const result = await fetcher(url, {
+      const result = await fetcher<{
+        position_list: PositionItem[];
+      }>(url, {
         method: 'GET',
       });
-      return result.position_list;
+
+      const { position_list } = result;
+
+      return position_list.map(item => {
+        const {
+          pool_name,
+          funding_fee,
+          margin,
+          open_price,
+          service_fee,
+          pnl,
+          size,
+          margin_ratio,
+        } = item;
+
+        const decimal = 18;
+
+        const [token0Name, token1Name] = pool_name.split('/').map(item => item.trim());
+
+        return {
+          ...item,
+          token0Name,
+          token1Name,
+          funding_fee: formatUnits(funding_fee, decimal),
+          margin: formatUnits(margin, decimal),
+          open_price: formatUnits(open_price, decimal),
+          service_fee: formatUnits(service_fee, decimal),
+          pnl: formatUnits(pnl, decimal),
+          size: formatUnits(size, decimal),
+          margin_ratio: formatUnits(margin_ratio, 4),
+        };
+      });
     }
   );
 

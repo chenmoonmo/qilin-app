@@ -38,6 +38,7 @@ export const usePoolInfo = () => {
 
       const poolInfo = result.pool;
       const decimal = poolInfo.pair_info.asset_info.pool_decimal;
+      const futurePrice = poolInfo.pair_info.future_price;
       const spotPrice = poolInfo.spot_price;
       const nakePosition = poolInfo.nake_position;
       const funding = poolInfo.funding_8;
@@ -46,22 +47,33 @@ export const usePoolInfo = () => {
       const pairName = poolInfo.pair_info.pool_info.name;
       const levels = poolInfo.setting.legal_level.map(item => item.toString());
 
-      const sizeTokenName = poolInfo.pair_info.pool_info.name.split('/')[0];
+      const liquidity = poolInfo.pair_info.asset_info.liquidity;
+      const positionLong = poolInfo.size_info.position_long;
+      const positionShort = poolInfo.size_info.position_short;
+
+      const [token0Name, token1Name] = poolInfo.pair_info.pool_info.name
+        .split('/')
+        .map(item => item.trim());
 
       const marginTokenAddress = poolInfo.pair_info.asset_info.pool_token;
 
       return {
         pairName,
         levels,
-        sizeTokenName,
+        token0Name,
+        token1Name,
         marginTokenAddress,
         origin: poolInfo,
         ID: poolInfo.pair_info.ID,
-        spotPrice: formatUnits(spotPrice, decimal),
+        positionLong: +formatUnits(positionLong, decimal),
+        positionShort: +formatUnits(positionShort, decimal),
+        liquidity: +formatUnits(liquidity, decimal),
+        futurePrice: +formatUnits(futurePrice, decimal),
+        spotPrice: +formatUnits(spotPrice, decimal),
         nakePosition: formatUnits(nakePosition, decimal),
         funding: formatUnits(funding, decimal),
-        change: +formatUnits(change, 6) * 100,
         volume: formatUnits(volume, decimal),
+        change: +formatUnits(change, 4) * 100,
       };
     }
   );

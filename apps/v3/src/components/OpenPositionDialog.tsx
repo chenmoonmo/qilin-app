@@ -1,8 +1,21 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
+import { formatAmount } from '@qilin/utils';
+import { useMemo, useState } from 'react';
 
 type OpenPositionDialogPropsType = {
   children: React.ReactNode;
+  direction?: string;
+  pairName?: string;
+  margin?: string;
+  openPrice?: number;
+  size?: number;
+  estLiqPrice: string;
+  token0Name?: string;
+  token1Name?: string;
+  marginTokenName?: string;
+  isNeedApprove?: boolean;
+  onConfirm?: () => void;
 };
 
 const Content = styled(Dialog.Content)`
@@ -39,7 +52,6 @@ const PositionInfoItem = styled.div`
   }
 `;
 
-
 const SubmitButton = styled(Button)`
   width: 100%;
   height: 40px;
@@ -48,9 +60,32 @@ const SubmitButton = styled(Button)`
 
 export const OpenPositionDialog = ({
   children,
+  pairName,
+  margin,
+  openPrice,
+  size,
+  estLiqPrice,
+  token0Name,
+  token1Name,
+  marginTokenName,
+  direction,
+  onConfirm,
+  isNeedApprove,
 }: OpenPositionDialogPropsType) => {
+  const [open, setOpen] = useState(false);
+
+  const titleText = useMemo(
+    () => `Open ${direction === '1' ? 'Long' : 'Short'}`,
+    [direction]
+  );
+
+  const handleConfirm = () => {
+    setOpen(false);
+    onConfirm && onConfirm();
+  };
+
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
@@ -70,29 +105,39 @@ export const OpenPositionDialog = ({
                 />
               </svg>
             </Dialog.Close>
-            Open Long
+            <span>{titleText}</span>
           </Title>
           <PositionInfoItem>
             <span>Trading Pair</span>
-            <span>BTC / USDC</span>
+            <span>{pairName}</span>
           </PositionInfoItem>
           <PositionInfoItem>
             <span>Margin</span>
-            <span>10.21 USDC</span>
+            <span>
+              {margin} {marginTokenName}
+            </span>
           </PositionInfoItem>
           <PositionInfoItem>
             <span>Open Price</span>
-            <span>500.12 USDC</span>
+            <span>
+              {formatAmount(openPrice)} {token1Name}
+            </span>
           </PositionInfoItem>
           <PositionInfoItem>
             <span>Size</span>
-            <span>100 BTC</span>
+            <span>
+              {formatAmount(size)} {token0Name}
+            </span>
           </PositionInfoItem>
           <PositionInfoItem>
             <span>Est.Liq.Price</span>
-            <span>234.23 USDC</span>
+            <span>
+              {estLiqPrice} {token1Name}
+            </span>
           </PositionInfoItem>
-          <SubmitButton>Confirm</SubmitButton>
+          <SubmitButton onClick={handleConfirm}>
+            {isNeedApprove ? 'Approve' : 'Confirm'}
+          </SubmitButton>
         </Content>
       </Dialog.Portal>
     </Dialog.Root>

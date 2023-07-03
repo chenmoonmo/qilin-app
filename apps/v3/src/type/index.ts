@@ -61,3 +61,22 @@ export type Pool = {
     rebase_ratio: number;
   };
 };
+
+export type PositionItem = {
+  pool_name: string;
+  pool_token: Address;
+  asset_address: string;
+  funding_fee: string;
+  leverage: number;
+  margin: string;
+  margin_ratio: number;
+  open_price: string;
+  open_time: string;
+  pnl: string;
+  pool_address: string;
+  position_id: number;
+  service_fee: string;
+  side: string;
+  size: string;
+  symbol: string;
+};

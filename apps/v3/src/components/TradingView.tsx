@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useMutationObserver } from '@qilin/hooks';
 import type { IChartApi } from 'lightweight-charts';
 import { ColorType, createChart } from 'lightweight-charts';
 import { useLayoutEffect, useRef } from 'react';
@@ -17,7 +18,6 @@ export const TradingView = () => {
   useLayoutEffect(() => {
     const width = chartRef.current?.clientWidth;
     const height = chartRef.current?.clientHeight;
-
     chart.current = createChart(chartRef.current!, {
       width,
       height,
@@ -53,10 +53,20 @@ export const TradingView = () => {
         },
       },
     });
+
     return () => {
       chart.current?.remove?.();
     };
   }, []);
 
-  return <ChartContainer ref={chartRef}></ChartContainer>;
+  // useMutationObserver(chartRef, () => {
+  //   console.log(111, chartRef);
+  //   const width = chartRef.current?.clientWidth;
+  //   const height = chartRef.current?.clientHeight;
+  //   if (width && height) {
+  //     chart.current?.resize(width, height);
+  //   }
+  // });
+
+  return <ChartContainer ref={chartRef} />;
 };
