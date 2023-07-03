@@ -1,20 +1,34 @@
-import type { Address } from 'wagmi';
+import { BigNumber } from 'ethers';
+import { useCallback } from 'react';
 import { useAccount, useContractWrite } from 'wagmi';
 
 import Asset from '@/abis/Asset.json';
 
-import { useApprove } from './useApprove';
+import type { usePositions } from './usePositions';
 
-export const useClosePosition = (assetAddress: Address, tokenId: number) => {
+export const useClosePosition = (
+  data: ReturnType<typeof usePositions>['data'][number]
+) => {
   const { address } = useAccount();
 
-  const {} = useApprove();
-
-  const {} = useContractWrite({
-    address: assetAddress,
+  const { writeAsync } = useContractWrite({
+    address: data.asset_address,
     abi: Asset.abi,
     functionName: 'closePosition',
     mode: 'recklesslyUnprepared',
-    args: [tokenId, address],
+    args: [data.position_id, address],
+    overrides: {
+      gasPrice: BigNumber.from(8000000000),
+      gasLimit: BigNumber.from(8000000),
+    },
   });
+
+  const handleClosePosition = useCallback(async () => {
+    const res = await writeAsync?.();
+    await res.wait();
+  }, [writeAsync]);
+
+  return {
+    handleClosePosition,
+  };
 };

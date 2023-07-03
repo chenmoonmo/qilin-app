@@ -1,33 +1,29 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { Address } from 'wagmi';
 import { useAccount, useContractWrite } from 'wagmi';
 
 import Asset from '@/abis/Asset.json';
+import type { PositionItem } from '@/type';
 
 import { useApprove } from './useApprove';
 
-export const useAdjustPosition = (
-  assetAddress: Address,
-  mariginTokenAddress: Address,
-  tokenId: number
-) => {
+export const useAdjustPosition = (data: PositionItem) => {
   const { address } = useAccount();
 
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState('');
 
   const { isNeedApprove, approve } = useApprove(
-    mariginTokenAddress,
-    assetAddress,
-    amount
+    data.pool_token,
+    data.asset_address,
+    +amount
   );
 
   const { writeAsync } = useContractWrite({
-    address: assetAddress,
+    address: data.asset_address,
     abi: Asset.abi,
     functionName: 'addMargin',
     mode: 'recklesslyUnprepared',
     args: [
-      tokenId,
+      data.position_id,
       {
         payType: 1,
         amount,

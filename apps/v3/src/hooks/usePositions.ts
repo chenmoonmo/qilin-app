@@ -58,7 +58,9 @@ export const usePositions = (isFilter?: boolean) => {
 
         const decimal = 18;
 
-        const [token0Name, token1Name] = pool_name.split('/').map(item => item.trim());
+        const [token0Name, token1Name] = pool_name
+          .split('/')
+          .map(item => item.trim());
 
         return {
           ...item,

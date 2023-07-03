@@ -1,11 +1,18 @@
+import { formatUnits } from 'ethers/lib/utils.js';
 import qs from 'querystring';
 import { useMemo } from 'react';
 import useSWRInfinite from 'swr/infinite';
 import { useAccount, useChainId } from 'wagmi';
 
 import { fetcher } from '@/helper';
+import type { HistoryPositionItem } from '@/type';
 
 const PAGE_SIZE = 10;
+
+const formatUnitsAmount = (amount: string) => {
+  const decimal = 18;
+  return amount === '-' || !amount ? '-' : formatUnits(amount, decimal);
+};
 
 export const useHistoryPositions = () => {
   const chainId = useChainId();
@@ -24,10 +31,24 @@ export const useHistoryPositions = () => {
         ? `/historyPositions?${queryString}&page_size=${PAGE_SIZE}&page_index=${index}`
         : null,
     async url => {
-      const result = await fetcher(url, {
+      const result = await fetcher<{
+        history_list: HistoryPositionItem[];
+      }>(url, {
         method: 'GET',
       });
-      return result.position_list;
+      return (
+        result.history_list?.map(item => {
+          const { Price, Margin, ServicesFee, PNL, FundingFee } = item;
+          return {
+            ...item,
+            Price: formatUnitsAmount(Price),
+            Margin: formatUnitsAmount(Margin),
+            ServicesFee: formatUnitsAmount(ServicesFee),
+            PNL: formatUnitsAmount(PNL),
+            FundingFee: formatUnitsAmount(FundingFee),
+          };
+        }) ?? []
+      );
     }
   );
 

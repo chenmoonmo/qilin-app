@@ -1,12 +1,18 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
+import { formatAmount, formatInput } from '@qilin/utils';
+import { useState } from 'react';
+
+import type { usePoolList } from '@/hooks';
+import { useAddLiquidity, usePoolParam } from '@/hooks';
 
 import { PoolSelector } from './PoolSelector';
 import { TokenIcon } from './TokenIcon';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
+  data: ReturnType<typeof usePoolList>['data'][number];
 };
 
 const Content = styled(Dialog.Content)`
@@ -114,9 +120,25 @@ const InfoItem = styled.div`
 
 export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
+  data,
 }) => {
+ 
+
+  const [open, setOpen] = useState(false);
+
+  const { amount, setAmount, marginToken, handleAddLiquidty } =
+    useAddLiquidity(data);
+
+  const { data: poolParam } = usePoolParam(
+    data.assetAddress,
+    data.poolAddress,
+    open
+  );
+
+  console.log(poolParam);
+
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
@@ -141,7 +163,7 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
           <Contianer>
             <div>
               <SubTitle>Select Oracle</SubTitle>
-              <PoolSelector />
+              <PoolSelector disabled value="chainlink" />
               <SubTitle
                 css={css`
                   margin-top: 20px;
@@ -159,38 +181,53 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                 `}
               >
                 Amount
-                <Balance>balance:0</Balance>
+                <Balance>
+                  balance: {formatAmount(marginToken?.formatted)}
+                </Balance>
               </SubTitle>
               <AmountInput>
-                <input></input>
+                <input
+                  type="text"
+                  value={amount}
+                  placeholder="0.0"
+                  onChange={e => setAmount(formatInput(e.target.value))}
+                />
                 <div
                   css={css`
                     display: flex;
                     align-items: center;
                   `}
                 >
-                  <MaxButton>Max</MaxButton>
+                  <MaxButton
+                    onClick={() =>
+                      setAmount(formatInput(marginToken!.formatted))
+                    }
+                  >
+                    Max
+                  </MaxButton>
                   <TokenInfo>
                     <TokenIcon size={26} />
-                    <TokenSymbol>ETH</TokenSymbol>
+                    <TokenSymbol>{marginToken?.symbol}</TokenSymbol>
                   </TokenInfo>
                 </div>
               </AmountInput>
-              <SubmitButton>Add Liquidity</SubmitButton>
+              <SubmitButton onClick={handleAddLiquidty}>
+                Add Liquidity
+              </SubmitButton>
             </div>
             <div>
               <SubTitle>Select Oracle</SubTitle>
               <InfoItem>
                 <span>Liquidity</span>
-                <span>321.12 ETH($123.12)</span>
+                <span>{formatAmount(poolParam?.liquidity)} ETH($123.12)</span>
               </InfoItem>
               <InfoItem>
                 <span>LP Price</span>
-                <span>0.12 ETH</span>
+                <span>{formatAmount(poolParam?.lp_price)} ETH</span>
               </InfoItem>
               <InfoItem>
                 <span>APY</span>
-                <span>+12.12%</span>
+                <span>{formatAmount(poolParam?.apy)}</span>
               </InfoItem>
               <InfoItem>
                 <span>Share Of Pool</span>
@@ -205,15 +242,15 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </SubTitle>
               <InfoItem>
                 <span>Fee</span>
-                <span>0.01%</span>
+                <span>{formatAmount(poolParam?.fee_ratio, 2)} %</span>
               </InfoItem>
               <InfoItem>
                 <span>Leverage Rate (L)</span>
-                <span>10</span>
+                <span>{formatAmount(poolParam?.leverage_rate)}</span>
               </InfoItem>
               <InfoItem>
                 <span>Min Margin Ratio (Dmin)</span>
-                <span>0.03</span>
+                <span>{formatAmount(poolParam?.margin_ratio)}</span>
               </InfoItem>
             </div>
           </Contianer>

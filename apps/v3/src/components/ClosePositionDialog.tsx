@@ -1,9 +1,14 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
+import { formatAmount } from '@qilin/utils';
 import { useState } from 'react';
+
+import type { usePositions } from '@/hooks';
+import { useClosePosition } from '@/hooks/useClosePosition';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
+  data: ReturnType<typeof usePositions>['data'][number];
 };
 
 const Content = styled(Dialog.Content)`
@@ -46,8 +51,13 @@ const InfoItem = styled.div`
 
 export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
+  data,
 }) => {
+  console.log(data);
+
   const [open, setOpen] = useState(false);
+
+  const { handleClosePosition } = useClosePosition(data);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -73,18 +83,33 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
             Close Position
           </Title>
           <InfoItem>
-            <span>balance</span>
-            <span>0.0001 USDT</span>
+            <span>Trading Pair</span>
+            <span>{data.pool_name}</span>
           </InfoItem>
           <InfoItem>
-            <span>Currently Assigned Margin</span>
-            <span>0.0001 USDT</span>
+            <span>Open Price</span>
+            <span>
+              {formatAmount(data.open_price)} {data.token1Name}
+            </span>
           </InfoItem>
           <InfoItem>
-            <span>Currently Assigned Margin</span>
-            <span>0.0001 USDT</span>
+            <span>Close Price</span>
+            <span>
+              {formatAmount(data.open_price)} {data.token1Name}
+            </span>
           </InfoItem>
-          <SubmitButton>Confirm</SubmitButton>
+          <InfoItem>
+            <span>Size</span>
+            <span>{formatAmount(data.size)}</span>
+          </InfoItem>
+          <InfoItem>
+            <span>Realized PNL</span>
+            <span>
+              {/* TODO: 计算 */}
+              {formatAmount(data.pnl)}
+            </span>
+          </InfoItem>
+          <SubmitButton onClick={handleClosePosition}>Confirm</SubmitButton>
         </Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -5,7 +5,7 @@ import { type FC, forwardRef } from 'react';
 type ColumnType = {
   title: string;
   key?: string;
-  render?: (value: any, data: any) => JSX.Element | string | number; 
+  render?: (value: any, data: any) => JSX.Element | string | number;
 };
 
 type TableType = {
@@ -53,16 +53,16 @@ export const Table = forwardRef<any, TableType>(
             return (
               <Tr key={index}>
                 {columns?.map(column => {
-                  const vlaue = column.key ? data[column.key] : undefined;
+                  const value = column.key ? data?.[column.key] : undefined;
 
                   return (
                     <Td key={column.key}>
                       {column.render
                         ? column.render(
-                            vlaue ? data[column.key!] : undefined,
+                            value ? data?.[column.key!] : undefined,
                             data
                           )
-                        : vlaue}
+                        : value}
                     </Td>
                   );
                 })}
@@ -92,7 +92,9 @@ const PoolTh = styled(Th)`
   color: #737884;
 `;
 
-const PoolTd = PoolTh.withComponent('td');
+const PoolTd = styled(PoolTh.withComponent('td'))`
+  color: #ffffff;
+`;
 
 export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
   return (
@@ -109,15 +111,15 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
           return (
             <PoolTr key={index}>
               {columns?.map(column => {
-                const vlaue = column.key ? data[column.key] : undefined;
+                const value = column.key ? data?.[column.key] : undefined;
                 return (
                   <PoolTd key={column.key}>
                     {column.render
                       ? column.render(
-                          vlaue ? data[column.key!] : undefined,
+                          value ? data[column.key!] : undefined,
                           data
                         )
-                      : vlaue}
+                      : value}
                   </PoolTd>
                 );
               })}

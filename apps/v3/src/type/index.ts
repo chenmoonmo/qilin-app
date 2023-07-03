@@ -65,7 +65,7 @@ export type Pool = {
 export type PositionItem = {
   pool_name: string;
   pool_token: Address;
-  asset_address: string;
+  asset_address: Address;
   funding_fee: string;
   leverage: number;
   margin: string;
@@ -79,4 +79,32 @@ export type PositionItem = {
   side: string;
   size: string;
   symbol: string;
+};
+
+export type HistoryPositionItem = {
+  ActionTime: number;
+  Direction: number;
+  FundingFee: string;
+  Margin: string;
+  PNL: string;
+  PositionId: number;
+  Price: string;
+  ServicesFee: string;
+  Status: string;
+  TokenID: number;
+  asset_address: string;
+  pool_address: string;
+  pool_name: string;
+  symbol: string;
+};
+
+export type PoolParam = {
+  asset_address: string;
+  pool_address: string;
+  fee_ratio: number; // 4位精度
+  leverage_rate: number; // 4位精度
+  margin_ratio: number; // 4位精度
+  liquidity: string; // 和代币一样的精度
+  lp_price: string; // 18位精度
+  apy: string; // 4位精度
 };

@@ -7,7 +7,6 @@ import {
   useAccount,
   useContractRead,
   useContractWrite,
-  usePrepareContractWrite,
 } from 'wagmi';
 
 import Assest from '@/abis/Asset.json';

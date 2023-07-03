@@ -20,7 +20,6 @@ export const usePoolInfo = () => {
   );
 
   const { data: poolList } = usePoolList();
-
   const {
     data: poolInfo,
     isLoading,
@@ -65,6 +64,8 @@ export const usePoolInfo = () => {
         marginTokenAddress,
         origin: poolInfo,
         ID: poolInfo.pair_info.ID,
+        assetAddress,
+        poolAddress,
         positionLong: +formatUnits(positionLong, decimal),
         positionShort: +formatUnits(positionShort, decimal),
         liquidity: +formatUnits(liquidity, decimal),
@@ -86,6 +87,7 @@ export const usePoolInfo = () => {
       );
     }
   }, [assetAddress, enabled, poolAddress, poolList, router]);
+
 
   return {
     data: poolInfo,

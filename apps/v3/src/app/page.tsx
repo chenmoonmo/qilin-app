@@ -29,6 +29,7 @@ import {
   usePoolInfo,
   usePositions,
 } from '@/hooks';
+import { PositionItem } from '@/type';
 
 const Main = styled.main`
   display: grid;
@@ -327,35 +328,68 @@ const TableItem = styled.div`
 const HistoryColumns = [
   {
     title: 'Trading Pair',
-    key: 'tradingPair',
+    key: 'pool_name',
   },
   {
     title: 'Side',
-    key: 'side',
+    key: 'Direction',
+    render: (value: 1 | 2) => {
+      return value === 1 ? 'Long' : 'Short';
+    },
   },
   {
     title: 'Type',
-    key: 'type',
+    key: 'Status',
   },
   {
     title: 'Margin',
-    key: 'margin',
+    key: 'Margin',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
   },
   {
     title: 'Price',
-    key: 'price',
+    key: 'Price',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
   },
   {
     title: 'Funding-Fee',
-    key: 'fundingFee',
+    key: 'FundingFee',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
   },
   {
     title: 'Service-Fee',
-    key: 'serviceFee',
+    key: 'ServicesFee',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
   },
   {
     title: 'PNL',
-    key: 'pnl',
+    key: 'PNL',
+    render: (value: string, item: any) => (
+      <TableItem>
+        <div>{formatAmount(value)}</div>
+        <div>{item.symbol}</div>
+      </TableItem>
+    ),
   },
   {
     title: 'Time',
@@ -363,123 +397,18 @@ const HistoryColumns = [
   },
 ];
 
-const PosiditonColumns = [
-  {
-    title: 'Trading Pair',
-    key: 'pool_name',
-  },
-  {
-    title: 'Margin',
-    key: 'margin',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Size',
-    key: 'size',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.token0Name}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Open Price',
-    key: 'open_price',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.token1Name}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Margin Ratio',
-    key: 'margin_ratio',
-    render: (value: string) => `${formatAmount(+value * 100, 2)}%`,
-  },
-  {
-    title: 'Funding Fee',
-    key: 'funding_fee',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'PNL',
-    key: 'pnl',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Operation',
-    key: 'operation',
-    render: () => (
-      <>
-        <AdjustMarginDialog>
-          <Button>
-            <svg
-              width="8"
-              height="8"
-              viewBox="0 0 8 8"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              css={css`
-                margin-right: 5px;
-              `}
-            >
-              <rect y="3" width="8" height="2" fill="white" />
-              <rect
-                x="5"
-                width="8"
-                height="2"
-                transform="rotate(90 5 0)"
-                fill="white"
-              />
-            </svg>
-            Margin
-          </Button>
-        </AdjustMarginDialog>
-        <ClosePositionDialog>
-          <Button
-            backgroundColor="#464A56"
-            css={css`
-              margin-left: 8px;
-            `}
-          >
-            Close
-          </Button>
-        </ClosePositionDialog>
-      </>
-    ),
-  },
-];
-
-const PositionTable = forwardRef<any, { isFilter: boolean }>(
-  ({ isFilter }, ref) => {
+const PositionTable = forwardRef<any, { columns: any; isFilter: boolean }>(
+  ({ columns, isFilter }, ref) => {
     const { data } = usePositions(isFilter);
-    console.log(data);
-    return <Table ref={ref} columns={PosiditonColumns} dataSource={data} />;
+    return <Table ref={ref} columns={columns} dataSource={data} />;
   }
 );
 
 PositionTable.displayName = 'PositionTable';
 
 const HistoryTable = forwardRef<any>((_, ref) => {
-  const data: any[] = [];
-  useHistoryPositions();
+  const { data } = useHistoryPositions();
+  console.log(data);
   return <Table ref={ref} columns={HistoryColumns} dataSource={data} />;
 });
 
@@ -527,6 +456,113 @@ export default function Home() {
   const [buttonText, buttonColor] = useMemo(() => {
     return direction === '1' ? ['Long', '#44c27f'] : ['Short', '#e15c48'];
   }, [direction]);
+
+  const positionColumns = useMemo(
+    () => [
+      {
+        title: 'Trading Pair',
+        key: 'pool_name',
+      },
+      {
+        title: 'Margin',
+        key: 'margin',
+        render: (value: string, item: any) => (
+          <TableItem>
+            <div>{formatAmount(value)}</div>
+            <div>{item.symbol}</div>
+          </TableItem>
+        ),
+      },
+      {
+        title: 'Size',
+        key: 'size',
+        render: (value: string, item: any) => (
+          <TableItem>
+            <div>{formatAmount(value)}</div>
+            <div>{item.token0Name}</div>
+          </TableItem>
+        ),
+      },
+      {
+        title: 'Open Price',
+        key: 'open_price',
+        render: (value: string, item: any) => (
+          <TableItem>
+            <div>{formatAmount(value)}</div>
+            <div>{item.token1Name}</div>
+          </TableItem>
+        ),
+      },
+      {
+        title: 'Margin Ratio',
+        key: 'margin_ratio',
+        render: (value: string) => `${formatAmount(+value * 100, 2)}%`,
+      },
+      {
+        title: 'Funding Fee',
+        key: 'funding_fee',
+        render: (value: string, item: any) => (
+          <TableItem>
+            <div>{formatAmount(value)}</div>
+            <div>{item.symbol}</div>
+          </TableItem>
+        ),
+      },
+      {
+        title: 'PNL',
+        key: 'pnl',
+        render: (value: string, item: any) => (
+          <TableItem>
+            <div>{formatAmount(value)}</div>
+            <div>{item.symbol}</div>
+          </TableItem>
+        ),
+      },
+      {
+        title: 'Operation',
+        key: 'operation',
+        render: (_, item) => (
+          <>
+            <AdjustMarginDialog data={item as any}>
+              <Button>
+                <svg
+                  width="8"
+                  height="8"
+                  viewBox="0 0 8 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  css={css`
+                    margin-right: 5px;
+                  `}
+                >
+                  <rect y="3" width="8" height="2" fill="white" />
+                  <rect
+                    x="5"
+                    width="8"
+                    height="2"
+                    transform="rotate(90 5 0)"
+                    fill="white"
+                  />
+                </svg>
+                Margin
+              </Button>
+            </AdjustMarginDialog>
+            <ClosePositionDialog data={item as any}>
+              <Button
+                backgroundColor="#464A56"
+                css={css`
+                  margin-left: 8px;
+                `}
+              >
+                Close
+              </Button>
+            </ClosePositionDialog>
+          </>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <Main>
@@ -696,7 +732,7 @@ export default function Home() {
             </div>
           </TableTabTitle>
           <TabContent value="1" asChild>
-            <PositionTable isFilter={isFilter} />
+            <PositionTable columns={positionColumns} isFilter={isFilter} />
           </TabContent>
           <TabContent value="2" asChild>
             <HistoryTable />

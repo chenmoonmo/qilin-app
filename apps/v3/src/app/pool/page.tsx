@@ -4,6 +4,8 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
+import { useMemo } from 'react';
+import { useNetwork } from 'wagmi';
 
 import {
   AddLiquidityDialog,
@@ -23,9 +25,11 @@ const TableTitle = styled.div`
 `;
 
 export default function Pool() {
+  const { chain } = useNetwork();
   const { data: poolList } = usePoolList();
-
-  console.log(poolList);
+  console.log({
+    poolList,
+  });
 
   const LiquidityColumns = [
     {
@@ -50,29 +54,41 @@ export default function Pool() {
     },
   ];
 
-  const PoolsColumns = [
-    {
-      title: 'Pool',
-      key: 'pairName',
-    },
-    {
-      title: 'Liquidity',
-      key: 'liquidity',
-      render: (value: any) => formatAmount(value),
-    },
-    {
-      title: 'LP Price',
-      key: 'futurePrice',
-      render: (value: any) => formatAmount(value),
-    },
-    {
-      title: 'APY',
-      key: 'APY',
-    },
-    {
-      title: 'Operation',
-    },
-  ];
+  const poolsColumns = useMemo(() => {
+    return [
+      {
+        title: 'Pool',
+        key: 'pairName',
+      },
+      {
+        title: 'Liquidity',
+        key: 'liquidity',
+        render: (value: any, item) =>
+          formatAmount(value) + ' ' + item.token0Name,
+      },
+      {
+        title: 'LP Price',
+        key: 'futurePrice',
+        render: (value: any, item) =>
+          formatAmount(value) + ' ' + item.token1Name,
+      },
+      {
+        title: 'APY',
+        key: 'APY',
+      },
+      {
+        title: 'Operation',
+        key: 'Operation',
+        render: (value, item) => {
+          return (
+            <AddLiquidityDialog data={item as any}>
+              <Button>Add</Button>
+            </AddLiquidityDialog>
+          );
+        },
+      },
+    ];
+  }, [chain]);
 
   return (
     <Main>
@@ -85,9 +101,9 @@ export default function Pool() {
         `}
       >
         <TableTitle>My Liquidity</TableTitle>
-        <AddLiquidityDialog>
-          <Button>New Position </Button>
-        </AddLiquidityDialog>
+        {/* <AddLiquidityDialog> */}
+        <Button>New Position </Button>
+        {/* </AddLiquidityDialog> */}
       </div>
       <PoolTable columns={LiquidityColumns} />
       <TableTitle
@@ -97,7 +113,7 @@ export default function Pool() {
       >
         Pools
       </TableTitle>
-      <PoolTable columns={PoolsColumns} dataSource={poolList} />
+      <PoolTable columns={poolsColumns} dataSource={poolList} />
       <RemoveLiquidityDialog></RemoveLiquidityDialog>
     </Main>
   );

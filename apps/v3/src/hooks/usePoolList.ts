@@ -36,9 +36,13 @@ export const usePoolList = (searchInfo?: string) => {
         const assetAddress = pool.asset_info.asset;
         const poolAddress = pool.pool_info.pool;
 
+        const marginTokenAddress = pool.asset_info.pool_token;
+
         const liquidity = pool.asset_info.liquidity;
 
         const pairName = pool.pool_info.name;
+
+        const [token0Name, token1Name] = pairName.split('/').map(name => name.trim());
 
         return {
           origin: pool,
@@ -46,6 +50,9 @@ export const usePoolList = (searchInfo?: string) => {
           pairName,
           assetAddress,
           poolAddress,
+          marginTokenAddress,
+          token0Name,
+          token1Name,
           volumn: formatUnits(volumn, decimal),
           change: +formatUnits(change, 6) * 100,
           futurePrice: formatUnits(futurePrice, decimal),

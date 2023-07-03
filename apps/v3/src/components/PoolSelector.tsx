@@ -28,15 +28,15 @@ const TriggerContainer = styled(Popover.Trigger)`
   padding: 14px 18px;
   border-radius: 6px;
   border: 1px solid #323640;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 12px;
   cursor: pointer;
   transition: background 0.1s ease-out;
 
-  svg {
-    transition: all 0.1s ease-out;
-  }
-
-  &[diabled] {
-    cursor: not-allowed;
+  &[disabled] {
+    color: #737884 !important;
   }
 
   &[data-state='open'] {
@@ -46,6 +46,10 @@ const TriggerContainer = styled(Popover.Trigger)`
     svg {
       transform: rotate(180deg);
     }
+  }
+
+  svg {
+    transition: all 0.1s ease-out;
   }
 `;
 

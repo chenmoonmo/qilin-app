@@ -1,11 +1,15 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { useState } from 'react';
+import { formatAmount, formatInput } from '@qilin/utils';
+import { useMemo, useState } from 'react';
+import { useAccount, useBalance } from 'wagmi';
 
 import { useAdjustPosition } from '@/hooks';
+import type { PositionItem } from '@/type';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
+  data: PositionItem;
 };
 
 const Content = styled(Dialog.Content)`
@@ -76,10 +80,23 @@ const InfoItem = styled.div`
 
 export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
+  data,
 }) => {
+  const { address } = useAccount();
   const [open, setOpen] = useState(false);
 
-  useAdjustPosition();
+  const { data: marginToken } = useBalance({
+    token: data.pool_token,
+    address,
+  });
+
+  const { amount, setAmount, handleAdjustPosition, isNeedApprove } =
+    useAdjustPosition(data);
+    
+
+  const enableSubmit = useMemo(() => {
+    return amount && +amount <= +(marginToken?.formatted ?? 0);
+  }, [amount, marginToken?.formatted]);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -105,22 +122,31 @@ export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
             Adjust Margin
           </Title>
           <InfoItem>
-            <span>balance</span>
-            <span>0.0001 USDT</span>
+            <span>Balance</span>
+            <span>
+              {formatAmount(marginToken?.formatted)} {marginToken?.symbol}
+            </span>
           </InfoItem>
           <MarginInput>
-            <input type="text" placeholder="Margin" />
-            <MarginSymbol>USDC</MarginSymbol>
+            <input
+              value={amount}
+              onChange={e => setAmount(formatInput(e.target.value))}
+              type="text"
+              placeholder="Margin"
+            />
+            <MarginSymbol>{marginToken?.symbol}</MarginSymbol>
           </MarginInput>
           <InfoItem>
             <span>Currently Assigned Margin</span>
-            <span>0.0001 USDT</span>
+            <span>0.0001 {marginToken?.symbol}</span>
           </InfoItem>
           <InfoItem>
-            <span>Currently Assigned Margin</span>
+            <span>Est.Liq.Price after increase</span>
             <span>0.0001 USDT</span>
           </InfoItem>
-          <SubmitButton>Confirm</SubmitButton>
+          <SubmitButton disabled={!enableSubmit} onClick={handleAdjustPosition}>
+            {isNeedApprove ? 'Approve' : 'Confirm'}
+          </SubmitButton>
         </Content>
       </Dialog.Portal>
     </Dialog.Root>
