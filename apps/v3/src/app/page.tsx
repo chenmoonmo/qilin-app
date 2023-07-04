@@ -6,7 +6,7 @@ import { formatAmount, formatInput } from '@qilin/utils';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { forwardRef, useEffect, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAccount, useBalance, useNetwork } from 'wagmi';
 
 import {
@@ -423,7 +423,7 @@ const HistoryTable = forwardRef<any, { isFilter: boolean }>(
           title: 'Time',
           key: 'ActionTime',
           // TODO: 缺少tx hash
-          render: (value: number, item: any) => (
+          render: (value: number) => (
             <Link
               target="_blank"
               href={`${chain?.blockExplorers?.default.url}/tx/${value}`}
@@ -479,11 +479,23 @@ export default function Home() {
 
   const { data: liquidationList } = useLiquidation();
 
-  const { data: poolList } = usePoolList();
+  const { data: poolList, mutate: refreshPoolList } = usePoolList();
 
-  const { data: poolInfo } = usePoolInfo(assetAddress, poolAddress, enabled);
+  const { data: poolInfo, mutate: refreshPoolInfo } = usePoolInfo(
+    assetAddress,
+    poolAddress,
+    enabled
+  );
 
-  const { data: kLine } = useKLine(poolInfo?.oracleAddress);
+  const { data: kLine, mutate: refreshKLine } = useKLine(
+    poolInfo?.oracleAddress
+  );
+
+  const handleSuccsee = useCallback(() => {
+    refreshPoolList();
+    refreshPoolInfo();
+    refreshKLine();
+  }, [refreshKLine, refreshPoolInfo, refreshPoolList]);
 
   const {
     margin,
@@ -498,7 +510,7 @@ export default function Home() {
     hanldeOpenPosition,
     slippage,
     estLiqPrice,
-  } = useOpenPositon(poolInfo);
+  } = useOpenPositon(poolInfo, handleSuccsee);
 
   const { data: marginToken } = useBalance({
     address,
@@ -527,6 +539,10 @@ export default function Home() {
                 item.pool_address === poolInfo?.poolAddress &&
                 item.asset_address === poolInfo?.assetAddress
               }
+              data-direction={item.side}
+              css={css`
+                cursor: pointer;
+              `}
             >
               {value}
             </Link>
@@ -537,10 +553,31 @@ export default function Home() {
         title: 'Margin',
         key: 'margin',
         render: (value: string, item: any) => (
-          <TableItem>
-            <div>{formatAmount(value)}</div>
-            <div>{item.symbol}</div>
-          </TableItem>
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+            `}
+          >
+            <TableItem>
+              <div>{formatAmount(value)}</div>
+              <div>{item.symbol}</div>
+            </TableItem>
+            <div
+              css={css`
+                padding: 0 5px;
+                margin-left: 8px;
+                border-radius: 2px;
+                background: #2c2f38;
+                color: #fff;
+                font-size: 10px;
+                font-style: normal;
+                font-weight: 400;
+              `}
+            >
+              x{item.leverage}
+            </div>
+          </div>
         ),
       },
       {
@@ -585,7 +622,7 @@ export default function Home() {
         key: 'pnl',
         render: (value: string, item: any) => (
           <TableItem>
-            <div>{formatAmount(value)}</div>
+            <TextWithDirection>{formatAmount(value)}</TextWithDirection>
             <div>{item.symbol}</div>
           </TableItem>
         ),
@@ -595,7 +632,7 @@ export default function Home() {
         key: 'operation',
         render: (_, item) => (
           <>
-            <AdjustMarginDialog data={item as any}>
+            <AdjustMarginDialog data={item as any} onSuccess={handleSuccsee}>
               <Button>
                 <svg
                   width="8"
@@ -619,7 +656,7 @@ export default function Home() {
                 Margin
               </Button>
             </AdjustMarginDialog>
-            <ClosePositionDialog data={item as any}>
+            <ClosePositionDialog data={item as any} onSuccess={handleSuccsee}>
               <Button
                 backgroundColor="#464A56"
                 css={css`

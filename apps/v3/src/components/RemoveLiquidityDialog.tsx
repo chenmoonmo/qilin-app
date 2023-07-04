@@ -12,6 +12,7 @@ import { TokenIcon } from './TokenIcon';
 type RemoveLiquidityDialogPropsType = {
   children: React.ReactNode;
   data: ReturnType<typeof useMyLiquidity>['data'][number];
+  onSuccess: () => void;
 };
 
 const Content = styled(Dialog.Content)`
@@ -203,7 +204,7 @@ const InfoItem = styled.div`
 
 export const RemoveLiquidityDialog: React.FC<
   RemoveLiquidityDialogPropsType
-> = ({ children, data }) => {
+> = ({ children, data, onSuccess }) => {
   const { address } = useAccount();
   const [open, setOpen] = useState(false);
   const [precent, setPrecent] = useState(50);
@@ -236,7 +237,8 @@ export const RemoveLiquidityDialog: React.FC<
   const { isNeedApprove, handleRemoveLiquidity } = useRemoveLiquidity(
     data.asset_address,
     poolInfo?.LPAddress,
-    LPAmount
+    LPAmount,
+    onSuccess
   );
 
   return (
@@ -330,7 +332,10 @@ export const RemoveLiquidityDialog: React.FC<
               <span>Share Of Pool</span>
               <span>{formatAmount(shareWillRemove, 2)}%</span>
             </InfoItem>
-            <SubmitButton disabled={precent === 0} onClick={handleRemoveLiquidity}>
+            <SubmitButton
+              disabled={precent === 0}
+              onClick={handleRemoveLiquidity}
+            >
               {isNeedApprove ? 'Approve' : 'Remove Liquidity'}
             </SubmitButton>
           </div>

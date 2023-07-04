@@ -91,13 +91,13 @@ const Content = styled.div`
 `;
 
 const Title = styled(RadixToast.Title)`
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
   color: #ffffff;
 `;
 
 const Description = styled(RadixToast.Description)`
-  font-size: 16px;
+  font-size: 12px;
   line-height: 16px;
   font-weight: 500;
   color: #bcc3d6;

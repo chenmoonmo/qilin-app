@@ -1,12 +1,8 @@
+import { useToast } from '@qilin/component';
 import { BigNumber } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils.js';
 import { useCallback, useMemo, useState } from 'react';
-import {
-  useAccount,
-  useBalance,
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi';
+import { useAccount, useBalance, useContractWrite } from 'wagmi';
 
 import Asset from '@/abis/Asset.json';
 
@@ -14,8 +10,10 @@ import { useApprove } from './useApprove';
 import type { usePoolList } from './usePoolList';
 
 export const useAddLiquidity = (
-  data: ReturnType<typeof usePoolList>['data'][number]
+  data: ReturnType<typeof usePoolList>['data'][number],
+  onSuccess: () => void
 ) => {
+  const { showWalletToast, closeWalletToast } = useToast();
   const { address } = useAccount();
 
   const { data: marginToken } = useBalance({
@@ -53,12 +51,44 @@ export const useAddLiquidity = (
   });
 
   const handleAddLiquidty = useCallback(async () => {
-    if (isNeedApprove) {
-      await approve();
+    showWalletToast({
+      title: 'Transaction Confirmation',
+      message: 'Please confirm the transaction in your wallet',
+      type: 'loading',
+    });
+    try {
+      if (isNeedApprove) {
+        await approve();
+      }
+      const res = await writeAsync?.();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
+      await res?.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
+      onSuccess();
+    } catch (e) {
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
     }
-    const res = await writeAsync?.();
-    await res?.wait();
-  }, [approve, isNeedApprove, writeAsync]);
+    setTimeout(closeWalletToast, 3000);
+  }, [
+    approve,
+    closeWalletToast,
+    isNeedApprove,
+    onSuccess,
+    showWalletToast,
+    writeAsync,
+  ]);
 
   return useMemo(() => {
     return {

@@ -1,3 +1,4 @@
+import { useToast } from '@qilin/component';
 import { BigNumber, ethers } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils.js';
 import { useMemo, useState } from 'react';
@@ -12,8 +13,10 @@ import type { usePoolInfo } from './usePoolInfo';
 const abi = new ethers.utils.AbiCoder();
 
 export const useOpenPositon = (
-  poolInfo: ReturnType<typeof usePoolInfo>['data']
+  poolInfo: ReturnType<typeof usePoolInfo>['data'],
+  onSuccess: () => void
 ) => {
+  const { showWalletToast, closeWalletToast } = useToast();
   const { address } = useAccount();
 
   const [assetAddress, poolAddress] = usePoolAddress();
@@ -37,7 +40,7 @@ export const useOpenPositon = (
   }, [margin, marginTokenDecimals]);
 
   const [estPrice, size, slippage, estLiqPrice] = useMemo(() => {
-    if (!poolInfo) return [undefined, undefined, undefined,undefined];
+    if (!poolInfo) return [undefined, undefined, undefined, undefined];
 
     const {
       liquidity,
@@ -90,7 +93,7 @@ export const useOpenPositon = (
         payerAddress: address,
         payType: 1,
       },
-      abi.encode(['uint8', 'uint16'], [2, 10]),
+      abi.encode(['uint8', 'uint16'], [direction, 10]),
     ],
     overrides: {
       gasPrice: BigNumber.from(8000000000),
@@ -99,11 +102,37 @@ export const useOpenPositon = (
   });
 
   const hanldeOpenPosition = async () => {
-    if (isNeedApprove) {
-      await approve?.();
+    showWalletToast({
+      title: 'Transaction Confirmation',
+      message: 'Please confirm the transaction in your wallet',
+      type: 'loading',
+    });
+
+    try {
+      if (isNeedApprove) {
+        await approve?.();
+      }
+      const res = await writeAsync();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
+      await res.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
+      onSuccess();
+    } catch (e) {
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
     }
-    const res = await writeAsync();
-    await res.wait();
+    setTimeout(closeWalletToast, 3000);
   };
 
   return {

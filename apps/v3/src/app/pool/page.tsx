@@ -4,8 +4,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
-import { useMemo } from 'react';
-import { useNetwork } from 'wagmi';
+import { useCallback, useMemo } from 'react';
 
 import {
   AddLiquidityDialog,
@@ -25,59 +24,67 @@ const TableTitle = styled.div`
 `;
 
 export default function Pool() {
-  const { data: poolList } = usePoolList();
-  const { data: myLiquidityList } = useMyLiquidity();
+  const { data: poolList, mutate: refreshPoolList } = usePoolList();
+  const { data: myLiquidityList, mutate: refreshMyLiquidity } =
+    useMyLiquidity();
 
-  const LiquidityColumns = [
-    {
-      title: 'Pool',
-      key: 'name',
-    },
-    {
-      title: 'Liquidity',
-      key: 'liquidity',
-      render: (value: any) => {
-        return `${formatAmount(value)}`;
+  const handleSuccess = useCallback(() => {
+    refreshPoolList();
+    refreshMyLiquidity();
+  }, [refreshMyLiquidity, refreshPoolList]);
+
+  const LiquidityColumns = useMemo(() => {
+    return [
+      {
+        title: 'Pool',
+        key: 'name',
       },
-    },
-    {
-      title: 'Share',
-      key: 'share',
-      render: (value: any) => {
-        return `${formatAmount(value, 2)}%`;
+      {
+        title: 'Liquidity',
+        key: 'liquidity',
+        render: (value: any) => {
+          return `${formatAmount(value)}`;
+        },
       },
-    },
-    {
-      title: 'Rol',
-      key: 'roi',
-      render: (value: any) => {
-        return `${formatAmount(value)}`;
+      {
+        title: 'Share',
+        key: 'share',
+        render: (value: any) => {
+          return `${formatAmount(value, 2)}%`;
+        },
       },
-    },
-    {
-      title: 'Operation',
-      key: 'operation',
-      render: (_, item: any) => {
-        return (
-          <>
-            <AddLiquidityDialog data={item}>
-              <Button>Add</Button>
-            </AddLiquidityDialog>
-            <RemoveLiquidityDialog data={item}>
-              <Button
-                backgroundColor="#464A56"
-                css={css`
-                  margin-left: 6px;
-                `}
-              >
-                Remove
-              </Button>
-            </RemoveLiquidityDialog>
-          </>
-        );
+      {
+        title: 'Rol',
+        key: 'roi',
+        render: (value: any) => {
+          return `${formatAmount(value)}`;
+        },
       },
-    },
-  ];
+      {
+        title: 'Operation',
+        key: 'operation',
+        render: (_, item: any) => {
+          return (
+            <>
+              <AddLiquidityDialog data={item} onSuccess={handleSuccess}>
+                <Button>Add</Button>
+              </AddLiquidityDialog>
+              <RemoveLiquidityDialog data={item} onSuccess={handleSuccess}>
+                <Button
+                  backgroundColor="#464A56"
+                  css={css`
+                    margin-left: 6px;
+                  `}
+                >
+                  Remove
+                </Button>
+              </RemoveLiquidityDialog>
+            </>
+          );
+        },
+      },
+    ];
+  }, [handleSuccess]);
 
   const poolsColumns = useMemo(() => {
     return [
@@ -89,13 +96,13 @@ export default function Pool() {
         title: 'Liquidity',
         key: 'liquidity',
         render: (value: any, item: any) =>
-          formatAmount(value) + ' ' + item.token0Name,
+          formatAmount(value) + ' ' + item.marginTokenSymbol,
       },
       {
         title: 'LP Price',
-        key: 'futurePrice',
+        key: 'LPPrice',
         render: (value: any, item: any) =>
-          formatAmount(value) + ' ' + item.token1Name,
+          formatAmount(value) + ' ' + item.marginTokenSymbol,
       },
       {
         title: 'APY',
@@ -106,14 +113,14 @@ export default function Pool() {
         key: 'Operation',
         render: (_, item: any) => {
           return (
-            <AddLiquidityDialog data={item}>
+            <AddLiquidityDialog data={item} onSuccess={handleSuccess}>
               <Button>Add</Button>
             </AddLiquidityDialog>
           );
         },
       },
     ];
-  }, []);
+  }, [handleSuccess]);
 
   return (
     <Main>

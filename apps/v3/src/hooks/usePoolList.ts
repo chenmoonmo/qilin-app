@@ -1,3 +1,4 @@
+import { BigNumber } from 'ethers';
 import { formatUnits } from 'ethers/lib/utils.js';
 import qs from 'querystring';
 import { useCallback, useMemo, useState } from 'react';
@@ -39,8 +40,13 @@ export const usePoolList = () => {
           const poolAddress = pool.pool_info.pool;
 
           const marginTokenAddress = pool.asset_info.pool_token;
+          const marginTokenSymbol = pool.asset_info.pool_name;
 
           const liquidity = pool.asset_info.liquidity;
+          const LPAmount = pool.asset_info.lp_amount;
+          const poolDecimal = pool.asset_info.pool_decimal;
+
+          const LPPrice = BigNumber.from(liquidity).div(LPAmount).toString();
 
           const pairName = pool.pool_info.name;
 
@@ -55,12 +61,14 @@ export const usePoolList = () => {
             assetAddress,
             poolAddress,
             marginTokenAddress,
+            marginTokenSymbol,
             token0Name,
             token1Name,
+            LPPrice,
             volumn: formatUnits(volumn, decimal),
             change: +formatUnits(change, 4) * 100,
             futurePrice: formatUnits(futurePrice, decimal),
-            liquidity: formatUnits(liquidity, decimal),
+            liquidity: formatUnits(liquidity, poolDecimal),
           };
         }) ?? []
       );

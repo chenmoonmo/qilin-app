@@ -1,3 +1,4 @@
+import { useToast } from '@qilin/component';
 import { useCallback, useMemo, useState } from 'react';
 import { useAccount, useContractWrite } from 'wagmi';
 
@@ -6,7 +7,11 @@ import type { PositionItem } from '@/type';
 
 import { useApprove } from './useApprove';
 
-export const useAdjustPosition = (data: PositionItem) => {
+export const useAdjustPosition = (
+  data: PositionItem,
+  onSuccess: () => void
+) => {
+  const { showWalletToast, closeWalletToast } = useToast();
   const { address } = useAccount();
 
   const [amount, setAmount] = useState('');
@@ -33,12 +38,45 @@ export const useAdjustPosition = (data: PositionItem) => {
   });
 
   const handleAdjustPosition = useCallback(async () => {
-    if (isNeedApprove) {
-      await approve();
+    showWalletToast({
+      title: 'Transaction Confirmation',
+      message: 'Please confirm the transaction in your wallet',
+      type: 'loading',
+    });
+
+    try {
+      if (isNeedApprove) {
+        await approve();
+      }
+      const res = await writeAsync();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Pending',
+        type: 'loading',
+      });
+      await res.wait();
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Transaction Confirmed',
+        type: 'success',
+      });
+      onSuccess();
+    } catch (e) {
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
     }
-    const res = await writeAsync();
-    await res.wait();
-  }, [approve, isNeedApprove, writeAsync]);
+    setTimeout(closeWalletToast, 3000);
+  }, [
+    approve,
+    closeWalletToast,
+    isNeedApprove,
+    onSuccess,
+    showWalletToast,
+    writeAsync,
+  ]);
 
   return useMemo(() => {
     return {

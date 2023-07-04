@@ -39,10 +39,15 @@ const Th = styled.th`
 `;
 
 const Td = styled(Th.withComponent('td'))`
-  :has([data-active='true']) {
+  :has([data-direction='long']) {
     font-weight: 600;
     color: #44c27f;
     border-left: 3px solid #44c27f;
+  }
+  :has([data-direction='short']) {
+    font-weight: 600;
+    color: #e15c48;
+    border-left: 3px solid #e15c48;
   }
 `;
 

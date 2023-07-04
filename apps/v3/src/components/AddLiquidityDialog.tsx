@@ -13,6 +13,7 @@ import { TokenIcon } from './TokenIcon';
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
   data: ReturnType<typeof usePoolList>['data'][number];
+  onSuccess: () => void;
 };
 
 const Content = styled(Dialog.Content)`
@@ -121,13 +122,14 @@ const InfoItem = styled.div`
 export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
   data,
+  onSuccess,
 }) => {
- 
-
   const [open, setOpen] = useState(false);
 
-  const { amount, setAmount, marginToken, handleAddLiquidty } =
-    useAddLiquidity(data);
+  const { amount, setAmount, marginToken, handleAddLiquidty } = useAddLiquidity(
+    data,
+    onSuccess
+  );
 
   const { data: poolParam } = usePoolParam(
     data.assetAddress,

@@ -1,6 +1,7 @@
 'use client';
 import './globals.css';
 
+import { ToastProvider } from '@qilin/component';
 import Web3Provider from '@qilin/wagmi-provider';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -11,7 +12,6 @@ import { Header } from '@/components';
 import { useChainInfo } from '@/hooks';
 
 dayjs.extend(duration);
-
 
 const poppins = Poppins({
   weight: ['300', '400', '500', '600', '700', '800'],
@@ -39,9 +39,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   useChainInfo();
-  
+
   return (
     <html lang="en">
       <body className={poppins.className}>
@@ -49,8 +48,10 @@ export default function RootLayout({
           defaultChains={[arbitrumGoerli]}
           connectorNames={['MetaMask']}
         >
-          <Header routes={routes} />
-          {children}
+          <ToastProvider>
+            <Header routes={routes} />
+            {children}
+          </ToastProvider>
         </Web3Provider>
       </body>
     </html>

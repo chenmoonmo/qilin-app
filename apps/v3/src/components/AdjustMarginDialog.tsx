@@ -10,6 +10,7 @@ import type { PositionItem } from '@/type';
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
   data: PositionItem;
+  onSuccess: () => void;
 };
 
 const Content = styled(Dialog.Content)`
@@ -81,6 +82,7 @@ const InfoItem = styled.div`
 export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
   data,
+  onSuccess,
 }) => {
   const { address } = useAccount();
   const [open, setOpen] = useState(false);
@@ -91,7 +93,7 @@ export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
   });
 
   const { amount, setAmount, handleAdjustPosition, isNeedApprove } =
-    useAdjustPosition(data);
+    useAdjustPosition(data, onSuccess);
 
   const currentMargin = useMemo(() => {
     return formatAmount(+data.margin + (amount ? +amount : 0));

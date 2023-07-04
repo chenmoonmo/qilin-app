@@ -5,11 +5,13 @@ import { useMemo, useState } from 'react';
 
 import type { usePositions } from '@/hooks';
 import { useClosePosition } from '@/hooks/useClosePosition';
+
 import { TextWithDirection } from './TextWithDirection';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
   data: ReturnType<typeof usePositions>['data'][number];
+  onSuccess: () => void;
 };
 
 const Content = styled(Dialog.Content)`
@@ -60,10 +62,10 @@ const SplitLine = styled.div`
 export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
   data,
+  onSuccess,
 }) => {
   const [open, setOpen] = useState(false);
-
-  const { handleClosePosition } = useClosePosition(data);
+  const { handleClosePosition } = useClosePosition(data, onSuccess);
 
   const realizedPNL = useMemo(() => {
     return +data.pnl + +data.funding_fee - +data.service_fee;
