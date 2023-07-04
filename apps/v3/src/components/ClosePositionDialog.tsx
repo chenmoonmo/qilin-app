@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { usePositions } from '@/hooks';
 import { useClosePosition } from '@/hooks/useClosePosition';
+import { TextWithDirection } from './TextWithDirection';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
@@ -49,15 +50,24 @@ const InfoItem = styled.div`
   }
 `;
 
+const SplitLine = styled.div`
+  width: 100%;
+  height: 1px;
+  background-color: #363a45;
+  margin: 20px 0;
+`;
+
 export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
   data,
 }) => {
-  console.log(data);
-
   const [open, setOpen] = useState(false);
 
   const { handleClosePosition } = useClosePosition(data);
+
+  const realizedPNL = useMemo(() => {
+    return +data.pnl + +data.funding_fee - +data.service_fee;
+  }, [data.funding_fee, data.pnl, data.service_fee]);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -102,11 +112,14 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
             <span>Size</span>
             <span>{formatAmount(data.size)}</span>
           </InfoItem>
+          <SplitLine />
           <InfoItem>
             <span>Realized PNL</span>
             <span>
               {/* TODO: 计算 */}
-              {formatAmount(data.pnl)}
+              <TextWithDirection>
+                {formatAmount(realizedPNL)} {data.symbol}
+              </TextWithDirection>
             </span>
           </InfoItem>
           <SubmitButton onClick={handleClosePosition}>Confirm</SubmitButton>

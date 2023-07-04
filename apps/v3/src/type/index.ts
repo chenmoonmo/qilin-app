@@ -108,3 +108,28 @@ export type PoolParam = {
   lp_price: string; // 18位精度
   apy: string; // 4位精度
 };
+
+export type KLineItem = {
+  close: string;
+  high: string;
+  low: string;
+  open: string;
+  oracle: Address;
+  timestamp: number;
+};
+
+export type LiquidationItem = {
+  asset_address: Address;
+  pool_address: Address;
+};
+
+export type MyLiquidityItem = {
+  asset_address: Address;
+  liquidity: string;
+  lp_amount: string;
+  name: string;
+  pool_address: Address;
+  pool_share: string;
+  roi: string;
+  user_lp_amount: string;
+};

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 import { usePoolList } from '@/hooks';
 
+import { TextWithDirection } from './TextWithDirection';
 import { TokenIcon } from './TokenIcon';
 
 type PairSelectorType = {
@@ -122,7 +123,8 @@ export const PairSelector: React.FC<PairSelectorType> = ({
   value,
 }) => {
   const router = useRouter();
-  const { data } = usePoolList();
+
+  const { data, searchInfo, setSearchInfo } = usePoolList();
 
   const handleClick = (assetsAddress: string, poolAddress: string) => {
     router.push(`/?assetAddress=${assetsAddress}&poolAddress=${poolAddress}`);
@@ -135,7 +137,12 @@ export const PairSelector: React.FC<PairSelectorType> = ({
         <Content align="start" sideOffset={10}>
           <SearchInput>
             <Icon.SearchIcon />
-            <input type="text" placeholder="Search name or paste address" />
+            <input
+              value={searchInfo}
+              onChange={e => setSearchInfo(e.target.value)}
+              type="text"
+              placeholder="Search name or paste address"
+            />
           </SearchInput>
           <TableLayout>
             <thead>
@@ -175,14 +182,18 @@ export const PairSelector: React.FC<PairSelectorType> = ({
                         `}
                       >
                         <PairIcon>
-                          <TokenIcon size={24}></TokenIcon>
-                          <TokenIcon size={24}></TokenIcon>
+                          <TokenIcon size={24} />
+                          <TokenIcon size={24} />
                         </PairIcon>
                         <span>{pool.pairName}</span>
                       </div>
                     </td>
                     <td>{formatAmount(pool.futurePrice)}</td>
-                    <td>{formatAmount(pool.change, 2)}%</td>
+                    <td>
+                      <TextWithDirection>
+                        {formatAmount(pool.change, 2)}%
+                      </TextWithDirection>
+                    </td>
                     <td>{formatAmount(pool.volumn)}</td>
                   </tr>
                 );

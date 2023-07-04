@@ -10,5 +10,8 @@ export * from './RemoveLiquidityDialog';
 export * from './SwapRadio';
 export * from './Tab';
 export * from './Table';
+export * from './TextWithDirection';
 export * from './TokenIcon';
 export * from './TradingView';
+
+

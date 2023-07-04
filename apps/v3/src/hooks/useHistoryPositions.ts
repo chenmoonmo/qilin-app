@@ -7,6 +7,8 @@ import { useAccount, useChainId } from 'wagmi';
 import { fetcher } from '@/helper';
 import type { HistoryPositionItem } from '@/type';
 
+import { usePoolAddress } from './usePoolAddress';
+
 const PAGE_SIZE = 10;
 
 const formatUnitsAmount = (amount: string) => {
@@ -14,16 +16,23 @@ const formatUnitsAmount = (amount: string) => {
   return amount === '-' || !amount ? '-' : formatUnits(amount, decimal);
 };
 
-export const useHistoryPositions = () => {
+export const useHistoryPositions = (isFilter: boolean) => {
   const chainId = useChainId();
   const { address } = useAccount();
+  const [assetAddress, poolAddress] = usePoolAddress();
 
   const queryString = useMemo(() => {
     return qs.stringify({
       chain_id: chainId,
       user_address: address,
+      ...(isFilter
+        ? {
+            asset_address: assetAddress,
+            pool_address: poolAddress,
+          }
+        : {}),
     });
-  }, [address, chainId]);
+  }, [address, assetAddress, chainId, isFilter, poolAddress]);
 
   const { data, isLoading, setSize, mutate } = useSWRInfinite(
     index =>

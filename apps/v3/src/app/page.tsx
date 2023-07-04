@@ -3,9 +3,11 @@ import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
 import { formatAmount, formatInput } from '@qilin/utils';
+import dayjs from 'dayjs';
 import Link from 'next/link';
-import { forwardRef, useMemo, useState } from 'react';
-import { useAccount, useBalance } from 'wagmi';
+import { useRouter } from 'next/navigation';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
+import { useAccount, useBalance, useNetwork } from 'wagmi';
 
 import {
   AdjustMarginDialog,
@@ -20,16 +22,20 @@ import {
   TabList,
   TabRoot,
   TabTrigger,
+  TextWithDirection,
   TokenIcon,
   TradingView,
 } from '@/components';
 import {
   useHistoryPositions,
+  useKLine,
+  useLiquidation,
   useOpenPositon,
+  usePoolAddress,
   usePoolInfo,
+  usePoolList,
   usePositions,
 } from '@/hooks';
-import { PositionItem } from '@/type';
 
 const Main = styled.main`
   display: grid;
@@ -325,78 +331,6 @@ const TableItem = styled.div`
   }
 `;
 
-const HistoryColumns = [
-  {
-    title: 'Trading Pair',
-    key: 'pool_name',
-  },
-  {
-    title: 'Side',
-    key: 'Direction',
-    render: (value: 1 | 2) => {
-      return value === 1 ? 'Long' : 'Short';
-    },
-  },
-  {
-    title: 'Type',
-    key: 'Status',
-  },
-  {
-    title: 'Margin',
-    key: 'Margin',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Price',
-    key: 'Price',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Funding-Fee',
-    key: 'FundingFee',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Service-Fee',
-    key: 'ServicesFee',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'PNL',
-    key: 'PNL',
-    render: (value: string, item: any) => (
-      <TableItem>
-        <div>{formatAmount(value)}</div>
-        <div>{item.symbol}</div>
-      </TableItem>
-    ),
-  },
-  {
-    title: 'Time',
-    key: 'time',
-  },
-];
-
 const PositionTable = forwardRef<any, { columns: any; isFilter: boolean }>(
   ({ columns, isFilter }, ref) => {
     const { data } = usePositions(isFilter);
@@ -406,23 +340,150 @@ const PositionTable = forwardRef<any, { columns: any; isFilter: boolean }>(
 
 PositionTable.displayName = 'PositionTable';
 
-const HistoryTable = forwardRef<any>((_, ref) => {
-  const { data } = useHistoryPositions();
-  console.log(data);
-  return <Table ref={ref} columns={HistoryColumns} dataSource={data} />;
-});
+const HistoryTable = forwardRef<any, { isFilter: boolean }>(
+  ({ isFilter }, ref) => {
+    const { chain } = useNetwork();
+
+    const HistoryColumns = useMemo(() => {
+      return [
+        {
+          title: 'Trading Pair',
+          key: 'pool_name',
+        },
+        {
+          title: 'Side',
+          key: 'Direction',
+          render: (value: 1 | 2) => {
+            const direction = value === 1 ? 'Long' : 'Short';
+
+            return (
+              <TextWithDirection
+                direction={direction.toLowerCase() as 'long' | 'short'}
+              >
+                {direction}
+              </TextWithDirection>
+            );
+          },
+        },
+        {
+          title: 'Type',
+          key: 'Status',
+        },
+        {
+          title: 'Margin',
+          key: 'Margin',
+          render: (value: string, item: any) => (
+            <TableItem>
+              <div>{formatAmount(value)}</div>
+              <div>{item.symbol}</div>
+            </TableItem>
+          ),
+        },
+        {
+          title: 'Price',
+          key: 'Price',
+          render: (value: string, item: any) => (
+            <TableItem>
+              <div>{formatAmount(value)}</div>
+              <div>{item.symbol}</div>
+            </TableItem>
+          ),
+        },
+        {
+          title: 'Funding-Fee',
+          key: 'FundingFee',
+          render: (value: string, item: any) => (
+            <TableItem>
+              <div>{formatAmount(value)}</div>
+              <div>{item.symbol}</div>
+            </TableItem>
+          ),
+        },
+        {
+          title: 'Service-Fee',
+          key: 'ServicesFee',
+          render: (value: string, item: any) => (
+            <TableItem>
+              <div>{formatAmount(value)}</div>
+              <div>{item.symbol}</div>
+            </TableItem>
+          ),
+        },
+        {
+          title: 'PNL',
+          key: 'PNL',
+          render: (value: string, item: any) => (
+            <TableItem>
+              <div>{formatAmount(value)}</div>
+              <div>{item.symbol}</div>
+            </TableItem>
+          ),
+        },
+        {
+          title: 'Time',
+          key: 'ActionTime',
+          // TODO: 缺少tx hash
+          render: (value: number, item: any) => (
+            <Link
+              target="_blank"
+              href={`${chain?.blockExplorers?.default.url}/tx/${value}`}
+              css={css`
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+              `}
+            >
+              {dayjs.unix(value).utc().format('YYYY.MM.DD HH:mm:ss UTC')}
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                css={css`
+                  margin-left: 3px;
+                `}
+              >
+                <path
+                  d="M4.86094 0.0124667C5.20303 -0.0561744 5.53593 0.165539 5.60442 0.507617C5.67306 0.849694 5.45134 1.18259 5.10925 1.25123C2.88704 1.69675 1.26297 3.65528 1.26297 5.94702C1.26297 8.59244 3.40977 10.7371 6.05881 10.7371C8.33468 10.7371 10.2838 9.14173 10.7502 6.94747C10.8228 6.6062 11.1581 6.38835 11.4994 6.46086C11.8406 6.53337 12.0585 6.86884 11.986 7.20995C11.3962 9.98492 8.9341 12 6.05914 12C2.71286 12 0 9.29013 0 5.94702C0 3.05024 2.05205 0.576258 4.86094 0.0124667ZM10.7367 0.000543109C11.0717 0.000543109 11.393 0.133475 11.6299 0.370174C11.8667 0.607034 11.9998 0.928164 12 1.26315V4.7371C12 4.96268 11.8798 5.17118 11.6843 5.28413C11.4889 5.39692 11.2481 5.39692 11.0527 5.28413C10.8572 5.17134 10.737 4.96268 10.737 4.7371V1.99822L5.68257 7.21059C5.45375 7.44681 5.08186 7.46792 4.82791 7.25893L4.78956 7.22445C4.66935 7.10779 4.60023 6.94828 4.59765 6.7807C4.59507 6.61329 4.6592 6.45151 4.7757 6.33131L9.69014 1.26315H7.26313C6.93184 1.26315 6.65695 1.00744 6.6331 0.676964L6.63165 0.632009C6.63165 0.283164 6.9146 0.00022085 7.26313 0.00022085L10.7367 0.000543109Z"
+                  fill="white"
+                />
+              </svg>
+            </Link>
+          ),
+        },
+      ];
+    }, [chain?.blockExplorers?.default.url]);
+
+    const { data } = useHistoryPositions(isFilter);
+
+    return <Table ref={ref} columns={HistoryColumns} dataSource={data} />;
+  }
+);
 
 HistoryTable.displayName = 'HistoryTable';
 
 export default function Home() {
   const { address } = useAccount();
+  const router = useRouter();
+
+  const [assetAddress, poolAddress] = usePoolAddress();
+
+  const enabled = useMemo(
+    () => !!(assetAddress && poolAddress),
+    [assetAddress, poolAddress]
+  );
 
   const [tableTab, setTableTab] = useState<string>('1');
   const [isFilter, setIsFilter] = useState<boolean>(false);
 
-  const { data: poolInfo } = usePoolInfo();
+  const { data: liquidationList } = useLiquidation();
 
-  console.log(poolInfo);
+  const { data: poolList } = usePoolList();
+
+  const { data: poolInfo } = usePoolInfo(assetAddress, poolAddress, enabled);
+
+  const { data: kLine } = useKLine(poolInfo?.oracleAddress);
 
   const {
     margin,
@@ -435,13 +496,9 @@ export default function Home() {
     estPrice,
     isNeedApprove,
     hanldeOpenPosition,
-  } = useOpenPositon({
-    marginTokenAddress: poolInfo?.marginTokenAddress,
-    price: poolInfo?.spotPrice,
-    positionLong: poolInfo?.positionLong,
-    positionShort: poolInfo?.positionShort,
-    liquidity: poolInfo?.liquidity,
-  });
+    slippage,
+    estLiqPrice,
+  } = useOpenPositon(poolInfo);
 
   const { data: marginToken } = useBalance({
     address,
@@ -462,6 +519,19 @@ export default function Home() {
       {
         title: 'Trading Pair',
         key: 'pool_name',
+        render: (value: string, item: any) => {
+          return (
+            <Link
+              href={`/?assetAddress=${item.asset_address}&poolAddress=${item.pool_address}`}
+              data-active={
+                item.pool_address === poolInfo?.poolAddress &&
+                item.asset_address === poolInfo?.assetAddress
+              }
+            >
+              {value}
+            </Link>
+          );
+        },
       },
       {
         title: 'Margin',
@@ -496,7 +566,9 @@ export default function Home() {
       {
         title: 'Margin Ratio',
         key: 'margin_ratio',
-        render: (value: string) => `${formatAmount(+value * 100, 2)}%`,
+        // TODO:
+        render: (value: string) =>
+          `${formatAmount(+value * 100, 2)}%(>2% safe)`,
       },
       {
         title: 'Funding Fee',
@@ -561,8 +633,17 @@ export default function Home() {
         ),
       },
     ],
-    []
+    [poolInfo?.assetAddress, poolInfo?.poolAddress]
   );
+
+  useEffect(() => {
+    const pool = poolList?.[0];
+    if (!enabled && pool) {
+      router.replace(
+        `/?assetAddress=${pool.assetAddress}&poolAddress=${pool.poolAddress}`
+      );
+    }
+  }, [assetAddress, enabled, poolAddress, poolList, router]);
 
   return (
     <Main>
@@ -595,7 +676,11 @@ export default function Home() {
         </PairDataItem>
         <PairDataItem>
           <div>24h Change</div>
-          <div>{formatAmount(poolInfo?.change, 2)}%</div>
+          <div>
+            <TextWithDirection>
+              {formatAmount(poolInfo?.change, 2)}%
+            </TextWithDirection>
+          </div>
         </PairDataItem>
         <PairDataItem>
           <div>24h Volume</div>
@@ -604,9 +689,11 @@ export default function Home() {
           </div>
         </PairDataItem>
         <PairDataItem>
-          <div>Fuding</div>
+          <div>Funding</div>
           <div>
-            {formatAmount(poolInfo?.funding)} {marginToken?.symbol}
+            <TextWithDirection>
+              {formatAmount(poolInfo?.funding, 2)}%
+            </TextWithDirection>
           </div>
         </PairDataItem>
         <PairDataItem>
@@ -615,16 +702,20 @@ export default function Home() {
             {formatAmount(poolInfo?.nakePosition)} {marginToken?.symbol}
           </div>
         </PairDataItem>
-        <LiquidateLink href="/liquidate">
-          <div>
-            <div>Liquidity Reward</div>
-            <span>11 usdc</span>
-          </div>
-          <div></div>
-        </LiquidateLink>
+        {liquidationList?.[0] && (
+          <LiquidateLink
+            href={`/liquidate?assetAddress=${liquidationList[0].asset_address}&pool_address=${liquidationList[0].pool_address}`}
+          >
+            <div>
+              <div>Liquidity Reward</div>
+              <span>11 usdc</span>
+            </div>
+            <div></div>
+          </LiquidateLink>
+        )}
       </PairInfoContainer>
       {/* chart */}
-      <TradingView />
+      <TradingView data={kLine} />
       {/* form */}
       <div>
         <SwapRadio value={direction} onChange={setDirection} />
@@ -684,17 +775,19 @@ export default function Home() {
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Slippage</span>
-          <span>0.2%</span>
+          <span>{formatAmount(slippage, 2)}%</span>
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Est.Liq Price</span>
           <span>
-            1 {poolInfo?.token0Name} = 123.12 {poolInfo?.token1Name}
+            1 {poolInfo?.token0Name} = {formatAmount(estLiqPrice)}{' '}
+            {poolInfo?.token1Name}
           </span>
         </BudgetResultItem>
         <OpenPositionDialog
           margin={margin}
           openPrice={estPrice}
+          estLiqPrice={estLiqPrice}
           size={size}
           direction={direction}
           isNeedApprove={isNeedApprove}
@@ -735,7 +828,7 @@ export default function Home() {
             <PositionTable columns={positionColumns} isFilter={isFilter} />
           </TabContent>
           <TabContent value="2" asChild>
-            <HistoryTable />
+            <HistoryTable isFilter={isFilter} />
           </TabContent>
         </TabRoot>
       </TableContainer>

@@ -10,7 +10,7 @@ type ColumnType = {
 
 type TableType = {
   columns: ColumnType[];
-  dataSource: any[];
+  dataSource?: any[];
 };
 
 const TableLayout = styled.table`
@@ -27,14 +27,24 @@ const Tr = styled.tr`
   &:last-of-type {
     border-bottom: 1px solid #363a45;
   }
+  &:hover td,
+  &:has([data-active='true']) {
+    background-color: rgba(54, 58, 69, 0.3);
+  }
 `;
 
 const Th = styled.th`
-  padding: 16px 0;
+  padding: 16px;
   text-align: left;
 `;
 
-const Td = Th.withComponent('td');
+const Td = styled(Th.withComponent('td'))`
+  :has([data-active='true']) {
+    font-weight: 600;
+    color: #44c27f;
+    border-left: 3px solid #44c27f;
+  }
+`;
 
 export const Table = forwardRef<any, TableType>(
   ({ columns, dataSource }, ref) => {

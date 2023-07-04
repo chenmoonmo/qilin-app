@@ -135,8 +135,6 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     open
   );
 
-  console.log(poolParam);
-
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>

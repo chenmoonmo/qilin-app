@@ -1,9 +1,9 @@
+import { BigNumber } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils.js';
 import { useCallback, useMemo, useState } from 'react';
 import {
   useAccount,
   useBalance,
-  useChainId,
   useContractWrite,
   usePrepareContractWrite,
 } from 'wagmi';
@@ -16,7 +16,6 @@ import type { usePoolList } from './usePoolList';
 export const useAddLiquidity = (
   data: ReturnType<typeof usePoolList>['data'][number]
 ) => {
-  const chainId = useChainId();
   const { address } = useAccount();
 
   const { data: marginToken } = useBalance({
@@ -26,31 +25,32 @@ export const useAddLiquidity = (
 
   const [amount, setAmount] = useState('');
 
+  //  带精度的 amount
+  const amountWithDecimals = useMemo(() => {
+    if (!amount || !marginToken?.decimals) return BigNumber.from(0);
+    return BigNumber.from(parseUnits(amount, marginToken.decimals));
+  }, [amount, marginToken?.decimals]);
+
   const { isNeedApprove, approve } = useApprove(
     data.marginTokenAddress,
     data.assetAddress,
-    parseUnits(amount || '0', marginToken?.decimals)
+    amountWithDecimals
   );
 
-  const { config, error } = usePrepareContractWrite({
+  const { writeAsync } = useContractWrite({
+    mode: 'recklesslyUnprepared',
     address: data.assetAddress,
     abi: Asset.abi,
-    functionName: 'removeLiquidity',
-    chainId,
+    functionName: 'addLiquidity',
     args: [
       address,
       {
-        amount: parseUnits(amount || '0', marginToken?.decimals),
+        amount: amountWithDecimals,
         payType: 1,
-        playerAddress: address,
+        payerAddress: address,
       },
     ],
-    enabled: !!amount,
   });
-
-  console.log(config, error);
-
-  const { writeAsync } = useContractWrite(config);
 
   const handleAddLiquidty = useCallback(async () => {
     if (isNeedApprove) {

@@ -1,19 +1,37 @@
 import styled from '@emotion/styled';
-import { useMutationObserver } from '@qilin/hooks';
-import type { IChartApi } from 'lightweight-charts';
+import useSize from '@react-hook/size';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import type { IChartApi, ISeriesApi } from 'lightweight-charts';
 import { ColorType, createChart } from 'lightweight-charts';
-import { useLayoutEffect, useRef } from 'react';
+import type { FC } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+
+dayjs.extend(utc);
+
+type TradingViewProps = {
+  data?: any[];
+};
 
 const ChartContainer = styled.div`
   position: relative;
   z-index: 0;
-  border: 1px solid #363a45;
+  /* border: 1px solid #363a45; */
 `;
 
-export const TradingView = () => {
+export const TradingView: FC<TradingViewProps> = ({ data }) => {
   const chartRef = useRef<HTMLDivElement>(null);
 
   const chart = useRef<IChartApi>();
+  const series = useRef<ISeriesApi<'Candlestick'>>();
+
+  const [clientWidth, clientHeight] = useSize(chartRef);
+
+  useEffect(() => {
+    if (clientWidth && clientHeight) {
+      chart.current?.resize(clientWidth, clientHeight);
+    }
+  }, [clientWidth, clientHeight]);
 
   useLayoutEffect(() => {
     const width = chartRef.current?.clientWidth;
@@ -27,19 +45,16 @@ export const TradingView = () => {
         barSpacing: 15,
         secondsVisible: false,
         lockVisibleTimeRangeOnResize: true,
-        // tickMarkFormatter: (unixTime: number) => {
-        //   return dayjs.unix(unixTime).utc().format('MM/DD h:mm A');
-        // },
+        tickMarkFormatter: (unixTime: number) => {
+          return dayjs.unix(unixTime).utc().format('MM/DD h:mm A');
+        },
       },
       rightPriceScale: {
         borderColor: '#363A45',
       },
-      leftPriceScale: {
-        visible: true,
-        borderColor: '#363A45',
-      },
       layout: {
         background: { type: ColorType.Solid, color: '#1F2127' },
+
         textColor: '#9094a2',
         fontSize: 12,
         fontFamily: 'InterVariable',
@@ -54,19 +69,22 @@ export const TradingView = () => {
       },
     });
 
+    series.current = chart.current?.addCandlestickSeries({
+      upColor: '#44C27F',
+      downColor: '#E15C48',
+      wickUpColor: '#44C27F',
+      wickDownColor: '#E15C48',
+      borderVisible: true,
+    });
+
     return () => {
       chart.current?.remove?.();
     };
   }, []);
 
-  // useMutationObserver(chartRef, () => {
-  //   console.log(111, chartRef);
-  //   const width = chartRef.current?.clientWidth;
-  //   const height = chartRef.current?.clientHeight;
-  //   if (width && height) {
-  //     chart.current?.resize(width, height);
-  //   }
-  // });
+  useEffect(() => {
+    series.current?.setData?.(data ?? []);
+  }, [data]);
 
   return <ChartContainer ref={chartRef} />;
 };

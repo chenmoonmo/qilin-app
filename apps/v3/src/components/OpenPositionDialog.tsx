@@ -10,7 +10,7 @@ type OpenPositionDialogPropsType = {
   margin?: string;
   openPrice?: number;
   size?: number;
-  estLiqPrice: string;
+  estLiqPrice?: number;
   token0Name?: string;
   token1Name?: string;
   marginTokenName?: string;
@@ -132,7 +132,7 @@ export const OpenPositionDialog = ({
           <PositionInfoItem>
             <span>Est.Liq.Price</span>
             <span>
-              {estLiqPrice} {token1Name}
+              {formatAmount(estLiqPrice)} {token1Name}
             </span>
           </PositionInfoItem>
           <SubmitButton onClick={handleConfirm}>

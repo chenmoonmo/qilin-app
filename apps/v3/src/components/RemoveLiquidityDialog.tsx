@@ -1,12 +1,17 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
+import { formatAmount } from '@qilin/utils';
 import * as Slider from '@radix-ui/react-slider';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useAccount, useBalance } from 'wagmi';
+
+import { type useMyLiquidity, usePoolInfo, useRemoveLiquidity } from '@/hooks';
 
 import { TokenIcon } from './TokenIcon';
 
 type RemoveLiquidityDialogPropsType = {
   children: React.ReactNode;
+  data: ReturnType<typeof useMyLiquidity>['data'][number];
 };
 
 const Content = styled(Dialog.Content)`
@@ -198,9 +203,41 @@ const InfoItem = styled.div`
 
 export const RemoveLiquidityDialog: React.FC<
   RemoveLiquidityDialogPropsType
-> = ({ children }) => {
+> = ({ children, data }) => {
+  const { address } = useAccount();
   const [open, setOpen] = useState(false);
   const [precent, setPrecent] = useState(50);
+
+  const { data: poolInfo } = usePoolInfo(
+    data.asset_address,
+    data.pool_address,
+    open
+  );
+
+  const { data: LPToken } = useBalance({
+    token: poolInfo?.LPAddress,
+    address,
+  });
+
+  const shareWillRemove = useMemo(() => {
+    return (data.share * precent) / 100;
+  }, [data.share, precent]);
+
+  const marginAmount = useMemo(() => {
+    return (
+      ((+(LPToken?.formatted ?? 0) * precent) / 100) * (poolInfo?.LPPrice ?? 1)
+    );
+  }, [LPToken?.formatted, poolInfo?.LPPrice, precent]);
+
+  const LPAmount = useMemo(() => {
+    return LPToken?.value.mul(precent).div(100);
+  }, [LPToken?.value, precent]);
+
+  const { isNeedApprove, handleRemoveLiquidity } = useRemoveLiquidity(
+    data.asset_address,
+    poolInfo?.LPAddress,
+    LPAmount
+  );
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -228,12 +265,12 @@ export const RemoveLiquidityDialog: React.FC<
           <div>
             <PoolInfo>
               <span>Pool</span>
-              <span>ETH / USDC</span>
+              <span>{data?.name}</span>
             </PoolInfo>
             <AmountPrecent>
               <h1>
                 <span>Remove Amount</span>
-                <span>Balance:0</span>
+                <span>Balance: {formatAmount(LPToken?.formatted)}</span>
               </h1>
               <PrecentValue>
                 <span>{precent}%</span>
@@ -278,22 +315,24 @@ export const RemoveLiquidityDialog: React.FC<
               </SliderRoot>
             </AmountPrecent>
             <LpAmount>
-              <span>0.0</span>
+              <span>{formatAmount(marginAmount)}</span>
               <TokenInfo>
                 <TokenIcon size={26} />
-                <TokenSymbol>ETH</TokenSymbol>
+                <TokenSymbol>{poolInfo?.marginTokenSymbol}</TokenSymbol>
               </TokenInfo>
             </LpAmount>
             <SubTitle>Summary</SubTitle>
             <InfoItem>
               <span>Lp Price</span>
-              <span>0.0</span>
+              <span>{formatAmount(poolInfo?.LPPrice)}</span>
             </InfoItem>
             <InfoItem>
               <span>Share Of Pool</span>
-              <span>0.0</span>
+              <span>{formatAmount(shareWillRemove, 2)}%</span>
             </InfoItem>
-            <SubmitButton>Remove Liquidity</SubmitButton>
+            <SubmitButton disabled={precent === 0} onClick={handleRemoveLiquidity}>
+              {isNeedApprove ? 'Approve' : 'Remove Liquidity'}
+            </SubmitButton>
           </div>
         </Content>
       </Dialog.Portal>

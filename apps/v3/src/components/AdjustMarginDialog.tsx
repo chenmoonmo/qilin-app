@@ -92,7 +92,10 @@ export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
 
   const { amount, setAmount, handleAdjustPosition, isNeedApprove } =
     useAdjustPosition(data);
-    
+
+  const currentMargin = useMemo(() => {
+    return formatAmount(+data.margin + (amount ? +amount : 0));
+  }, [data.margin, amount]);
 
   const enableSubmit = useMemo(() => {
     return amount && +amount <= +(marginToken?.formatted ?? 0);
@@ -138,7 +141,9 @@ export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
           </MarginInput>
           <InfoItem>
             <span>Currently Assigned Margin</span>
-            <span>0.0001 {marginToken?.symbol}</span>
+            <span>
+              {currentMargin} {marginToken?.symbol}
+            </span>
           </InfoItem>
           <InfoItem>
             <span>Est.Liq.Price after increase</span>

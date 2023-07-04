@@ -1,39 +1,24 @@
 import { BigNumber, ethers } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils.js';
 import { useMemo, useState } from 'react';
-import type { Address } from 'wagmi';
-import {
-  erc20ABI,
-  useAccount,
-  useContractRead,
-  useContractWrite,
-} from 'wagmi';
+import { erc20ABI, useAccount, useContractRead, useContractWrite } from 'wagmi';
 
 import Assest from '@/abis/Asset.json';
 
 import { useApprove } from './useApprove';
 import { usePoolAddress } from './usePoolAddress';
+import type { usePoolInfo } from './usePoolInfo';
 
 const abi = new ethers.utils.AbiCoder();
 
-export const useOpenPositon = ({
-  marginTokenAddress,
-  liquidity,
-  positionLong,
-  positionShort,
-  price,
-}: {
-  marginTokenAddress?: Address;
-  liquidity?: number;
-  positionLong?: number;
-  positionShort?: number;
-  price?: number;
-}) => {
+export const useOpenPositon = (
+  poolInfo: ReturnType<typeof usePoolInfo>['data']
+) => {
   const { address } = useAccount();
-  const [assetAddress, poolAddress] = usePoolAddress();
 
+  const [assetAddress, poolAddress] = usePoolAddress();
   const { data: marginTokenDecimals } = useContractRead({
-    address: marginTokenAddress,
+    address: poolInfo?.marginTokenAddress,
     abi: erc20ABI,
     functionName: 'decimals',
   });
@@ -51,9 +36,16 @@ export const useOpenPositon = ({
     return BigNumber.from(parseUnits(margin, marginTokenDecimals));
   }, [margin, marginTokenDecimals]);
 
-  const [estPrice, size, slippage] = useMemo(() => {
-    if (!price || !liquidity || !positionLong || !positionShort)
-      return [undefined, undefined, undefined];
+  const [estPrice, size, slippage, estLiqPrice] = useMemo(() => {
+    if (!poolInfo) return [undefined, undefined, undefined,undefined];
+
+    const {
+      liquidity,
+      futurePrice: price,
+      positionLong,
+      positionShort,
+      marginRatio,
+    } = poolInfo;
 
     const position = +margin * +leverage;
 
@@ -69,22 +61,19 @@ export const useOpenPositon = ({
 
     const estPrice = y / x;
     const size: number = +position / +estPrice;
-    const slippage = (estPrice - price) / price;
-    // const estLipPrice = price * (1 + slippage);
+    const slippage = Math.abs((estPrice - price) / price) * 100;
+    const closeRatio = 0.005;
+    const level = +leverage;
+    const estLiqPrice =
+      direction === '1'
+        ? ((marginRatio + level) * estPrice) / (level * (1 - closeRatio))
+        : ((level - marginRatio) * estPrice) / (level * (1 + closeRatio));
 
-    return [estPrice, size, slippage];
-  }, [
-    direction,
-    leverage,
-    liquidity,
-    margin,
-    positionLong,
-    positionShort,
-    price,
-  ]);
+    return [estPrice, size, slippage, estLiqPrice];
+  }, [direction, leverage, margin, poolInfo]);
 
   const { isNeedApprove, approve } = useApprove(
-    marginTokenAddress,
+    poolInfo?.marginTokenAddress,
     assetAddress,
     marginWithDecimals
   );
@@ -125,6 +114,7 @@ export const useOpenPositon = ({
     setLeverage,
     setMargin,
     estPrice,
+    estLiqPrice,
     size,
     slippage,
     isNeedApprove,
