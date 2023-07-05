@@ -2,6 +2,7 @@ import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
 import * as Slider from '@radix-ui/react-slider';
+import { BigNumber } from 'ethers';
 import { useMemo, useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 
@@ -231,7 +232,9 @@ export const RemoveLiquidityDialog: React.FC<
   }, [LPToken?.formatted, poolInfo?.LPPrice, precent]);
 
   const LPAmount = useMemo(() => {
-    return LPToken?.value.mul(precent).div(100);
+    return LPToken?.value
+      ? LPToken.value.mul(precent).div(100)
+      : BigNumber.from(0);
   }, [LPToken?.value, precent]);
 
   const { isNeedApprove, handleRemoveLiquidity } = useRemoveLiquidity(

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "NEXT_PUBLIC_DOMAIN_ENV=development next dev -p 3002",
     "build:dev": "NEXT_PUBLIC_DOMAIN_ENV=development next build",
-    "build": "NEXT_PUBLIC_DOMAIN_ENV=productionnext build",
+    "build": "NEXT_PUBLIC_DOMAIN_ENV=production build",
     "start": "next start -p 3002"
   },
   "dependencies": {

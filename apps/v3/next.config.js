@@ -6,6 +6,7 @@ const developmentENV = {
 };
 
 const productionENV = {
+  SERVICE_API_URL: 'http://192.168.31.50:18888/',
   ARBITRUM_GOERLI_FACTORY_ADDRESS: '0x67eEF41A86Ca7b411207B9aF7c6698f6DBAA5261',
 };
 
