@@ -14,7 +14,7 @@ import {
 import { useMyLiquidity, usePoolList } from '@/hooks';
 
 const Main = styled.main`
-  padding: 16px 12.5% 0;
+  padding: 16px 12.5% 80px;
 `;
 
 const TableTitle = styled.div`

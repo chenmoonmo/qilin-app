@@ -39,13 +39,11 @@ import {
 
 const Main = styled.main`
   display: grid;
-  grid-template-columns: 1fr 332px;
+  grid-template-columns: 1060px 332px;
   grid-template-rows: max-content max-content auto;
   justify-content: center;
   gap: 0 24px;
-  width: 100%;
-  min-width: 1440px;
-  padding: 0 12.5%;
+  padding: 16px 40px 80px;
 `;
 
 const PairInfoContainer = styled.div`
@@ -670,7 +668,7 @@ export default function Home() {
         ),
       },
     ],
-    [poolInfo?.assetAddress, poolInfo?.poolAddress]
+    [handleSuccsee, poolInfo?.assetAddress, poolInfo?.poolAddress]
   );
 
   useEffect(() => {

@@ -22,6 +22,8 @@ const HeaderContainer = styled.header`
   grid-template-columns: max-content max-content 1fr max-content max-content;
   align-items: center;
   padding: 0 20px;
+  z-index: 10;
+  background: var(--background-color);
 `;
 
 const Logo = styled.svg`
