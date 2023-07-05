@@ -11,9 +11,10 @@ export function formatInput(value: string): string {
 
 export const formatAmount = (
   num1: number | string | undefined | null,
-  digits: number = 4
+  digits = 4
 ): string => {
   if (+num1! === 0) return '0.00';
+  if(isNaN(+num1!)) return '-'
   if (!num1) return '-';
   let number: string;
   if (+num1 >= 1 || +num1 <= -1) {

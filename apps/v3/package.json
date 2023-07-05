@@ -1,0 +1,33 @@
+{
+  "name": "@qilin/v3",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "NEXT_PUBLIC_DOMAIN_ENV=development next dev -p 3002",
+    "build:dev": "NEXT_PUBLIC_DOMAIN_ENV=development next build",
+    "build": "NEXT_PUBLIC_DOMAIN_ENV=productionnext build",
+    "start": "next start -p 3002"
+  },
+  "dependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@qilin/component": "workspace:*",
+    "@qilin/hooks": "workspace:*",
+    "@qilin/utils": "workspace:*",
+    "@qilin/wagmi-provider": "workspace:*",
+    "@radix-ui/react-avatar": "^1.0.3",
+    "@radix-ui/react-popover": "1.0.5",
+    "@radix-ui/react-radio-group": "^1.1.2",
+    "@radix-ui/react-slider": "^1.1.2",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@react-hook/size": "^2.1.2",
+    "dayjs": "^1.11.7",
+    "ethers": "^5",
+    "jotai": "^2.1.0",
+    "lightweight-charts": "^4.0.1",
+    "querystring": "^0.2.1",
+    "swr": "^2.1.5",
+    "wagmi": "0.12.13"
+  }
+}

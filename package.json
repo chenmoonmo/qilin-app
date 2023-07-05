@@ -8,11 +8,12 @@
     "build:pvp": "pnpm -F @qilin/pvp build",
     "buildDev:pvp": "pnpm -F @qilin/pvp build:dev",
     "start:pvp": "pnpm -F @qilin/pvp start",
-    "prepare": "husky install",
     "dev:flashloan": "pnpm -F @qilin/flashloan dev",
     "build:flashloan": "pnpm -F @qilin/flashloan build",
     "buildDev:flashloan": "pnpm -F @qilin/flashloan build:dev",
-    "start:flashloan": "pnpm -F @qilin/flashloan start"
+    "start:flashloan": "pnpm -F @qilin/flashloan start",
+    "dev:v3": "pnpm -F @qilin/v3 dev",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",

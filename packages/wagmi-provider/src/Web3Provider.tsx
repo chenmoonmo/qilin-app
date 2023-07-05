@@ -1,3 +1,4 @@
+'use client';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import type { Chain } from 'wagmi';
