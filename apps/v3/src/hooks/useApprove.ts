@@ -17,7 +17,7 @@ export const useApprove = (
   const { address } = useAccount();
 
   const approveAmount = useMemo(() => {
-    return BigNumber.from(amount);
+    return BigNumber.from(amount ?? '0');
   }, [amount]);
 
   const { data: allowance, refetch } = useContractRead({

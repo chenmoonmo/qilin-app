@@ -93,7 +93,7 @@ export const useOpenPositon = (
         payerAddress: address,
         payType: 1,
       },
-      abi.encode(['uint8', 'uint16'], [direction, 10]),
+      abi.encode(['uint8', 'uint16'], [direction, leverage]),
     ],
     overrides: {
       gasPrice: BigNumber.from(8000000000),
