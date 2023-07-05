@@ -63,7 +63,7 @@ export default function Pool() {
       {
         title: 'Operation',
         key: 'operation',
-        render: (_, item: any) => {
+        render: (_: any, item: any) => {
           return (
             <>
               <AddLiquidityDialog data={item} onSuccess={handleSuccess}>
@@ -111,7 +111,7 @@ export default function Pool() {
       {
         title: 'Operation',
         key: 'Operation',
-        render: (_, item: any) => {
+        render: (_: any, item: any) => {
           return (
             <AddLiquidityDialog data={item} onSuccess={handleSuccess}>
               <Button>Add</Button>
