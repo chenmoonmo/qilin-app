@@ -2,17 +2,20 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { formatAmount, formatInput } from '@qilin/utils';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { Address } from 'wagmi';
 
-import type { usePoolList } from '@/hooks';
-import { useAddLiquidity, usePoolParam } from '@/hooks';
+// import type { usePoolList } from '@/hooks';
+import { useAddLiquidity, usePoolInfo, usePoolParam } from '@/hooks';
 
 import { PoolSelector } from './PoolSelector';
 import { TokenIcon } from './TokenIcon';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
-  data: ReturnType<typeof usePoolList>['data'][number];
+  // data: ReturnType<typeof usePoolList>['data'][number];
+  assetAddress: Address;
+  poolAddress: Address;
   onSuccess: () => void;
 };
 
@@ -121,21 +124,25 @@ const InfoItem = styled.div`
 
 export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
-  data,
+  // data,
+  assetAddress,
+  poolAddress,
   onSuccess,
 }) => {
   const [open, setOpen] = useState(false);
 
+  const { data: poolInfo } = usePoolInfo(assetAddress, poolAddress, open);
+
   const { amount, setAmount, marginToken, handleAddLiquidty } = useAddLiquidity(
-    data,
+    poolInfo,
     onSuccess
   );
 
-  const { data: poolParam } = usePoolParam(
-    data.assetAddress,
-    data.poolAddress,
-    open
-  );
+  const { data: poolParam } = usePoolParam(assetAddress, poolAddress, open);
+
+  const enableSubmit = useMemo(() => {
+    return amount && +amount > 0 && +amount <= +(marginToken?.formatted ?? 0);
+  }, [amount, marginToken]);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -211,7 +218,10 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                   </TokenInfo>
                 </div>
               </AmountInput>
-              <SubmitButton onClick={handleAddLiquidty}>
+              <SubmitButton
+                disabled={!enableSubmit}
+                onClick={handleAddLiquidty}
+              >
                 Add Liquidity
               </SubmitButton>
             </div>

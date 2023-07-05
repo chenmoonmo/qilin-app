@@ -66,7 +66,11 @@ export default function Pool() {
         render: (_: any, item: any) => {
           return (
             <>
-              <AddLiquidityDialog data={item} onSuccess={handleSuccess}>
+              <AddLiquidityDialog
+                assetAddress={item.asset_address}
+                poolAddress={item.pool_address}
+                onSuccess={handleSuccess}
+              >
                 <Button>Add</Button>
               </AddLiquidityDialog>
               <RemoveLiquidityDialog data={item} onSuccess={handleSuccess}>
@@ -113,7 +117,11 @@ export default function Pool() {
         key: 'Operation',
         render: (_: any, item: any) => {
           return (
-            <AddLiquidityDialog data={item} onSuccess={handleSuccess}>
+            <AddLiquidityDialog
+              assetAddress={item.assetAddress}
+              poolAddress={item.poolAddress}
+              onSuccess={handleSuccess}
+            >
               <Button>Add</Button>
             </AddLiquidityDialog>
           );
