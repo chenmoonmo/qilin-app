@@ -11,7 +11,7 @@ type PoolSelectorPropsType = {
   onValueChange?: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
-  hasSearch?: boolean;
+  // hasSearch?: boolean;
   searchInfo?: string;
   onSearchInfoChange?: (value: string) => void;
   selections?: string[];
@@ -104,7 +104,7 @@ export const PoolSelector: React.FC<PoolSelectorPropsType> = ({
   value,
   onValueChange,
   placeholder,
-  hasSearch,
+  // hasSearch = true,
   disabled,
   searchInfo,
   onSearchInfoChange,

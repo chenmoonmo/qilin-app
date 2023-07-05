@@ -13,6 +13,9 @@
     "buildDev:flashloan": "pnpm -F @qilin/flashloan build:dev",
     "start:flashloan": "pnpm -F @qilin/flashloan start",
     "dev:v3": "pnpm -F @qilin/v3 dev",
+    "buildDev:v3": "pnpm -F @qilin/v3 build:dev",
+    "build:v3": "pnpm -F @qilin/v3 build",
+    "start:v3": "pnpm -F @qilin/v3 start",
     "prepare": "husky install"
   },
   "keywords": [],
