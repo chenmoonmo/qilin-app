@@ -4,7 +4,7 @@ import { useAccount, useChainId } from 'wagmi';
 import { fetcher } from '@/helper';
 import type { LiquidationItem } from '@/type';
 
-export const useLiquidation = () => {
+export const useLiquidationList = () => {
   const chainId = useChainId();
   const { address } = useAccount();
 

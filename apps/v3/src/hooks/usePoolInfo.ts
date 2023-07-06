@@ -60,15 +60,15 @@ export const usePoolInfo = (
       const marginRatio = poolInfo.setting.margin_ratio;
 
       const marginTokenSymbol = poolInfo.pair_info.asset_info.pool_name;
-      const [token0Name, token1Name] = poolInfo.pair_info.pool_info.name
+      const [token0Symbol, token1Symbol] = poolInfo.pair_info.pool_info.name
         .split('/')
         .map(item => item.trim());
 
       return {
         pairName,
         levels,
-        token0Name,
-        token1Name,
+        token0Symbol,
+        token1Symbol,
         marginTokenAddress,
         origin: poolInfo,
         ID: poolInfo.pair_info.ID,

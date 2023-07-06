@@ -26,7 +26,7 @@ export const useMyLiquidity = () => {
             (+formatUnits(user_lp_amount, decimal) * 100) /
             +formatUnits(lp_amount, decimal);
 
-          const [token0Name, token1Name] = name
+          const [token0Symbol, token1Symbol] = name
             .split('/')
             .map(name => name.trim());
 
@@ -37,8 +37,8 @@ export const useMyLiquidity = () => {
             lp_amount: formatUnits(lp_amount, decimal),
             user_lp_amount: formatUnits(user_lp_amount, decimal),
             roi: formatUnits(roi, 4),
-            token0Name,
-            token1Name,
+            token0Symbol,
+            token1Symbol,
             share,
           };
         }) ?? []

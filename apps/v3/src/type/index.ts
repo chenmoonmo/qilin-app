@@ -73,7 +73,7 @@ export type PositionItem = {
   open_price: string;
   open_time: string;
   pnl: string;
-  pool_address: string;
+  pool_address: Address;
   position_id: number;
   service_fee: string;
   side: string;

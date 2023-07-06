@@ -58,21 +58,22 @@ export const usePositions = (isFilter?: boolean) => {
 
         const decimal = 18;
 
-        const [token0Name, token1Name] = pool_name
+        const [token0Symbol, token1Symbol] = pool_name
           .split('/')
           .map(item => item.trim());
 
         return {
           ...item,
-          token0Name,
-          token1Name,
-          funding_fee: formatUnits(funding_fee, decimal),
-          margin: formatUnits(margin, decimal),
-          open_price: formatUnits(open_price, decimal),
-          service_fee: formatUnits(service_fee, decimal),
-          pnl: formatUnits(pnl, decimal),
-          size: formatUnits(size, decimal),
-          margin_ratio: formatUnits(margin_ratio, 4),
+          token0Symbol,
+          token1Symbol,
+          poolName: pool_name,
+          fundingFee: -+formatUnits(funding_fee, decimal),
+          margin: +formatUnits(margin, decimal),
+          openPrice: +formatUnits(open_price, decimal),
+          serviceFee: +formatUnits(service_fee, decimal),
+          pnl: +formatUnits(pnl, decimal),
+          size: +formatUnits(size, decimal),
+          marginRatio: formatUnits(margin_ratio, 4),
         };
       });
     }

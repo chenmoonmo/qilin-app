@@ -5,7 +5,9 @@ import styled from '@emotion/styled';
 import { PoolTable } from '@/components';
 
 const Main = styled.main`
-  padding: 16px 12.5% 0;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px 40px 80px;
 `;
 
 const Total = styled.div`

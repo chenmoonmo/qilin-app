@@ -1,7 +1,7 @@
 import { useToast } from '@qilin/component';
 import { BigNumber, ethers } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils.js';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { erc20ABI, useAccount, useContractRead, useContractWrite } from 'wagmi';
 
 import Assest from '@/abis/Asset.json';
@@ -44,10 +44,10 @@ export const useOpenPositon = (
 
     const {
       liquidity,
-      futurePrice: price,
       positionLong,
       positionShort,
       marginRatio,
+      futurePrice: price,
     } = poolInfo;
 
     const position = +margin * +leverage;
@@ -101,7 +101,7 @@ export const useOpenPositon = (
     },
   });
 
-  const hanldeOpenPosition = async () => {
+  const hanldeOpenPosition = useCallback(async () => {
     showWalletToast({
       title: 'Transaction Confirmation',
       message: 'Please confirm the transaction in your wallet',
@@ -133,20 +133,39 @@ export const useOpenPositon = (
       });
     }
     setTimeout(closeWalletToast, 3000);
-  };
+  }, [
+    approve,
+    closeWalletToast,
+    isNeedApprove,
+    onSuccess,
+    showWalletToast,
+    writeAsync,
+  ]);
 
-  return {
+  return useMemo(() => {
+    return {
+      direction,
+      margin,
+      leverage,
+      setDirection,
+      setLeverage,
+      setMargin,
+      estPrice,
+      estLiqPrice,
+      size,
+      slippage,
+      isNeedApprove,
+      hanldeOpenPosition,
+    };
+  }, [
     direction,
-    margin,
-    leverage,
-    setDirection,
-    setLeverage,
-    setMargin,
-    estPrice,
     estLiqPrice,
+    estPrice,
+    hanldeOpenPosition,
+    isNeedApprove,
+    leverage,
+    margin,
     size,
     slippage,
-    isNeedApprove,
-    hanldeOpenPosition,
-  };
+  ]);
 };

@@ -29,7 +29,7 @@ import {
 import {
   useHistoryPositions,
   useKLine,
-  useLiquidation,
+  useLiquidationList,
   useOpenPositon,
   usePoolAddress,
   usePoolInfo,
@@ -39,7 +39,7 @@ import {
 
 const Main = styled.main`
   display: grid;
-  grid-template-columns: 1060px 332px;
+  grid-template-columns: minmax(500px, 1060px) 332px;
   grid-template-rows: max-content max-content auto;
   justify-content: center;
   gap: 0 24px;
@@ -388,7 +388,7 @@ const HistoryTable = forwardRef<any, { isFilter: boolean }>(
           ),
         },
         {
-          title: 'Funding-Fee',
+          title: 'Funding Fee',
           key: 'FundingFee',
           render: (value: string, item: any) => (
             <TableItem>
@@ -398,7 +398,7 @@ const HistoryTable = forwardRef<any, { isFilter: boolean }>(
           ),
         },
         {
-          title: 'Service-Fee',
+          title: 'Service Fee',
           key: 'ServicesFee',
           render: (value: string, item: any) => (
             <TableItem>
@@ -475,7 +475,7 @@ export default function Home() {
   const [tableTab, setTableTab] = useState<string>('1');
   const [isFilter, setIsFilter] = useState<boolean>(false);
 
-  const { data: liquidationList } = useLiquidation();
+  const { data: liquidationList } = useLiquidationList();
 
   const { data: poolList, mutate: refreshPoolList } = usePoolList();
 
@@ -528,7 +528,7 @@ export default function Home() {
     () => [
       {
         title: 'Trading Pair',
-        key: 'pool_name',
+        key: 'poolName',
         render: (value: string, item: any) => {
           return (
             <Link
@@ -584,30 +584,30 @@ export default function Home() {
         render: (value: string, item: any) => (
           <TableItem>
             <div>{formatAmount(value)}</div>
-            <div>{item.token0Name}</div>
+            <div>{item.token0Symbol}</div>
           </TableItem>
         ),
       },
       {
         title: 'Open Price',
-        key: 'open_price',
+        key: 'openPrice',
         render: (value: string, item: any) => (
           <TableItem>
             <div>{formatAmount(value)}</div>
-            <div>{item.token1Name}</div>
+            <div>{item.token1Symbol}</div>
           </TableItem>
         ),
       },
       {
         title: 'Margin Ratio',
-        key: 'margin_ratio',
+        key: 'marginRatio',
         // TODO:
         render: (value: string) =>
           `${formatAmount(+value * 100, 2)}%(>2% safe)`,
       },
       {
         title: 'Funding Fee',
-        key: 'funding_fee',
+        key: 'fundingFee',
         render: (value: string, item: any) => (
           <TableItem>
             <div>{formatAmount(value)}</div>
@@ -793,7 +793,7 @@ export default function Home() {
               disabled
             />
           </FormInput>
-          <Token2>{poolInfo?.token0Name}</Token2>
+          <Token2>{poolInfo?.token0Symbol}</Token2>
         </FormInputContainer>
         <FormLeverageLabel>Leverage</FormLeverageLabel>
         <LeverageRadio
@@ -804,8 +804,8 @@ export default function Home() {
         <BudgetResultItem>
           <span>Est.Open Price</span>
           <span>
-            1 {poolInfo?.token0Name} = {formatAmount(estPrice)}{' '}
-            {poolInfo?.token1Name}
+            1 {poolInfo?.token0Symbol} = {formatAmount(estPrice)}{' '}
+            {poolInfo?.token1Symbol}
           </span>
         </BudgetResultItem>
         <BudgetResultItem>
@@ -815,8 +815,8 @@ export default function Home() {
         <BudgetResultItem>
           <span>Est.Liq Price</span>
           <span>
-            1 {poolInfo?.token0Name} = {formatAmount(estLiqPrice)}{' '}
-            {poolInfo?.token1Name}
+            1 {poolInfo?.token0Symbol} = {formatAmount(estLiqPrice)}{' '}
+            {poolInfo?.token1Symbol}
           </span>
         </BudgetResultItem>
         <OpenPositionDialog
@@ -827,8 +827,8 @@ export default function Home() {
           direction={direction}
           isNeedApprove={isNeedApprove}
           pairName={poolInfo?.pairName}
-          token0Name={poolInfo?.token0Name}
-          token1Name={poolInfo?.token1Name}
+          token0Symbol={poolInfo?.token0Symbol}
+          token1Symbol={poolInfo?.token1Symbol}
           marginTokenName={marginToken?.symbol}
           onConfirm={hanldeOpenPosition}
         >
