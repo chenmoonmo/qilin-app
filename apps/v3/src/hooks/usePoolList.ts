@@ -50,7 +50,7 @@ export const usePoolList = () => {
 
           const pairName = pool.pool_info.name;
 
-          const [token0Name, token1Name] = pairName
+          const [token0Symbol, token1Symbol] = pairName
             .split('/')
             .map(name => name.trim());
 
@@ -62,8 +62,8 @@ export const usePoolList = () => {
             poolAddress,
             marginTokenAddress,
             marginTokenSymbol,
-            token0Name,
-            token1Name,
+            token0Symbol,
+            token1Symbol,
             LPPrice,
             volumn: formatUnits(volumn, decimal),
             change: +formatUnits(change, 4) * 100,

@@ -11,8 +11,8 @@ type OpenPositionDialogPropsType = {
   openPrice?: number;
   size?: number;
   estLiqPrice?: number;
-  token0Name?: string;
-  token1Name?: string;
+  token0Symbol?: string;
+  token1Symbol?: string;
   marginTokenName?: string;
   isNeedApprove?: boolean;
   onConfirm?: () => void;
@@ -65,8 +65,8 @@ export const OpenPositionDialog = ({
   openPrice,
   size,
   estLiqPrice,
-  token0Name,
-  token1Name,
+  token0Symbol,
+  token1Symbol,
   marginTokenName,
   direction,
   onConfirm,
@@ -120,19 +120,19 @@ export const OpenPositionDialog = ({
           <PositionInfoItem>
             <span>Open Price</span>
             <span>
-              {formatAmount(openPrice)} {token1Name}
+              {formatAmount(openPrice)} {token1Symbol}
             </span>
           </PositionInfoItem>
           <PositionInfoItem>
             <span>Size</span>
             <span>
-              {formatAmount(size)} {token0Name}
+              {formatAmount(size)} {token0Symbol}
             </span>
           </PositionInfoItem>
           <PositionInfoItem>
             <span>Est.Liq.Price</span>
             <span>
-              {formatAmount(estLiqPrice)} {token1Name}
+              {formatAmount(estLiqPrice)} {token1Symbol}
             </span>
           </PositionInfoItem>
           <SubmitButton onClick={handleConfirm}>

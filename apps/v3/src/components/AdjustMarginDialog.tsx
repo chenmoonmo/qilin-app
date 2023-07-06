@@ -2,14 +2,13 @@ import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { formatAmount, formatInput } from '@qilin/utils';
 import { useMemo, useState } from 'react';
-import { useAccount, useBalance } from 'wagmi';
 
+import type { usePositions } from '@/hooks';
 import { useAdjustPosition } from '@/hooks';
-import type { PositionItem } from '@/type';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
-  data: PositionItem;
+  data: ReturnType<typeof usePositions>['data'][number];
   onSuccess: () => void;
 };
 
@@ -84,16 +83,16 @@ export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
   data,
   onSuccess,
 }) => {
-  const { address } = useAccount();
   const [open, setOpen] = useState(false);
 
-  const { data: marginToken } = useBalance({
-    token: data.pool_token,
-    address,
-  });
-
-  const { amount, setAmount, handleAdjustPosition, isNeedApprove } =
-    useAdjustPosition(data, onSuccess);
+  const {
+    amount,
+    setAmount,
+    marginToken,
+    handleAdjustPosition,
+    isNeedApprove,
+    estLiqPrice,
+  } = useAdjustPosition(data, onSuccess);
 
   const currentMargin = useMemo(() => {
     return formatAmount(+data.margin + (amount ? +amount : 0));
@@ -149,7 +148,9 @@ export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
           </InfoItem>
           <InfoItem>
             <span>Est.Liq.Price after increase</span>
-            <span>0.0001 USDT</span>
+            <span>
+              {estLiqPrice} {marginToken?.symbol}
+            </span>
           </InfoItem>
           <SubmitButton disabled={!enableSubmit} onClick={handleAdjustPosition}>
             {isNeedApprove ? 'Approve' : 'Confirm'}

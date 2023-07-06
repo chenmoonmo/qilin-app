@@ -68,8 +68,8 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
   const { handleClosePosition } = useClosePosition(data, onSuccess);
 
   const realizedPNL = useMemo(() => {
-    return +data.pnl + +data.funding_fee - +data.service_fee;
-  }, [data.funding_fee, data.pnl, data.service_fee]);
+    return +data.pnl + +data.fundingFee - +data.serviceFee;
+  }, [data.fundingFee, data.pnl, data.serviceFee]);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -101,13 +101,13 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
           <InfoItem>
             <span>Open Price</span>
             <span>
-              {formatAmount(data.open_price)} {data.token1Name}
+              {formatAmount(data.openPrice)} {data.token1Symbol}
             </span>
           </InfoItem>
           <InfoItem>
             <span>Close Price</span>
             <span>
-              {formatAmount(data.open_price)} {data.token1Name}
+              {formatAmount(data.openPrice)} {data.token1Symbol}
             </span>
           </InfoItem>
           <InfoItem>

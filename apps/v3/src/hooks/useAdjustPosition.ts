@@ -1,25 +1,72 @@
 import { useToast } from '@qilin/component';
+import { BigNumber } from 'ethers';
+import { parseUnits } from 'ethers/lib/utils.js';
 import { useCallback, useMemo, useState } from 'react';
-import { useAccount, useContractWrite } from 'wagmi';
+import { useAccount, useBalance, useContractWrite } from 'wagmi';
 
 import Asset from '@/abis/Asset.json';
-import type { PositionItem } from '@/type';
 
 import { useApprove } from './useApprove';
+import { usePoolInfo } from './usePoolInfo';
+import type { usePositions } from './usePositions';
 
 export const useAdjustPosition = (
-  data: PositionItem,
+  data: ReturnType<typeof usePositions>['data'][number],
   onSuccess: () => void
 ) => {
   const { showWalletToast, closeWalletToast } = useToast();
   const { address } = useAccount();
 
+  const { data: poolInfo } = usePoolInfo(data.asset_address, data.pool_address);
+
   const [amount, setAmount] = useState('');
+
+  const { data: marginToken } = useBalance({
+    token: data.pool_token,
+    address,
+  });
+
+  const estLiqPrice = useMemo(() => {
+    if (!poolInfo) return undefined;
+    const { side, margin, leverage, openPrice } = data;
+    const { liquidity, positionLong, positionShort, marginRatio } = poolInfo;
+
+    const position = (margin + +amount) * +leverage;
+
+    let x = liquidity / 2;
+    let y = x * openPrice + positionLong;
+    x = x + positionShort;
+
+    if (side === 'long') {
+      y = y + position;
+    } else {
+      y = y - position;
+    }
+
+    const estPrice = y / x;
+
+    const closeRatio = 0.005;
+
+    const level = +leverage;
+
+    const estLiqPrice =
+      side === 'long'
+        ? ((marginRatio + level) * estPrice) / (level * (1 - closeRatio))
+        : ((level - marginRatio) * estPrice) / (level * (1 + closeRatio));
+
+    return estLiqPrice;
+  }, [amount, data, poolInfo]);
+
+  const amountWithDecimals = useMemo(() => {
+    return amount && marginToken?.decimals
+      ? parseUnits(amount, marginToken?.decimals)
+      : BigNumber.from(0);
+  }, [amount, marginToken?.decimals]);
 
   const { isNeedApprove, approve } = useApprove(
     data.pool_token,
     data.asset_address,
-    +amount
+    amountWithDecimals
   );
 
   const { writeAsync } = useContractWrite({
@@ -82,8 +129,10 @@ export const useAdjustPosition = (
     return {
       amount,
       setAmount,
+      estLiqPrice,
+      marginToken,
       isNeedApprove,
       handleAdjustPosition,
     };
-  }, [amount, handleAdjustPosition, isNeedApprove]);
+  }, [amount, estLiqPrice, marginToken, isNeedApprove, handleAdjustPosition]);
 };

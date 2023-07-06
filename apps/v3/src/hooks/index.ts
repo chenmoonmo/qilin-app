@@ -3,7 +3,7 @@ export * from './useAdjustPosition';
 export * from './useChainInfo';
 export * from './useHistoryPositions';
 export * from './useKLine';
-export * from './useLiquidation';
+export * from './useLiquidationList';
 export * from './useMyLiquidity';
 export * from './useMyLiquidity';
 export * from './useOpenPositon';

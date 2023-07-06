@@ -7,10 +7,10 @@ import { useAccount, useBalance, useContractWrite } from 'wagmi';
 import Asset from '@/abis/Asset.json';
 
 import { useApprove } from './useApprove';
-import type { usePoolList } from './usePoolList';
+import type { usePoolInfo } from './usePoolInfo';
 
 export const useAddLiquidity = (
-  data: ReturnType<typeof usePoolList>['data'][number],
+  data: ReturnType<typeof usePoolInfo>['data'],
   onSuccess: () => void
 ) => {
   const { showWalletToast, closeWalletToast } = useToast();
@@ -18,7 +18,7 @@ export const useAddLiquidity = (
 
   const { data: marginToken } = useBalance({
     address,
-    token: data.marginTokenAddress,
+    token: data?.marginTokenAddress,
   });
 
   const [amount, setAmount] = useState('');
@@ -30,14 +30,14 @@ export const useAddLiquidity = (
   }, [amount, marginToken?.decimals]);
 
   const { isNeedApprove, approve } = useApprove(
-    data.marginTokenAddress,
-    data.assetAddress,
+    data?.marginTokenAddress,
+    data?.assetAddress,
     amountWithDecimals
   );
 
   const { writeAsync } = useContractWrite({
     mode: 'recklesslyUnprepared',
-    address: data.assetAddress,
+    address: data?.assetAddress,
     abi: Asset.abi,
     functionName: 'addLiquidity',
     args: [
