@@ -31,8 +31,10 @@ export default function Pool() {
     useMyLiquidity();
 
   const handleSuccess = useCallback(() => {
-    refreshPoolList();
-    refreshMyLiquidity();
+    setTimeout(() => {
+      refreshPoolList();
+      refreshMyLiquidity();
+    }, 2000);
   }, [refreshMyLiquidity, refreshPoolList]);
 
   const LiquidityColumns = useMemo(() => {

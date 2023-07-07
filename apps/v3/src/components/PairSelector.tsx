@@ -4,6 +4,7 @@ import { Icon } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
 import * as Popover from '@radix-ui/react-popover';
 import { useRouter } from 'next/navigation';
+import { useCallback, useState } from 'react';
 
 import { usePoolList } from '@/hooks';
 
@@ -124,14 +125,20 @@ export const PairSelector: React.FC<PairSelectorType> = ({
 }) => {
   const router = useRouter();
 
+  const [open, setOpen] = useState(false);
+
   const { data, searchInfo, setSearchInfo } = usePoolList();
 
-  const handleClick = (assetsAddress: string, poolAddress: string) => {
-    router.push(`/?assetAddress=${assetsAddress}&poolAddress=${poolAddress}`);
-  };
+  const handleClick = useCallback(
+    (assetsAddress: string, poolAddress: string) => {
+      router.push(`/?assetAddress=${assetsAddress}&poolAddress=${poolAddress}`);
+      setOpen(false);
+    },
+    [router]
+  );
 
   return (
-    <Popover.Root>
+    <Popover.Root open={open} onOpenChange={setOpen}>
       <Trigger asChild>{children}</Trigger>
       <Popover.Portal>
         <Content align="start" sideOffset={10}>

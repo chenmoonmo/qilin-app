@@ -107,12 +107,14 @@ export type HistoryPositionItem = {
 export type PoolParam = {
   asset_address: Address;
   pool_address: Address;
-  fee_ratio: number; // 4位精度
-  leverage_rate: number; // 4位精度
-  margin_ratio: number; // 4位精度
-  liquidity: string; // 和代币一样的精度
-  lp_price: string; // 18位精度
-  apy: string; // 4位精度
+  fee_ratio: number;
+  asset_level: number;
+  margin_ratio: number;
+  liquidity: string;
+  lp_price: string;
+  lp_amount: string;
+  lp: Address;
+  apy: string;
 };
 
 export type KLineItem = {

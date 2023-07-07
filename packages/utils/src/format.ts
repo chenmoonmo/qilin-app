@@ -13,9 +13,9 @@ export const formatAmount = (
   num1: number | string | undefined | null,
   digits = 4
 ): string => {
+  if (isNaN(+num1!)) return '-';
+  if (num1 === undefined || num1 === null) return '-';
   if (+num1! === 0) return '0.00';
-  if(isNaN(+num1!)) return '-'
-  if (!num1) return '-';
   let number: string;
   if (+num1 >= 1 || +num1 <= -1) {
     const BN = BigNumber.clone(); //生成一个独立的BigNumber构造函数

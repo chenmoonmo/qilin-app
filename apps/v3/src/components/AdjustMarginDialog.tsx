@@ -149,7 +149,7 @@ export const AdjustMarginDialog: React.FC<AddLiquidityDialogPropsType> = ({
           <InfoItem>
             <span>Est.Liq.Price after increase</span>
             <span>
-              {estLiqPrice} {marginToken?.symbol}
+              {formatAmount(estLiqPrice)} {marginToken?.symbol}
             </span>
           </InfoItem>
           <SubmitButton
