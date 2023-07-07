@@ -53,13 +53,15 @@ export const usePoolFromOracle = ({
 
       const {
         fee_ratio,
-        leverage_rate,
+        // leverage_rate,
         margin_ratio,
         liquidity,
         lp_price,
         asset_address,
         pool_address,
         apy,
+        lp_amount,
+        asset_level,
       } = parma;
 
       return {
@@ -68,11 +70,13 @@ export const usePoolFromOracle = ({
         poolAddress: pool_address,
         feeRatio: +formatUnitsAmount(fee_ratio, 4) * 100,
         apy: +formatUnitsAmount(apy, 4) * 100,
-        leverageRate: formatUnitsAmount(leverage_rate, 4),
-        marginRatio: formatUnitsAmount(margin_ratio, 4),
+        // leverageRate: formatUnitsAmount(leverage_rate, 4),
+        marginRatio: +formatUnitsAmount(margin_ratio, 4),
         // //TODO: 和代币一样的精度
-        liquidity: formatUnitsAmount(liquidity, 18),
-        LPPrice: formatUnitsAmount(lp_price, 18),
+        liquidity: +formatUnitsAmount(liquidity, 18),
+        LPPrice: +formatUnitsAmount(lp_price, 18),
+        LPAmount: +formatUnitsAmount(lp_amount, 18),
+        assetLevel: +formatUnitsAmount(asset_level, 4),
       };
     },
     {

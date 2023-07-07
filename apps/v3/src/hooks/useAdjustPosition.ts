@@ -33,21 +33,9 @@ export const useAdjustPosition = (
     if (!poolInfo) return undefined;
     const { side, margin, openPrice, openRebase, size } = data;
 
-    const { marginRatio, rebaseLong, rebaseShort, closeRatio } = poolInfo;
+    const { marginRatio, rebaseLong, closeRatio } = poolInfo;
 
     const newMargin = margin + +amount;
-
-    console.log({
-      side,
-      margin: newMargin,
-      openPrice,
-      openRebase,
-      size,
-      marginRatio,
-      rebaseLong,
-      rebaseShort,
-      closeRatio,
-    });
 
     let price = 0;
 
@@ -61,9 +49,7 @@ export const useAdjustPosition = (
         (size - (rebaseLong - openRebase) * size - size * closeRatio);
     }
 
-    console.log('price', price);
-
-    return price;
+    return price > 0 ? price : undefined;
   }, [amount, data, poolInfo]);
 
   const amountWithDecimals = useMemo(() => {

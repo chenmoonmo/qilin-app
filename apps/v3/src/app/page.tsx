@@ -609,20 +609,27 @@ export default function Home() {
       },
       {
         title: 'Margin Ratio',
-        key: 'marginRatio',
+        key: 'positionRatio',
         // TODO:
-        render: (value: string) =>
-          `${formatAmount(+value * 100, 2)}%(>2% safe)`,
+        render: (value: number, item: any) => {
+          const { marginRatio } = item;
+          return `${formatAmount(value * 100, 2)}%(> ${formatAmount(
+            marginRatio * 100,
+            2
+          )}% safe)`;
+        },
       },
       {
         title: 'Funding Fee',
         key: 'fundingFee',
-        render: (value: string, item: any) => (
-          <TableItem>
-            <div>{formatAmount(value)}</div>
-            <div>{item.symbol}</div>
-          </TableItem>
-        ),
+        render: (_: any, item: any) => {
+          return (
+            <TableItem>
+              <div>{formatAmount(item.fundingFee)}</div>
+              <div>{item.symbol}</div>
+            </TableItem>
+          );
+        },
       },
       {
         title: 'PNL',

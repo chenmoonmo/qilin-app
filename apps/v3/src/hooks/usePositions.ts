@@ -54,6 +54,7 @@ export const usePositions = (isFilter?: boolean) => {
           pnl,
           size,
           margin_ratio,
+          position_ratio,
           open_rebase,
         } = item;
 
@@ -76,6 +77,7 @@ export const usePositions = (isFilter?: boolean) => {
           size: +formatUnits(size, decimal),
           openRebase: +formatUnits(open_rebase, decimal),
           marginRatio: +formatUnits(margin_ratio, 4),
+          positionRatio: +formatUnits(position_ratio, 4),
         };
       });
     }

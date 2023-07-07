@@ -13,6 +13,7 @@ import {
 } from '@/hooks';
 
 import { PoolSelector } from './PoolSelector';
+import { TextWithDirection } from './TextWithDirection';
 import { TokenIcon } from './TokenIcon';
 
 type AddLiquidityDialogPropsType = {
@@ -155,6 +156,20 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     tokenAddress: currentItem?.tokenAddress,
     enabled: open,
   });
+
+  const { data: LPToken } = useBalance({
+    token: poolParam?.lp,
+    enabled: open && !!poolParam?.lp,
+    address,
+  });
+
+  const share = useMemo(() => {
+    if (!poolParam || !LPToken) {
+      return undefined;
+    }
+    const { LPAmount } = poolParam;
+    return Math.min((+LPToken?.formatted + +amount) / LPAmount, 1);
+  }, [LPToken, amount, poolParam]);
 
   // if has poolParam, means the pool is exist
   const isNewPool = useMemo(() => {
@@ -356,12 +371,14 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </InfoItem>
               <InfoItem>
                 <span>APY</span>
-                <span>{formatAmount(poolParam?.apy)}</span>
+                <TextWithDirection>
+                  {formatAmount(poolParam?.apy)}%
+                </TextWithDirection>
               </InfoItem>
               <InfoItem>
                 {/* TODO: 计算 */}
                 <span>Share Of Pool</span>
-                <span>0.15%</span>
+                <span>{share ? formatAmount(share * 100, 2) : '-'}%</span>
               </InfoItem>
               <SubTitle
                 css={css`
@@ -376,7 +393,12 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </InfoItem>
               <InfoItem>
                 <span>Leverage Rate (L)</span>
-                <span>{formatAmount(poolParam?.leverageRate)}</span>
+                <span>
+                  {poolParam?.assetLevel === undefined
+                    ? '-'
+                    : formatAmount(poolParam?.assetLevel * 100, 2)}{' '}
+                  %
+                </span>
               </InfoItem>
               <InfoItem>
                 <span>Min Margin Ratio (Dmin)</span>
