@@ -17,7 +17,10 @@ export const useAdjustPosition = (
   const { showWalletToast, closeWalletToast } = useToast();
   const { address } = useAccount();
 
-  const { data: poolInfo } = usePoolInfo(data.asset_address, data.pool_address);
+  const { data: poolInfo } = usePoolInfo({
+    assetAddress: data.asset_address,
+    poolAddress: data.pool_address,
+  });
 
   const [amount, setAmount] = useState('');
 
@@ -28,33 +31,39 @@ export const useAdjustPosition = (
 
   const estLiqPrice = useMemo(() => {
     if (!poolInfo) return undefined;
-    const { side, margin, leverage, openPrice } = data;
-    const { liquidity, positionLong, positionShort, marginRatio } = poolInfo;
+    const { side, margin, openPrice, openRebase, size } = data;
 
-    const position = (margin + +amount) * +leverage;
+    const { marginRatio, rebaseLong, rebaseShort, closeRatio } = poolInfo;
 
-    let x = liquidity / 2;
-    let y = x * openPrice + positionLong;
-    x = x + positionShort;
+    const newMargin = margin + +amount;
+
+    console.log({
+      side,
+      margin: newMargin,
+      openPrice,
+      openRebase,
+      size,
+      marginRatio,
+      rebaseLong,
+      rebaseShort,
+      closeRatio,
+    });
+
+    let price = 0;
 
     if (side === 'long') {
-      y = y + position;
+      price =
+        (newMargin * (marginRatio - 1) + openPrice * size) /
+        (size - (rebaseLong - openRebase) * size - size * closeRatio);
     } else {
-      y = y - position;
+      price =
+        (openPrice * size - newMargin * (marginRatio - 1)) /
+        (size - (rebaseLong - openRebase) * size - size * closeRatio);
     }
 
-    const estPrice = y / x;
+    console.log('price', price);
 
-    const closeRatio = 0.005;
-
-    const level = +leverage;
-
-    const estLiqPrice =
-      side === 'long'
-        ? ((marginRatio + level) * estPrice) / (level * (1 - closeRatio))
-        : ((level - marginRatio) * estPrice) / (level * (1 + closeRatio));
-
-    return estLiqPrice;
+    return price;
   }, [amount, data, poolInfo]);
 
   const amountWithDecimals = useMemo(() => {

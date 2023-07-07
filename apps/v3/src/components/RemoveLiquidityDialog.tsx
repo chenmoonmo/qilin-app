@@ -210,11 +210,11 @@ export const RemoveLiquidityDialog: React.FC<
   const [open, setOpen] = useState(false);
   const [precent, setPrecent] = useState(50);
 
-  const { data: poolInfo } = usePoolInfo(
-    data.asset_address,
-    data.pool_address,
-    open
-  );
+  const { data: poolInfo } = usePoolInfo({
+    assetAddress: data.asset_address,
+    poolAddress: data.pool_address,
+    enabled: open,
+  });
 
   const { data: LPToken } = useBalance({
     token: poolInfo?.LPAddress,
@@ -337,7 +337,10 @@ export const RemoveLiquidityDialog: React.FC<
             </InfoItem>
             <SubmitButton
               disabled={precent === 0}
-              onClick={handleRemoveLiquidity}
+              onClick={() => {
+                handleRemoveLiquidity();
+                setOpen(false);
+              }}
             >
               {isNeedApprove ? 'Approve' : 'Remove Liquidity'}
             </SubmitButton>

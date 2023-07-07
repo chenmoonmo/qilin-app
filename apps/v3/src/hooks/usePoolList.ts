@@ -10,26 +10,33 @@ import type { PoolItem } from '@/type';
 
 const PAGE_SIZE = 10;
 
-export const usePoolList = () => {
+export const usePoolList = (withoutZero = true) => {
   const chainId = useChainId();
   const [searchInfo, setSearchInfo] = useState<undefined | string>();
 
+  const getQueryString = useCallback(
+    (index: number) => {
+      return chainId
+        ? `/poolList?${qs.stringify({
+            chain_id: chainId,
+            page_size: PAGE_SIZE,
+            without_zero: withoutZero,
+            page_index: index,
+            search_info: searchInfo,
+          })}`
+        : null;
+    },
+    [chainId, withoutZero, searchInfo]
+  );
+
   const { data, setSize, isLoading, mutate } = useSWRInfinite(
-    index => (chainId ? ['/poolList', index, searchInfo] : null),
-    async ([url, page_index, search_info]) => {
+    getQueryString,
+    async url => {
       const result = await fetcher<{
         pool_list: PoolItem[];
-      }>(
-        `${url}?${qs.stringify({
-          chain_id: chainId,
-          page_size: PAGE_SIZE,
-          search_info,
-          page_index,
-        })}`,
-        {
-          method: 'GET',
-        }
-      );
+      }>(url, {
+        method: 'GET',
+      });
       return (
         result.pool_list?.map(pool => {
           const change = pool.future_chang_24;
@@ -38,6 +45,7 @@ export const usePoolList = () => {
           const decimal = pool.asset_info.pool_decimal;
           const assetAddress = pool.asset_info.asset;
           const poolAddress = pool.pool_info.pool;
+          const orcaleAddress = pool.pool_info.oracle;
 
           const marginTokenAddress = pool.asset_info.pool_token;
           const marginTokenSymbol = pool.asset_info.pool_name;
@@ -45,8 +53,11 @@ export const usePoolList = () => {
           const liquidity = pool.asset_info.liquidity;
           const LPAmount = pool.asset_info.lp_amount;
           const poolDecimal = pool.asset_info.pool_decimal;
+          const apy = pool.apy;
 
-          const LPPrice = BigNumber.from(liquidity).div(LPAmount).toString();
+          const LPPrice = BigNumber.from(liquidity).gt(0)
+            ? BigNumber.from(liquidity).div(LPAmount).toString()
+            : undefined;
 
           const pairName = pool.pool_info.name;
 
@@ -60,11 +71,13 @@ export const usePoolList = () => {
             pairName,
             assetAddress,
             poolAddress,
+            orcaleAddress,
             marginTokenAddress,
             marginTokenSymbol,
             token0Symbol,
             token1Symbol,
             LPPrice,
+            apy: apy === '-' ? undefined : +formatUnits(apy, 4) * 100,
             volumn: formatUnits(volumn, decimal),
             change: +formatUnits(change, 4) * 100,
             futurePrice: formatUnits(futurePrice, decimal),

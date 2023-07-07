@@ -47,7 +47,7 @@ export const useOpenPositon = (
       positionLong,
       positionShort,
       marginRatio,
-      futurePrice: price,
+      spotPrice: price,
     } = poolInfo;
 
     const position = +margin * +leverage;
@@ -95,10 +95,6 @@ export const useOpenPositon = (
       },
       abi.encode(['uint8', 'uint16'], [direction, leverage]),
     ],
-    overrides: {
-      gasPrice: BigNumber.from(8000000000),
-      gasLimit: BigNumber.from(8000000),
-    },
   });
 
   const hanldeOpenPosition = useCallback(async () => {

@@ -65,7 +65,12 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
   onSuccess,
 }) => {
   const [open, setOpen] = useState(false);
-  const { handleClosePosition } = useClosePosition(data, onSuccess);
+
+  const { positionValue, handleClosePosition } = useClosePosition({
+    enabled: open,
+    data,
+    onSuccess,
+  });
 
   const realizedPNL = useMemo(() => {
     return +data.pnl + +data.fundingFee - +data.serviceFee;
@@ -107,7 +112,7 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
           <InfoItem>
             <span>Close Price</span>
             <span>
-              {formatAmount(data.openPrice)} {data.token1Symbol}
+              {formatAmount(positionValue?.closePrice)} {data.token1Symbol}
             </span>
           </InfoItem>
           <InfoItem>
@@ -118,13 +123,19 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
           <InfoItem>
             <span>Realized PNL</span>
             <span>
-              {/* TODO: 计算 */}
               <TextWithDirection>
                 {formatAmount(realizedPNL)} {data.symbol}
               </TextWithDirection>
             </span>
           </InfoItem>
-          <SubmitButton onClick={handleClosePosition}>Confirm</SubmitButton>
+          <SubmitButton
+            onClick={() => {
+              handleClosePosition();
+              setOpen(false);
+            }}
+          >
+            Confirm
+          </SubmitButton>
         </Content>
       </Dialog.Portal>
     </Dialog.Root>

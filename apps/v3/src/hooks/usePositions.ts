@@ -54,6 +54,7 @@ export const usePositions = (isFilter?: boolean) => {
           pnl,
           size,
           margin_ratio,
+          open_rebase,
         } = item;
 
         const decimal = 18;
@@ -73,7 +74,8 @@ export const usePositions = (isFilter?: boolean) => {
           serviceFee: +formatUnits(service_fee, decimal),
           pnl: +formatUnits(pnl, decimal),
           size: +formatUnits(size, decimal),
-          marginRatio: formatUnits(margin_ratio, 4),
+          openRebase: +formatUnits(open_rebase, decimal),
+          marginRatio: +formatUnits(margin_ratio, 4),
         };
       });
     }

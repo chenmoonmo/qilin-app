@@ -14,24 +14,25 @@ export type ChainInfo = {
 
 export type AssetInfo = {
   asset: Address;
+  lp_token: Address;
+  pool_token: Address;
   liquidity: string;
   lp_amount: string;
-  lp_token: Address;
   pool_decimal: number;
   pool_name: string;
-  pool_token: Address;
 };
 
 export type PoolInfo = {
-  name: string;
   oracle: Address;
   pool: Address;
   rate: Address;
+  name: string;
   reserve: boolean;
 };
 
 export type PoolItem = {
   ID: number;
+  apy: string;
   future_chang_24: string;
   future_price: string;
   volumn_24: string;
@@ -47,6 +48,8 @@ export type Pool = {
   size_info: {
     position_long: string;
     position_short: string;
+    rebase_long: string;
+    rebase_short: string;
     size_long: string;
     size_short: string;
   };
@@ -63,18 +66,20 @@ export type Pool = {
 };
 
 export type PositionItem = {
-  pool_name: string;
-  pool_token: Address;
   asset_address: Address;
   funding_fee: string;
   leverage: number;
   margin: string;
   margin_ratio: number;
   open_price: string;
+  open_rebase: string;
   open_time: string;
   pnl: string;
   pool_address: Address;
+  pool_name: string;
+  pool_token: Address;
   position_id: number;
+  position_ratio: number;
   service_fee: string;
   side: string;
   size: string;
@@ -82,6 +87,7 @@ export type PositionItem = {
 };
 
 export type HistoryPositionItem = {
+  ActionHash: string;
   ActionTime: number;
   Direction: number;
   FundingFee: string;
@@ -99,8 +105,8 @@ export type HistoryPositionItem = {
 };
 
 export type PoolParam = {
-  asset_address: string;
-  pool_address: string;
+  asset_address: Address;
+  pool_address: Address;
   fee_ratio: number; // 4位精度
   leverage_rate: number; // 4位精度
   margin_ratio: number; // 4位精度
@@ -132,4 +138,29 @@ export type MyLiquidityItem = {
   pool_share: string;
   roi: string;
   user_lp_amount: string;
+  token: Address;
+};
+
+export type OracleItem = {
+  address: Address;
+  name: string;
+  token_address: Address;
+  token_name: string;
+};
+
+export type PositionValue = {
+  asset_address: Address;
+  pool_address: Address;
+  pool_name: string;
+  pool_token: Address;
+  position_id: number;
+  side: string;
+  symbol: string;
+  service_fee: string;
+  funding_fee: string;
+  pnl: string;
+  realized_pnl: string;
+  open_price: string;
+  close_price: string;
+  size: string;
 };

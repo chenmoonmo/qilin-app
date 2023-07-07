@@ -1,21 +1,21 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Icon } from '@qilin/component';
-import { useMutationObserver } from '@qilin/hooks';
 import * as Popover from '@radix-ui/react-popover';
+import useSize from '@react-hook/size';
 import type React from 'react';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 type PoolSelectorPropsType = {
   value?: string;
-  onValueChange?: (value: string) => void;
+  onValueChange?: (value: { text: string; value: any }) => void;
   placeholder?: string;
   disabled?: boolean;
   // hasSearch?: boolean;
   searchInfo?: string;
-  onSearchInfoChange?: (value: string) => void;
-  selections?: string[];
-  renderSelection?: (value: string) => React.ReactNode;
+  onSearchInfoChange?: (searchInfo: string) => void;
+  selections?: { text: string; value: any }[];
+  renderSelection?: (value: { text: string; value: any }) => React.ReactNode;
 };
 
 const TriggerContainer = styled(Popover.Trigger)`
@@ -95,6 +95,8 @@ const SelectItem = styled.div<{ active: boolean }>`
   font-weight: 500;
   line-height: 12px;
   cursor: pointer;
+  background: ${props => (props.active ? '#323640' : 'transparent')};
+  transition: background 0.1s ease-out;
   &:hover {
     background: #323640;
   }
@@ -109,22 +111,24 @@ export const PoolSelector: React.FC<PoolSelectorPropsType> = ({
   searchInfo,
   onSearchInfoChange,
   selections,
-  renderSelection,
+  renderSelection = item => {
+    return item.text;
+  },
 }) => {
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const [inputWidth, setInputWidth] = useState(0);
+  const [inputWidth] = useSize(triggerRef);
 
-  useMutationObserver(triggerRef, () => {
-    if (triggerRef.current) {
-      setInputWidth(triggerRef.current.offsetWidth);
-    }
-  });
+  const [open, setOpen] = useState(false);
+
+  const currentItem = useMemo(() => {
+    return selections?.find(item => item.value === value);
+  }, [selections, value]);
 
   return (
-    <Popover.Root>
+    <Popover.Root open={open} onOpenChange={setOpen}>
       <TriggerContainer ref={triggerRef} disabled={disabled}>
         {/* TODO:  placeholder*/}
-        <span>{value ?? placeholder}</span>
+        <span>{currentItem?.text ?? placeholder}</span>
         <svg
           width="11"
           height="7"
@@ -159,14 +163,17 @@ export const PoolSelector: React.FC<PoolSelectorPropsType> = ({
           </SearchContainer>
           <SelectContainer>
             {/* TODO: no data */}
-            {selections?.map(item => {
+            {selections?.map((item, index) => {
               return (
                 <SelectItem
-                  key={item}
-                  active={item === value}
-                  onClick={() => onValueChange?.(item)}
+                  key={index}
+                  active={item.value === value}
+                  onClick={() => {
+                    setOpen(false);
+                    onValueChange?.(item);
+                  }}
                 >
-                  {renderSelection ? renderSelection(item) : item}
+                  {renderSelection ? renderSelection(item) : item.text}
                 </SelectItem>
               );
             })}
