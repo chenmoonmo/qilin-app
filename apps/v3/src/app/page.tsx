@@ -644,9 +644,9 @@ export default function Home() {
       {
         title: 'Operation',
         key: 'operation',
-        render: (_, item) => (
+        render: (_: any, item: any) => (
           <>
-            <AdjustMarginDialog data={item as any} onSuccess={handleSuccsee}>
+            <AdjustMarginDialog data={item} onSuccess={handleSuccsee}>
               <Button>
                 <svg
                   width="8"
