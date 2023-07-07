@@ -47,9 +47,13 @@ const Route = styled(Link)<{ active?: boolean }>`
   text-decoration: none;
   color: #9699a3;
   cursor: pointer;
+  user-select: none;
   &[data-active='true'],
   &:hover {
     color: #ffffff;
+  }
+  &[data-active='true'] {
+    pointer-events: none;
   }
 `;
 
@@ -70,7 +74,12 @@ const ChainInfo = styled.div`
 const More = styled(ChainInfo)`
   margin-left: 14px;
   grid-column: 5/ 6;
+  cursor: pointer;
 `;
+
+More.defaultProps = {
+  children: 'More',
+};
 
 export const Header: FC<HeaderPropsType> = ({ routes }) => {
   const pathname = usePathname();
@@ -181,7 +190,7 @@ export const Header: FC<HeaderPropsType> = ({ routes }) => {
       ) : (
         <Button onClick={handleConnect}>Connect Wallet</Button>
       )}
-      <More>More</More>
+      <More />
     </HeaderContainer>
   );
 };

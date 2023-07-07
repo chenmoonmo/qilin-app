@@ -248,6 +248,7 @@ const OpenButton = styled(Button)`
   width: 100%;
   height: 40px;
   margin-top: 34px;
+  transition: background 0.3s ease;
 `;
 
 const TableContainer = styled.div`
@@ -420,11 +421,10 @@ const HistoryTable = forwardRef<any, { isFilter: boolean }>(
         {
           title: 'Time',
           key: 'ActionTime',
-          // TODO: 缺少tx hash
-          render: (value: number) => (
+          render: (value: number, item: any) => (
             <Link
               target="_blank"
-              href={`${chain?.blockExplorers?.default.url}/tx/${value}`}
+              href={`${chain?.blockExplorers?.default.url}/tx/${item.ActionHash}`}
               css={css`
                 display: flex;
                 align-items: center;
@@ -475,15 +475,24 @@ export default function Home() {
   const [tableTab, setTableTab] = useState<string>('1');
   const [isFilter, setIsFilter] = useState<boolean>(false);
 
-  const { data: liquidationList } = useLiquidationList();
+  const { data: { list: liquidationList } = { list: [] } } = useLiquidationList(
+    {
+      assetAddress,
+      poolAddress,
+    }
+  );
 
   const { data: poolList, mutate: refreshPoolList } = usePoolList();
 
-  const { data: poolInfo, mutate: refreshPoolInfo } = usePoolInfo(
+  const {
+    data: poolInfo,
+    error,
+    mutate: refreshPoolInfo,
+  } = usePoolInfo({
     assetAddress,
     poolAddress,
-    enabled
-  );
+    enabled,
+  });
 
   const { data: kLine, mutate: refreshKLine } = useKLine(
     poolInfo?.oracleAddress
@@ -673,12 +682,12 @@ export default function Home() {
 
   useEffect(() => {
     const pool = poolList?.[0];
-    if (!enabled && pool) {
+    if ((!enabled || error) && pool) {
       router.replace(
         `/?assetAddress=${pool.assetAddress}&poolAddress=${pool.poolAddress}`
       );
     }
-  }, [assetAddress, enabled, poolAddress, poolList, router]);
+  }, [assetAddress, enabled, error, poolAddress, poolList, router]);
 
   return (
     <Main>
@@ -798,7 +807,7 @@ export default function Home() {
         <FormLeverageLabel>Leverage</FormLeverageLabel>
         <LeverageRadio
           value={leverage}
-          leverages={poolInfo?.levels}
+          leverages={poolInfo?.leverages}
           onChange={setLeverage}
         />
         <BudgetResultItem>

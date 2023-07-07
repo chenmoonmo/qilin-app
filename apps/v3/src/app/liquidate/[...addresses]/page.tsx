@@ -1,8 +1,11 @@
 'use client';
 
 import styled from '@emotion/styled';
+import { formatAmount } from '@qilin/utils';
+import type { Address } from 'wagmi';
 
 import { PoolTable } from '@/components';
+import { useLiquidationList, usePoolInfo } from '@/hooks';
 
 const Main = styled.main`
   max-width: 1440px;
@@ -31,7 +34,23 @@ const TableTitle = styled.h1`
   color: #ffffff;
 `;
 
-export default function Liquidate() {
+export default function Liquidate({
+  params: { addresses },
+}: {
+  params: { addresses: [Address, Address] };
+}) {
+  const [assetAddress, poolAddress] = addresses;
+
+  const { data: poolInfo } = usePoolInfo({
+    assetAddress,
+    poolAddress,
+  });
+
+  const { data } = useLiquidationList({
+    assetAddress,
+    poolAddress,
+  });
+
   const columns = [
     {
       title: '#',
@@ -47,15 +66,17 @@ export default function Liquidate() {
     },
     {
       title: 'Action',
+      key: 'Action',
     },
   ];
+
   return (
     <Main>
       <Total>
         <h2>Total Value Liquidation Reward</h2>
-        <div>$88,541,999.65</div>
+        <div>${formatAmount(data?.totalReward)}</div>
       </Total>
-      <TableTitle>ETH-USDC-Vanilla Liquidation Positions</TableTitle>
+      <TableTitle>{poolInfo?.pairName} Liquidation Positions</TableTitle>
       <PoolTable columns={columns} />
     </Main>
   );

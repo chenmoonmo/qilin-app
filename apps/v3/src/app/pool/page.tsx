@@ -26,7 +26,7 @@ const TableTitle = styled.div`
 `;
 
 export default function Pool() {
-  const { data: poolList, mutate: refreshPoolList } = usePoolList();
+  const { data: poolList, mutate: refreshPoolList } = usePoolList(false);
   const { data: myLiquidityList, mutate: refreshMyLiquidity } =
     useMyLiquidity();
 
@@ -70,7 +70,9 @@ export default function Pool() {
             <>
               <AddLiquidityDialog
                 assetAddress={item.asset_address}
+                tokenAddress={item.token}
                 poolAddress={item.pool_address}
+                orcaleAddress={item.oracle_address}
                 onSuccess={handleSuccess}
               >
                 <Button>Add</Button>
@@ -112,7 +114,8 @@ export default function Pool() {
       },
       {
         title: 'APY',
-        key: 'APY',
+        key: 'apy',
+        render: (value: any) => formatAmount(value),
       },
       {
         title: 'Operation',
@@ -122,6 +125,8 @@ export default function Pool() {
             <AddLiquidityDialog
               assetAddress={item.assetAddress}
               poolAddress={item.poolAddress}
+              orcaleAddress={item.orcaleAddress}
+              tokenAddress={item.marginTokenAddress}
               onSuccess={handleSuccess}
             >
               <Button>Add</Button>
@@ -143,9 +148,9 @@ export default function Pool() {
         `}
       >
         <TableTitle>My Liquidity</TableTitle>
-        {/* <AddLiquidityDialog> */}
-        <Button>New Position </Button>
-        {/* </AddLiquidityDialog> */}
+        <AddLiquidityDialog onSuccess={handleSuccess}>
+          <Button>New Position </Button>
+        </AddLiquidityDialog>
       </div>
       <PoolTable columns={LiquidityColumns} dataSource={myLiquidityList} />
       <TableTitle

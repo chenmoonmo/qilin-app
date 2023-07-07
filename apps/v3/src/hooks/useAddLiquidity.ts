@@ -1,27 +1,32 @@
 import { useToast } from '@qilin/component';
 import { BigNumber } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils.js';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
+import type { Address } from 'wagmi';
 import { useAccount, useBalance, useContractWrite } from 'wagmi';
 
 import Asset from '@/abis/Asset.json';
 
 import { useApprove } from './useApprove';
-import type { usePoolInfo } from './usePoolInfo';
 
-export const useAddLiquidity = (
-  data: ReturnType<typeof usePoolInfo>['data'],
-  onSuccess: () => void
-) => {
+export const useAddLiquidity = ({
+  marginTokenAddress,
+  assetAddress,
+  amount,
+  onSuccess,
+}: {
+  marginTokenAddress?: Address;
+  assetAddress?: Address;
+  amount: string;
+  onSuccess: () => void;
+}) => {
   const { showWalletToast, closeWalletToast } = useToast();
   const { address } = useAccount();
 
   const { data: marginToken } = useBalance({
     address,
-    token: data?.marginTokenAddress,
+    token: marginTokenAddress,
   });
-
-  const [amount, setAmount] = useState('');
 
   //  带精度的 amount
   const amountWithDecimals = useMemo(() => {
@@ -30,14 +35,14 @@ export const useAddLiquidity = (
   }, [amount, marginToken?.decimals]);
 
   const { isNeedApprove, approve } = useApprove(
-    data?.marginTokenAddress,
-    data?.assetAddress,
+    marginTokenAddress,
+    assetAddress,
     amountWithDecimals
   );
 
   const { writeAsync } = useContractWrite({
     mode: 'recklesslyUnprepared',
-    address: data?.assetAddress,
+    address: assetAddress,
     abi: Asset.abi,
     functionName: 'addLiquidity',
     args: [
@@ -92,10 +97,7 @@ export const useAddLiquidity = (
 
   return useMemo(() => {
     return {
-      amount,
-      setAmount,
       handleAddLiquidty,
-      marginToken,
     };
-  }, [amount, handleAddLiquidty, marginToken]);
+  }, [handleAddLiquidty]);
 };

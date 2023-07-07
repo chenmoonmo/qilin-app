@@ -2,20 +2,25 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { formatAmount, formatInput } from '@qilin/utils';
-import { useMemo, useState } from 'react';
-import type { Address } from 'wagmi';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type Address, useAccount, useBalance } from 'wagmi';
 
-// import type { usePoolList } from '@/hooks';
-import { useAddLiquidity, usePoolInfo, usePoolParam } from '@/hooks';
+import {
+  useAddLiquidity,
+  useCreatePool,
+  useOracles,
+  usePoolFromOracle,
+} from '@/hooks';
 
 import { PoolSelector } from './PoolSelector';
 import { TokenIcon } from './TokenIcon';
 
 type AddLiquidityDialogPropsType = {
   children: React.ReactNode;
-  // data: ReturnType<typeof usePoolList>['data'][number];
-  assetAddress: Address;
-  poolAddress: Address;
+  assetAddress?: Address;
+  tokenAddress?: Address;
+  poolAddress?: Address;
+  orcaleAddress?: Address;
   onSuccess: () => void;
 };
 
@@ -124,28 +129,128 @@ const InfoItem = styled.div`
 
 export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
-  // data,
+  orcaleAddress,
+  tokenAddress,
   assetAddress,
   poolAddress,
   onSuccess,
 }) => {
+  const { address } = useAccount();
   const [open, setOpen] = useState(false);
 
-  const { data: poolInfo } = usePoolInfo(assetAddress, poolAddress, open);
+  const [poolIndex, setPoolIndex] = useState<string | undefined>();
+  const [amount, setAmount] = useState('');
 
-  const { amount, setAmount, marginToken, handleAddLiquidty } = useAddLiquidity(
-    poolInfo,
-    onSuccess
+  const {
+    data: oraclesList,
+    searchInfo,
+    setSearchInfo,
+    currentItem,
+  } = useOracles(poolIndex);
+
+  const { data: poolParam } = usePoolFromOracle({
+    poolAddress: poolAddress,
+    assetAddress: assetAddress,
+    oracleAddress: currentItem?.oracleAddress,
+    tokenAddress: currentItem?.tokenAddress,
+    enabled: open,
+  });
+
+  // if has poolParam, means the pool is exist
+  const isNewPool = useMemo(() => {
+    return !poolParam;
+  }, [poolParam]);
+
+  const handleSuccess = useCallback(() => {
+    onSuccess?.();
+    setOpen(false);
+  }, [onSuccess]);
+
+  const { handleAddLiquidty } = useAddLiquidity({
+    marginTokenAddress: currentItem?.tokenAddress,
+    assetAddress: poolParam?.assetAddress,
+    onSuccess: handleSuccess,
+    amount,
+  });
+
+  const { handleCreatePool } = useCreatePool({
+    oracleAddress: currentItem?.oracleAddress,
+    tokenAddress: currentItem?.tokenAddress,
+    onSuccess: handleSuccess,
+    amount,
+  });
+
+  const { data: marginTokenInfo } = useBalance({
+    token: currentItem?.tokenAddress,
+    enabled: false,
+    address,
+  });
+
+  const marginToken = useMemo(
+    () => (currentItem?.tokenAddress ? marginTokenInfo : undefined),
+    [currentItem?.tokenAddress, marginTokenInfo]
   );
 
-  const { data: poolParam } = usePoolParam(assetAddress, poolAddress, open);
+  const titleText = useMemo(() => {
+    if (!isNewPool) {
+      return 'Add Liquidity';
+    } else {
+      return 'New Position';
+    }
+  }, [isNewPool]);
+
+  const buttonText = useMemo(() => {
+    if (!isNewPool) {
+      return 'Add Liquidity';
+    } else {
+      return 'Create a pool';
+    }
+  }, [isNewPool]);
 
   const enableSubmit = useMemo(() => {
-    return amount && +amount > 0 && +amount <= +(marginToken?.formatted ?? 0);
-  }, [amount, marginToken]);
+    return (
+      poolIndex &&
+      amount &&
+      +amount > 0 &&
+      +amount <= +(marginToken?.formatted ?? 0)
+    );
+  }, [amount, marginToken?.formatted, poolIndex]);
+
+  const handleSubmit = useCallback(() => {
+    if (isNewPool) {
+      handleCreatePool();
+    } else {
+      handleAddLiquidty();
+    }
+  }, [handleAddLiquidty, handleCreatePool, isNewPool]);
+
+  const handleOpenChange = (open: boolean) => {
+    setOpen(open);
+    if (!open) {
+      setPoolIndex(undefined);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      orcaleAddress &&
+      tokenAddress &&
+      oraclesList.length &&
+      poolIndex === undefined
+    ) {
+      const index = oraclesList.findIndex(
+        item =>
+          item.oracleAddress === orcaleAddress &&
+          item.tokenAddress === tokenAddress
+      );
+      if (index !== -1) {
+        setPoolIndex(index.toString());
+      }
+    }
+  }, [oraclesList, orcaleAddress, poolIndex, tokenAddress]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay />
@@ -165,12 +270,16 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                 />
               </svg>
             </Dialog.Close>
-            Add Liquidity
+            {titleText}
           </Title>
           <Contianer>
             <div>
               <SubTitle>Select Oracle</SubTitle>
-              <PoolSelector disabled value="chainlink" />
+              <PoolSelector
+                disabled
+                selections={[{ text: 'chainlink', value: 'chainlink' }]}
+                value="chainlink"
+              />
               <SubTitle
                 css={css`
                   margin-top: 20px;
@@ -178,7 +287,13 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               >
                 Select Pool
               </SubTitle>
-              <PoolSelector />
+              <PoolSelector
+                value={poolIndex}
+                selections={oraclesList}
+                onValueChange={(item: any) => setPoolIndex(item.value)}
+                searchInfo={searchInfo}
+                onSearchInfoChange={setSearchInfo}
+              />
               <SubTitle
                 css={css`
                   display: flex;
@@ -206,6 +321,7 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                   `}
                 >
                   <MaxButton
+                    disabled={!marginToken}
                     onClick={() =>
                       setAmount(formatInput(marginToken!.formatted))
                     }
@@ -214,32 +330,36 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                   </MaxButton>
                   <TokenInfo>
                     <TokenIcon size={26} />
-                    <TokenSymbol>{marginToken?.symbol}</TokenSymbol>
+                    <TokenSymbol>{marginToken?.symbol ?? '-'}</TokenSymbol>
                   </TokenInfo>
                 </div>
               </AmountInput>
-              <SubmitButton
-                disabled={!enableSubmit}
-                onClick={handleAddLiquidty}
-              >
-                Add Liquidity
+              <SubmitButton disabled={!enableSubmit} onClick={handleSubmit}>
+                {buttonText}
               </SubmitButton>
             </div>
             <div>
               <SubTitle>Select Oracle</SubTitle>
               <InfoItem>
                 <span>Liquidity</span>
-                <span>{formatAmount(poolParam?.liquidity)} ETH($123.12)</span>
+                <span>
+                  {formatAmount(poolParam?.liquidity)} {marginToken?.symbol}
+                  {/* TODO: */}
+                  ($123.12)
+                </span>
               </InfoItem>
               <InfoItem>
                 <span>LP Price</span>
-                <span>{formatAmount(poolParam?.lp_price)} ETH</span>
+                <span>
+                  {formatAmount(poolParam?.LPPrice)} {marginToken?.symbol}
+                </span>
               </InfoItem>
               <InfoItem>
                 <span>APY</span>
                 <span>{formatAmount(poolParam?.apy)}</span>
               </InfoItem>
               <InfoItem>
+                {/* TODO: 计算 */}
                 <span>Share Of Pool</span>
                 <span>0.15%</span>
               </InfoItem>
@@ -252,15 +372,15 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </SubTitle>
               <InfoItem>
                 <span>Fee</span>
-                <span>{formatAmount(poolParam?.fee_ratio, 2)} %</span>
+                <span>{formatAmount(poolParam?.feeRatio, 2)} %</span>
               </InfoItem>
               <InfoItem>
                 <span>Leverage Rate (L)</span>
-                <span>{formatAmount(poolParam?.leverage_rate)}</span>
+                <span>{formatAmount(poolParam?.leverageRate)}</span>
               </InfoItem>
               <InfoItem>
                 <span>Min Margin Ratio (Dmin)</span>
-                <span>{formatAmount(poolParam?.margin_ratio)}</span>
+                <span>{formatAmount(poolParam?.marginRatio)}</span>
               </InfoItem>
             </div>
           </Contianer>

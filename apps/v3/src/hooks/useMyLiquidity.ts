@@ -32,14 +32,14 @@ export const useMyLiquidity = () => {
 
           return {
             ...item,
+            token0Symbol,
+            token1Symbol,
+            share,
             // TODO: 和代币精度一样
             liquidity: formatUnits(liquidity, decimal),
             lp_amount: formatUnits(lp_amount, decimal),
             user_lp_amount: formatUnits(user_lp_amount, decimal),
             roi: formatUnits(roi, 4),
-            token0Symbol,
-            token1Symbol,
-            share,
           };
         }) ?? []
       );
