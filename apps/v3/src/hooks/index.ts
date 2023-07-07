@@ -13,6 +13,5 @@ export * from './usePoolAddress';
 export * from './usePoolFromOracle';
 export * from './usePoolInfo';
 export * from './usePoolList';
-export * from './usePoolParam';
 export * from './usePositions';
 export * from './useRemoveLiquidity';
