@@ -39,7 +39,7 @@ export const useMyLiquidity = () => {
             liquidity: formatUnits(liquidity, decimal),
             lp_amount: formatUnits(lp_amount, decimal),
             user_lp_amount: formatUnits(user_lp_amount, decimal),
-            roi: formatUnits(roi, 4),
+            roi: +formatUnits(roi, 4) * 100,
           };
         }) ?? []
       );

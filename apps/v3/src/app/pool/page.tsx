@@ -37,7 +37,7 @@ export default function Pool() {
     }, 2000);
   }, [refreshMyLiquidity, refreshPoolList]);
 
-  const LiquidityColumns = useMemo(() => {
+  const liquidityColumns = useMemo(() => {
     return [
       {
         title: 'Pool',
@@ -61,7 +61,7 @@ export default function Pool() {
         title: 'Rol',
         key: 'roi',
         render: (value: any) => {
-          return `${formatAmount(value)}`;
+          return value ? formatAmount(value, 2) + '%' : formatAmount(value, 2);
         },
       },
       {
@@ -106,18 +106,21 @@ export default function Pool() {
         title: 'Liquidity',
         key: 'liquidity',
         render: (value: any, item: any) =>
-          formatAmount(value) + ' ' + item.marginTokenSymbol,
+          `${formatAmount(value)} ${item.marginTokenSymbol}`,
       },
       {
         title: 'LP Price',
         key: 'LPPrice',
         render: (value: any, item: any) =>
-          formatAmount(value) + ' ' + item.marginTokenSymbol,
+          value
+            ? `${formatAmount(value)} ${item.marginTokenSymbol}`
+            : formatAmount(value),
       },
       {
         title: 'APY',
         key: 'apy',
-        render: (value: any) => formatAmount(value),
+        render: (value: any) =>
+          value ? formatAmount(value, 2) + '%' : formatAmount(value, 2),
       },
       {
         title: 'Operation',
@@ -154,7 +157,7 @@ export default function Pool() {
           <Button>New Position </Button>
         </AddLiquidityDialog>
       </div>
-      <PoolTable columns={LiquidityColumns} dataSource={myLiquidityList} />
+      <PoolTable columns={liquidityColumns} dataSource={myLiquidityList} />
       <TableTitle
         css={css`
           margin: 20px 0 17px;

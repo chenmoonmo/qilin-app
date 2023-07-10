@@ -127,8 +127,11 @@ export type KLineItem = {
 };
 
 export type LiquidationItem = {
-  asset_address: Address;
-  pool_address: Address;
+  position_id: number;
+  rewards: string;
+  size: string;
+  symbol: string;
+  user_address: Address;
 };
 
 export type MyLiquidityItem = {

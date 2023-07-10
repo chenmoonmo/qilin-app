@@ -47,7 +47,12 @@ export const useHistoryPositions = (isFilter: boolean) => {
       });
       return (
         result.history_list?.map(item => {
-          const { Price, Margin, ServicesFee, PNL, FundingFee } = item;
+          const { Price, Margin, ServicesFee, PNL, FundingFee, pool_name } =
+            item;
+          const [token0Symbol, token1Symbol] = pool_name
+            .split('/')
+            .map(item => item.trim());
+
           return {
             ...item,
             Price: formatUnitsAmount(Price),
@@ -55,6 +60,8 @@ export const useHistoryPositions = (isFilter: boolean) => {
             ServicesFee: formatUnitsAmount(ServicesFee),
             PNL: formatUnitsAmount(PNL),
             FundingFee: formatUnitsAmount(FundingFee),
+            token0Symbol,
+            token1Symbol,
           };
         }) ?? []
       );

@@ -5,7 +5,11 @@ import { type FC, forwardRef } from 'react';
 type ColumnType = {
   title: string;
   key?: string;
-  render?: (value: any, data: any) => JSX.Element | string | number;
+  render?: (
+    value: any,
+    data: any,
+    index: number
+  ) => JSX.Element | string | number;
 };
 
 type TableType = {
@@ -125,14 +129,15 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
         {dataSource?.map((data, index) => {
           return (
             <PoolTr key={index}>
-              {columns?.map(column => {
+              {columns?.map((column, _index) => {
                 const value = column.key ? data?.[column.key] : undefined;
                 return (
                   <PoolTd key={column.key}>
                     {column.render
                       ? column.render(
                           value ? data[column.key!] : undefined,
-                          data
+                          data,
+                          _index
                         )
                       : value}
                   </PoolTd>
