@@ -65,6 +65,7 @@ export const useAddLiquidity = ({
       if (isNeedApprove) {
         await approve();
       }
+
       const res = await writeAsync?.();
       showWalletToast({
         title: 'Transaction Confirmation',
@@ -77,7 +78,9 @@ export const useAddLiquidity = ({
         message: 'Transaction Confirmed',
         type: 'success',
       });
-      onSuccess();
+      setTimeout(() => {
+        onSuccess();
+      }, 2000);
     } catch (e) {
       showWalletToast({
         title: 'Transaction Error',

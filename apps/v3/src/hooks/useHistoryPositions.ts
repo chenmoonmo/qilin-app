@@ -61,18 +61,14 @@ export const useHistoryPositions = (isFilter: boolean) => {
     }
   );
 
-  const getNextPage = () => {
-    setSize((prevSize: number) => prevSize + 1);
-  };
-
-  const allData = useMemo(() => {
-    return data?.flat() ?? [];
-  }, [data]);
-
-  return {
-    data: allData,
-    getNextPage,
-    isLoading,
-    mutate,
-  };
+  return useMemo(() => {
+    return {
+      data: data?.flat() ?? [],
+      getNextPage: () => {
+        setSize((prevSize: number) => prevSize + 1);
+      },
+      isLoading,
+      mutate,
+    };
+  }, [data, isLoading, mutate, setSize]);
 };

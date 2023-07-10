@@ -73,7 +73,7 @@ export const useAdjustPosition = (
       data.position_id,
       {
         payType: 1,
-        amount,
+        amount: amountWithDecimals,
         payerAddress: address,
       },
     ],
@@ -102,7 +102,9 @@ export const useAdjustPosition = (
         message: 'Transaction Confirmed',
         type: 'success',
       });
-      onSuccess();
+      setTimeout(() => {
+        onSuccess();
+      }, 2000);
     } catch (e) {
       showWalletToast({
         title: 'Transaction Error',

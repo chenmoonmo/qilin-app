@@ -66,8 +66,6 @@ export const usePoolList = (withoutZero = true) => {
             .map(name => name.trim());
 
           return {
-            origin: pool,
-            ID: pool.ID,
             pairName,
             assetAddress,
             poolAddress,
@@ -77,6 +75,7 @@ export const usePoolList = (withoutZero = true) => {
             token0Symbol,
             token1Symbol,
             LPPrice,
+            ID: pool.ID,
             apy: apy === '-' ? undefined : +formatUnits(apy, 4) * 100,
             volumn: formatUnits(volumn, decimal),
             change: +formatUnits(change, 4) * 100,
