@@ -9,7 +9,7 @@ export const useMyLiquidity = () => {
   const { address } = useAccount();
   const chainId = useChainId();
 
-  const { data, mutate } = useSWR(
+  return useSWR(
     `/myLiquidity?chain_id=${chainId}&user_address=${address}&page_size=1000`,
     async (url: string) => {
       const result = await fetcher<{
@@ -43,10 +43,9 @@ export const useMyLiquidity = () => {
           };
         }) ?? []
       );
+    },
+    {
+      fallbackData: [],
     }
   );
-  return {
-    data: data ?? [],
-    mutate,
-  };
 };

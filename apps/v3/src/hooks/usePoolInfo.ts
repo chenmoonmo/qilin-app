@@ -30,48 +30,56 @@ export const usePoolInfo = ({
         method: 'GET',
       });
 
-      const { pool: poolInfo } = result;
+      const {
+        pool: {
+          spot_price: spotPrice,
+          nake_position: nakePosition,
+          funding_8: funding,
+          pair_info: {
+            ID,
+            asset_info,
+            pool_info,
+            future_price: futurePrice,
+            volumn_24: volume,
+            future_chang_24: change,
+          },
+          size_info: {
+            position_long: positionLong,
+            position_short: positionShort,
+            rebase_long: rebaseLong,
+            rebase_short: rebaseShort,
+          },
+          setting: {
+            margin_ratio: marginRatio,
+            fee_ratio: closeRatio,
+            legal_level: leverages,
+          },
+        },
+      } = result;
 
-      const poolDecimal = poolInfo.pair_info.asset_info.pool_decimal;
-      const liquidity = poolInfo.pair_info.asset_info.liquidity;
-      const LPAmount = poolInfo.pair_info.asset_info.lp_amount;
+      const {
+        liquidity,
+        pool_decimal: poolDecimal,
+        lp_amount: LPAmount,
+        pool_decimal: decimal,
+        pool_token: marginTokenAddress,
+        lp_token: LPAddress,
+        pool_name: marginTokenSymbol,
+      } = asset_info;
+
+      const { name: pairName, oracle: oracleAddress } = pool_info;
 
       const LPPrice = BigNumber.from(liquidity)
         .div(BigNumber.from(LPAmount))
         .toNumber();
 
-      const decimal = poolInfo.pair_info.asset_info.pool_decimal;
-      const futurePrice = poolInfo.pair_info.future_price;
-      const spotPrice = poolInfo.spot_price;
-      const nakePosition = poolInfo.nake_position;
-      const volume = poolInfo.pair_info.volumn_24;
-      const pairName = poolInfo.pair_info.pool_info.name;
-      const leverages = poolInfo.setting.legal_level.map(item =>
-        item.toString()
-      );
-      const positionLong = poolInfo.size_info.position_long;
-      const positionShort = poolInfo.size_info.position_short;
-
-      const oracleAddress = poolInfo.pair_info.pool_info.oracle;
-      const marginTokenAddress = poolInfo.pair_info.asset_info.pool_token;
-      const LPAddress = poolInfo.pair_info.asset_info.lp_token;
-
-      const funding = poolInfo.funding_8;
-      const change = poolInfo.pair_info.future_chang_24;
-      const marginRatio = poolInfo.setting.margin_ratio;
-
-      const rebaseLong = poolInfo.size_info.rebase_long;
-      const rebaseShort = poolInfo.size_info.rebase_short;
-      const fee_ratio = poolInfo.setting.fee_ratio;
-
-      const marginTokenSymbol = poolInfo.pair_info.asset_info.pool_name;
       const [token0Symbol, token1Symbol] = pairName
         .split('/')
         .map(item => item.trim());
 
       return {
+        ID,
         pairName,
-        leverages,
         token0Symbol,
         token1Symbol,
         marginTokenAddress,
@@ -81,7 +89,7 @@ export const usePoolInfo = ({
         LPAddress,
         LPPrice,
         marginTokenSymbol,
-        ID: poolInfo.pair_info.ID,
+        leverages: leverages.map(item => item.toString()),
         positionLong: +formatUnits(positionLong, decimal),
         positionShort: +formatUnits(positionShort, decimal),
         rebaseLong: +formatUnits(rebaseLong, decimal),
@@ -94,8 +102,7 @@ export const usePoolInfo = ({
         funding: +formatUnits(funding, 4) * 100,
         change: +formatUnits(change, 4) * 100,
         marginRatio: +formatUnits(marginRatio, 4),
-        closeRatio: +formatUnits(fee_ratio, 4),
-        // origin: poolInfo,
+        closeRatio: +formatUnits(closeRatio, 4),
       };
     }
   );

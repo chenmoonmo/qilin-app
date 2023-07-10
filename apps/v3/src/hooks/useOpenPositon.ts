@@ -120,7 +120,9 @@ export const useOpenPositon = (
         message: 'Transaction Confirmed',
         type: 'success',
       });
-      onSuccess();
+      setTimeout(() => {
+        onSuccess();
+      }, 2000);
     } catch (e) {
       showWalletToast({
         title: 'Transaction Error',
