@@ -79,7 +79,8 @@ export const Table = forwardRef<any, TableType>(
                       {column.render
                         ? column.render(
                             value ? data?.[column.key!] : undefined,
-                            data
+                            data,
+                            index
                           )
                         : value}
                     </Td>
@@ -129,7 +130,7 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
         {dataSource?.map((data, index) => {
           return (
             <PoolTr key={index}>
-              {columns?.map((column, _index) => {
+              {columns?.map(column => {
                 const value = column.key ? data?.[column.key] : undefined;
                 return (
                   <PoolTd key={column.key}>
@@ -137,7 +138,7 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
                       ? column.render(
                           value ? data[column.key!] : undefined,
                           data,
-                          _index
+                          index
                         )
                       : value}
                   </PoolTd>
