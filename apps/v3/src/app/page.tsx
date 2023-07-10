@@ -735,9 +735,7 @@ export default function Home() {
         </PairDataItem>
         <PairDataItem>
           <div>24h Volume</div>
-          <div>
-            {formatAmount(poolInfo?.volume)} {marginToken?.symbol}
-          </div>
+          <div>$ {formatAmount(poolInfo?.volume)}</div>
         </PairDataItem>
         <PairDataItem>
           <div>Funding</div>
