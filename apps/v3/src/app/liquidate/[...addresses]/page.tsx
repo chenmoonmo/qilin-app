@@ -1,11 +1,14 @@
 'use client';
 
 import styled from '@emotion/styled';
+import { Button } from '@qilin/component';
 import { formatAmount } from '@qilin/utils';
+import { useMemo } from 'react';
 import type { Address } from 'wagmi';
 
 import { PoolTable } from '@/components';
 import { useLiquidationList, usePoolInfo } from '@/hooks';
+import { useLiquidity } from '@/hooks/useLiquidity';
 
 const Main = styled.main`
   max-width: 1440px;
@@ -46,38 +49,75 @@ export default function Liquidate({
     poolAddress,
   });
 
-  const { data } = useLiquidationList({
+  const { data, mutate } = useLiquidationList({
     assetAddress,
     poolAddress,
   });
 
-  const columns = [
-    {
-      title: '#',
-      key: 'index',
+  const { handleLiquidate } = useLiquidity({
+    assetAddress: poolInfo?.assetAddress,
+    onSuccess: () => {
+      mutate({
+        list: [],
+        totalReward: 0,
+      });
     },
-    {
-      title: 'Position',
-      key: 'position',
-    },
-    {
-      title: 'Rewards',
-      key: 'rewards',
-    },
-    {
-      title: 'Action',
-      key: 'Action',
-    },
-  ];
+  });
+
+  const columns = useMemo(() => {
+    return [
+      {
+        title: '#',
+        key: 'index',
+        render: (_: any, _1: any, index: number) => <>{index + 1}</>,
+      },
+      {
+        title: 'Position',
+        key: 'size',
+        render: (_: any, record: any) => {
+          return (
+            <>
+              {formatAmount(record.size)} {record.symbol}
+            </>
+          );
+        },
+      },
+      {
+        title: 'Rewards',
+        key: 'rewards',
+        render: (_: any, record: any) => {
+          return (
+            <>
+              {formatAmount(record.rewards)} {record.symbol}
+            </>
+          );
+        },
+      },
+      {
+        title: 'Action',
+        key: 'positionId',
+        render: (positionId: number) => {
+          return (
+            <Button onClick={() => handleLiquidate(positionId)}>
+              Liqudate
+            </Button>
+          );
+        },
+      },
+    ];
+  }, [handleLiquidate]);
+  console.log(data);
 
   return (
     <Main>
       <Total>
         <h2>Total Value Liquidation Reward</h2>
-        <div>${formatAmount(data?.totalReward)}</div>
+        <div>
+          {formatAmount(data?.totalReward)} {poolInfo?.marginTokenSymbol}
+        </div>
       </Total>
       <TableTitle>{poolInfo?.pairName} Liquidation Positions</TableTitle>
-      <PoolTable columns={columns} />
+      <PoolTable columns={columns} dataSource={data.list} />
     </Main>
   );
 }

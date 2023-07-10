@@ -5,7 +5,11 @@ import { type FC, forwardRef } from 'react';
 type ColumnType = {
   title: string;
   key?: string;
-  render?: (value: any, data: any) => JSX.Element | string | number;
+  render?: (
+    value: any,
+    data: any,
+    index: number
+  ) => JSX.Element | string | number;
 };
 
 type TableType = {
@@ -75,7 +79,8 @@ export const Table = forwardRef<any, TableType>(
                       {column.render
                         ? column.render(
                             value ? data?.[column.key!] : undefined,
-                            data
+                            data,
+                            index
                           )
                         : value}
                     </Td>
@@ -132,7 +137,8 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
                     {column.render
                       ? column.render(
                           value ? data[column.key!] : undefined,
-                          data
+                          data,
+                          index
                         )
                       : value}
                   </PoolTd>

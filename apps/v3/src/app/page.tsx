@@ -384,7 +384,7 @@ const HistoryTable = forwardRef<any, { isFilter: boolean }>(
           render: (value: string, item: any) => (
             <TableItem>
               <div>{formatAmount(value)}</div>
-              <div>{item.symbol}</div>
+              <div>{item.token1Symbol}</div>
             </TableItem>
           ),
         },
@@ -475,12 +475,12 @@ export default function Home() {
   const [tableTab, setTableTab] = useState<string>('1');
   const [isFilter, setIsFilter] = useState<boolean>(false);
 
-  const { data: { list: liquidationList } = { list: [] } } = useLiquidationList(
-    {
-      assetAddress,
-      poolAddress,
-    }
-  );
+  const {
+    data: { totalReward },
+  } = useLiquidationList({
+    assetAddress,
+    poolAddress,
+  });
 
   const { data: poolList, mutate: refreshPoolList } = usePoolList();
 
@@ -612,11 +612,14 @@ export default function Home() {
         key: 'positionRatio',
         // TODO:
         render: (value: number, item: any) => {
-          const { marginRatio } = item;
-          return `${formatAmount(value * 100, 2)}%(> ${formatAmount(
-            marginRatio * 100,
+          let { marginRatio } = item;
+          const positionRatio = value * 100;
+          marginRatio = marginRatio * 100;
+          const ratiaText = positionRatio >= marginRatio * 2 ? 'safe' : 'risk';
+          return `${formatAmount(positionRatio, 2)}%(> ${formatAmount(
+            marginRatio,
             2
-          )}% safe)`;
+          )}% ${ratiaText})`;
         },
       },
       {
@@ -751,13 +754,13 @@ export default function Home() {
             {formatAmount(poolInfo?.nakePosition)} {marginToken?.symbol}
           </div>
         </PairDataItem>
-        {liquidationList?.[0] && (
-          <LiquidateLink
-            href={`/liquidate?assetAddress=${liquidationList[0].asset_address}&pool_address=${liquidationList[0].pool_address}`}
-          >
+        {!!totalReward && (
+          <LiquidateLink href={`/liquidate/${assetAddress}/${poolAddress}`}>
             <div>
               <div>Liquidity Reward</div>
-              <span>11 usdc</span>
+              <span>
+                {totalReward} {poolInfo?.marginTokenSymbol}
+              </span>
             </div>
             <div></div>
           </LiquidateLink>
