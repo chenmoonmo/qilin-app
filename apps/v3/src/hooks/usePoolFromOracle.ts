@@ -72,7 +72,6 @@ export const usePoolFromOracle = ({
         feeRatio: +formatUnitsAmount(fee_ratio, 4) * 100,
         apy: +formatUnitsAmount(apy, 4) * 100,
         marginRatio: +formatUnitsAmount(margin_ratio, 4) * 100,
-        // //TODO: 和代币一样的精度
         liquidity: +formatUnitsAmount(liquidity, 18),
         LPPrice: +formatUnitsAmount(lp_price, 18),
         LPAmount: +formatUnitsAmount(lp_amount, 18),
