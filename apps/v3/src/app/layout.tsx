@@ -44,6 +44,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={poppins.className}>
+        <head>
+          <title>QILIN V3 interface</title>
+        </head>
         <Web3Provider
           defaultChains={[arbitrumGoerli]}
           connectorNames={['MetaMask']}

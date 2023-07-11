@@ -52,13 +52,13 @@ export const useOpenPositon = (
 
     const position = +margin * +leverage;
 
-    let x = liquidity / 2;
+    const x = liquidity / 2;
     let y = x * price + positionLong - positionShort;
 
     if (direction === '1') {
       y = y + position;
     } else {
-      x = x + position;
+      y = y - position;
     }
 
     const estPrice = y / x;
