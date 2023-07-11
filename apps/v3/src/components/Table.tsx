@@ -2,6 +2,8 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { type FC, forwardRef } from 'react';
 
+import { NoData } from './NoData';
+
 type ColumnType = {
   title: string;
   key?: string;
@@ -72,7 +74,6 @@ export const Table = forwardRef<any, TableType>(
               <Tr key={index}>
                 {columns?.map(column => {
                   const value = column.key ? data?.[column.key] : undefined;
-
                   return (
                     <Td key={column.key}>
                       {column.render
@@ -88,6 +89,13 @@ export const Table = forwardRef<any, TableType>(
               </Tr>
             );
           })}
+          {dataSource?.length === 0 && (
+            <tr>
+              <td colSpan={columns.length}>
+                <NoData />
+              </td>
+            </tr>
+          )}
         </tbody>
       </TableLayout>
     );
@@ -146,6 +154,13 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
             </PoolTr>
           );
         })}
+        {dataSource?.length === 0 && (
+          <tr>
+            <td colSpan={columns.length}>
+              <NoData />
+            </td>
+          </tr>
+        )}
         <tr
           css={css`
             height: 93px;

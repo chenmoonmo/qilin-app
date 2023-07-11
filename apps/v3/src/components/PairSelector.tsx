@@ -8,6 +8,7 @@ import { useCallback, useState } from 'react';
 
 import { usePoolList } from '@/hooks';
 
+import { NoData } from './NoData';
 import { TextWithDirection } from './TextWithDirection';
 import { TokenIcon } from './TokenIcon';
 
@@ -109,6 +110,13 @@ const TableLayout = styled.table`
   }
 `;
 
+const LoadMore = styled.div`
+  font-size: 12px;
+  color: #2781ff;
+  font-weight: 500;
+  cursor: pointer;
+`;
+
 const PairIcon = styled.div`
   position: relative;
   display: inline-flex;
@@ -127,7 +135,8 @@ export const PairSelector: React.FC<PairSelectorType> = ({
 
   const [open, setOpen] = useState(false);
 
-  const { data, searchInfo, setSearchInfo } = usePoolList();
+  const { data, searchInfo, setSearchInfo, canLoadMore, getNextPage } =
+    usePoolList();
 
   const handleClick = useCallback(
     (assetsAddress: string, poolAddress: string) => {
@@ -205,6 +214,24 @@ export const PairSelector: React.FC<PairSelectorType> = ({
                   </tr>
                 );
               })}
+              {data?.length === 0 && (
+                <tr>
+                  <td colSpan={4}>
+                    <NoData />
+                  </td>
+                </tr>
+              )}
+              {canLoadMore && (
+                <tr
+                  css={css`
+                    background: transparent !important;
+                  `}
+                >
+                  <td colSpan={4}>
+                    <LoadMore onClick={getNextPage}>View More</LoadMore>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </TableLayout>
         </Content>

@@ -12,6 +12,7 @@ const PAGE_SIZE = 10;
 
 export const usePoolList = (withoutZero = true) => {
   const chainId = useChainId();
+
   const [searchInfo, setSearchInfo] = useState<undefined | string>();
 
   const getQueryString = useCallback(
@@ -96,6 +97,10 @@ export const usePoolList = (withoutZero = true) => {
     setSize((prevSize: number) => prevSize + 1);
   }, [setSize]);
 
+  const canLoadMore = useMemo(() => {
+    return data?.[data.length - 1]?.length === PAGE_SIZE;
+  }, [data]);
+
   const allData = useMemo(() => {
     return data?.flat() ?? [];
   }, [data]);
@@ -106,8 +111,9 @@ export const usePoolList = (withoutZero = true) => {
       searchInfo,
       setSearchInfo,
       getNextPage,
+      canLoadMore,
       isLoading,
       mutate,
     };
-  }, [allData, getNextPage, isLoading, mutate, searchInfo]);
+  }, [allData, canLoadMore, getNextPage, isLoading, mutate, searchInfo]);
 };

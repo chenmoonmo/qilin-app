@@ -360,8 +360,9 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                 <span>Liquidity</span>
                 <span>
                   {formatAmount(poolParam?.liquidity)} {marginToken?.symbol}
-                  {/* TODO: */}
-                  ($ {poolParam?.liquidityValue})
+                  {poolParam?.liquidityValue && (
+                    <>($ {formatAmount(poolParam?.liquidityValue)})</>
+                  )}
                 </span>
               </InfoItem>
               <InfoItem>
@@ -374,7 +375,9 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               <InfoItem>
                 <span>APY</span>
                 <TextWithDirection>
-                  {foramtPrecent(poolParam?.apy)}%
+                  {poolParam?.apy === undefined
+                    ? '-'
+                    : `${foramtPrecent(poolParam?.apy)}%`}
                 </TextWithDirection>
               </InfoItem>
               <InfoItem>
@@ -391,20 +394,27 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </SubTitle>
               <InfoItem>
                 <span>Fee</span>
-                <span>{foramtPrecent(poolParam?.feeRatio)} %</span>
+                <span>
+                  {poolParam?.feeRatio === undefined
+                    ? '-'
+                    : `${foramtPrecent(poolParam?.feeRatio)}%`}
+                </span>
               </InfoItem>
               <InfoItem>
                 <span>Leverage Rate (L)</span>
                 <span>
                   {poolParam?.assetLevel === undefined
                     ? '-'
-                    : foramtPrecent(poolParam?.assetLevel)}{' '}
-                  %
+                    : `${foramtPrecent(poolParam?.assetLevel)}%`}
                 </span>
               </InfoItem>
               <InfoItem>
                 <span>Min Margin Ratio (Dmin)</span>
-                <span>{formatAmount(poolParam?.marginRatio)} %</span>
+                <span>
+                  {poolParam?.marginRatio === undefined
+                    ? '-'
+                    : `${foramtPrecent(poolParam?.marginRatio)}%`}
+                </span>
               </InfoItem>
             </div>
           </Contianer>
