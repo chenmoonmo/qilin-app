@@ -48,6 +48,7 @@ export const useOpenPositon = (
       positionShort,
       marginRatio,
       spotPrice: price,
+      futurePrice,
     } = poolInfo;
 
     const position = +margin * +leverage;
@@ -63,7 +64,8 @@ export const useOpenPositon = (
 
     const estPrice = y / x;
     const size: number = +position / +estPrice;
-    const slippage = Math.abs((estPrice - price) / price) * 100;
+    const slippage = Math.abs((estPrice - futurePrice) / futurePrice) * 100;
+
     const closeRatio = poolInfo.closeRatio;
     const level = +leverage;
     const estLiqPrice =

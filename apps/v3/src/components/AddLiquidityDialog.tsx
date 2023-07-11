@@ -381,7 +381,6 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                 </TextWithDirection>
               </InfoItem>
               <InfoItem>
-                {/* TODO: 计算 */}
                 <span>Share Of Pool</span>
                 <span>{share ? `${foramtPrecent(share * 100)}%` : '-'}</span>
               </InfoItem>

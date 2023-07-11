@@ -610,7 +610,6 @@ export default function Home() {
       {
         title: 'Margin Ratio',
         key: 'positionRatio',
-        // TODO:
         render: (value: number, item: any) => {
           let { marginRatio } = item;
           const positionRatio = value * 100;
