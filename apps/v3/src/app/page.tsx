@@ -2,7 +2,7 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
-import { formatAmount, formatInput } from '@qilin/utils';
+import { foramtPrecent, formatAmount, formatInput } from '@qilin/utils';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -602,7 +602,7 @@ export default function Home() {
         key: 'openPrice',
         render: (value: string, item: any) => (
           <TableItem>
-            <div>{formatAmount(value)}</div>
+            <div>{formatAmount(value, 4, true)}</div>
             <div>{item.token1Symbol}</div>
           </TableItem>
         ),
@@ -616,9 +616,8 @@ export default function Home() {
           const positionRatio = value * 100;
           marginRatio = marginRatio * 100;
           const ratiaText = positionRatio >= marginRatio * 2 ? 'safe' : 'risk';
-          return `${formatAmount(positionRatio, 2)}%(> ${formatAmount(
-            marginRatio,
-            2
+          return `${foramtPrecent(positionRatio)}%(> ${foramtPrecent(
+            marginRatio
           )}% ${ratiaText})`;
         },
       },
@@ -723,16 +722,16 @@ export default function Home() {
             </svg>
           </PairInfo>
         </PairSelector>
-        <PairPrice>{formatAmount(poolInfo?.futurePrice)}</PairPrice>
+        <PairPrice>{formatAmount(poolInfo?.futurePrice, 4, true)}</PairPrice>
         <PairDataItem>
           <div>Chainlink Price</div>
-          <div>$ {formatAmount(poolInfo?.spotPrice)}</div>
+          <div>$ {formatAmount(poolInfo?.spotPrice, 4, true)}</div>
         </PairDataItem>
         <PairDataItem>
           <div>24h Change</div>
           <div>
             <TextWithDirection>
-              {formatAmount(poolInfo?.change, 2)}%
+              {foramtPrecent(poolInfo?.change)}%
             </TextWithDirection>
           </div>
         </PairDataItem>
@@ -744,7 +743,7 @@ export default function Home() {
           <div>Funding</div>
           <div>
             <TextWithDirection>
-              {formatAmount(poolInfo?.funding, 2)}%
+              {foramtPrecent(poolInfo?.funding)}%
             </TextWithDirection>
           </div>
         </PairDataItem>
@@ -827,7 +826,7 @@ export default function Home() {
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Slippage</span>
-          <span>{formatAmount(slippage, 2)}%</span>
+          <span>{foramtPrecent(slippage)}%</span>
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Est.Liq Price</span>

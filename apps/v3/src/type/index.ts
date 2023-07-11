@@ -20,6 +20,7 @@ export type AssetInfo = {
   lp_amount: string;
   pool_decimal: number;
   pool_name: string;
+  liquidity_value: string;
 };
 
 export type PoolInfo = {
@@ -115,6 +116,7 @@ export type PoolParam = {
   lp_amount: string;
   lp: Address;
   apy: string;
+  liquidity_value: string;
 };
 
 export type KLineItem = {
@@ -136,14 +138,17 @@ export type LiquidationItem = {
 
 export type MyLiquidityItem = {
   asset_address: Address;
+  oracle_address: Address;
+  pool_address: Address;
+  token: Address;
   liquidity: string;
   lp_amount: string;
   name: string;
-  pool_address: Address;
   pool_share: string;
   roi: string;
   user_lp_amount: string;
-  token: Address;
+  user_liquidity: string;
+  user_liquidity_value: string;
 };
 
 export type OracleItem = {

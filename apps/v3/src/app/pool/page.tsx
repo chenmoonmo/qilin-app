@@ -3,7 +3,7 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
-import { formatAmount } from '@qilin/utils';
+import { foramtPrecent, formatAmount } from '@qilin/utils';
 import { useCallback, useMemo } from 'react';
 
 import {
@@ -45,7 +45,7 @@ export default function Pool() {
       },
       {
         title: 'Liquidity',
-        key: 'liquidity',
+        key: 'userLiquidity',
         render: (value: any) => {
           return `${formatAmount(value)}`;
         },
@@ -54,14 +54,14 @@ export default function Pool() {
         title: 'Share',
         key: 'share',
         render: (value: any) => {
-          return `${formatAmount(value, 2)}%`;
+          return `${foramtPrecent(value)}%`;
         },
       },
       {
         title: 'Rol',
         key: 'roi',
         render: (value: any) => {
-          return value ? formatAmount(value, 2) + '%' : formatAmount(value, 2);
+          return value ? foramtPrecent(value) + '%' : foramtPrecent(value);
         },
       },
       {
@@ -71,10 +71,10 @@ export default function Pool() {
           return (
             <>
               <AddLiquidityDialog
-                assetAddress={item.asset_address}
+                assetAddress={item.assetAddress}
                 tokenAddress={item.token}
-                poolAddress={item.pool_address}
-                orcaleAddress={item.oracle_address}
+                poolAddress={item.poolAddress}
+                oracleAddress={item.oracleAddress}
                 onSuccess={handleSuccess}
               >
                 <Button>Add</Button>
@@ -105,22 +105,22 @@ export default function Pool() {
       {
         title: 'Liquidity',
         key: 'liquidity',
-        render: (value: any, item: any) =>
-          `${formatAmount(value)} ${item.marginTokenSymbol}`,
+        render: (value: any) => `${formatAmount(value)}`,
       },
       {
         title: 'LP Price',
         key: 'LPPrice',
         render: (value: any, item: any) =>
           value
-            ? `${formatAmount(value)} ${item.marginTokenSymbol}`
+            ? `${formatAmount(value, 4, true)} ${item.marginTokenSymbol}`
             : formatAmount(value),
       },
       {
         title: 'APY',
         key: 'apy',
-        render: (value: any) =>
-          value ? formatAmount(value, 2) + '%' : formatAmount(value, 2),
+        render: (value: any) => {
+          return value ? foramtPrecent(value) + '%' : foramtPrecent(value);
+        },
       },
       {
         title: 'Operation',
@@ -130,7 +130,7 @@ export default function Pool() {
             <AddLiquidityDialog
               assetAddress={item.assetAddress}
               poolAddress={item.poolAddress}
-              orcaleAddress={item.orcaleAddress}
+              oracleAddress={item.oracleAddress}
               tokenAddress={item.marginTokenAddress}
               onSuccess={handleSuccess}
             >

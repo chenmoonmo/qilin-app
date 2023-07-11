@@ -120,7 +120,7 @@ export const OpenPositionDialog = ({
           <PositionInfoItem>
             <span>Open Price</span>
             <span>
-              {formatAmount(openPrice)} {token1Symbol}
+              {formatAmount(openPrice, 4, true)} {token1Symbol}
             </span>
           </PositionInfoItem>
           <PositionInfoItem>
