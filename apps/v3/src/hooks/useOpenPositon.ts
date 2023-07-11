@@ -53,8 +53,7 @@ export const useOpenPositon = (
     const position = +margin * +leverage;
 
     let x = liquidity / 2;
-    let y = x * price + positionLong;
-    x = x + positionShort;
+    let y = x * price + positionLong - positionShort;
 
     if (direction === '1') {
       y = y + position;
@@ -65,7 +64,7 @@ export const useOpenPositon = (
     const estPrice = y / x;
     const size: number = +position / +estPrice;
     const slippage = Math.abs((estPrice - price) / price) * 100;
-    const closeRatio = 0.005;
+    const closeRatio = poolInfo.closeRatio;
     const level = +leverage;
     const estLiqPrice =
       direction === '1'
