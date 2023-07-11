@@ -66,7 +66,6 @@ export const Table = forwardRef<any, TableType>(
             })}
           </Tr>
         </thead>
-
         <tbody>
           {dataSource?.map((data, index) => {
             return (

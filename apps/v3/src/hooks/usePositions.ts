@@ -11,7 +11,7 @@ import { usePoolAddress } from './usePoolAddress';
 
 const PAGE_SIZE = 10;
 
-export const usePositions = (isFilter?: boolean) => {
+export const usePositions = (isFilter = false) => {
   const chainId = useChainId();
   const { address } = useAccount();
 
@@ -21,12 +21,9 @@ export const usePositions = (isFilter?: boolean) => {
     return qs.stringify({
       chain_id: chainId,
       user_address: address,
-      ...(isFilter
-        ? {
-            asset_address: assetAddress,
-            pool_address: poolAddress,
-          }
-        : {}),
+      asset_address: assetAddress,
+      pool_address: poolAddress,
+      tick: isFilter,
     });
   }, [address, assetAddress, chainId, isFilter, poolAddress]);
 

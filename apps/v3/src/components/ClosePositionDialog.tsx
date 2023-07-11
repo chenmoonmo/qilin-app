@@ -106,13 +106,14 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
           <InfoItem>
             <span>Open Price</span>
             <span>
-              {formatAmount(data.openPrice)} {data.token1Symbol}
+              {formatAmount(data.openPrice, 4, true)} {data.token1Symbol}
             </span>
           </InfoItem>
           <InfoItem>
             <span>Close Price</span>
             <span>
-              {formatAmount(positionValue?.closePrice)} {data.token1Symbol}
+              {formatAmount(positionValue?.closePrice, 4, true)}{' '}
+              {data.token1Symbol}
             </span>
           </InfoItem>
           <InfoItem>

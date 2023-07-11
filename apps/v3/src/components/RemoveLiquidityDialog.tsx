@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { formatAmount } from '@qilin/utils';
+import { foramtPrecent, formatAmount } from '@qilin/utils';
 import * as Slider from '@radix-ui/react-slider';
 import { BigNumber } from 'ethers';
 import { useMemo, useState } from 'react';
@@ -211,8 +211,8 @@ export const RemoveLiquidityDialog: React.FC<
   const [precent, setPrecent] = useState(50);
 
   const { data: poolInfo } = usePoolInfo({
-    assetAddress: data.asset_address,
-    poolAddress: data.pool_address,
+    assetAddress: data.assetAddress,
+    poolAddress: data.poolAddress,
     enabled: open,
   });
 
@@ -238,7 +238,7 @@ export const RemoveLiquidityDialog: React.FC<
   }, [LPToken?.value, precent]);
 
   const { isNeedApprove, handleRemoveLiquidity } = useRemoveLiquidity(
-    data.asset_address,
+    data.assetAddress,
     poolInfo?.LPAddress,
     LPAmount,
     onSuccess
@@ -329,11 +329,11 @@ export const RemoveLiquidityDialog: React.FC<
             <SubTitle>Summary</SubTitle>
             <InfoItem>
               <span>Lp Price</span>
-              <span>{formatAmount(poolInfo?.LPPrice)}</span>
+              <span>{formatAmount(poolInfo?.LPPrice, 4, true)}</span>
             </InfoItem>
             <InfoItem>
               <span>Share Of Pool</span>
-              <span>{formatAmount(shareWillRemove, 2)}%</span>
+              <span>{foramtPrecent(shareWillRemove)}%</span>
             </InfoItem>
             <SubmitButton
               disabled={precent === 0}

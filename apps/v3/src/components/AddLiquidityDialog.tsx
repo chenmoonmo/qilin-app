@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { formatAmount, formatInput } from '@qilin/utils';
+import { foramtPrecent, formatAmount, formatInput } from '@qilin/utils';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type Address, useAccount, useBalance } from 'wagmi';
 
@@ -21,7 +21,7 @@ type AddLiquidityDialogPropsType = {
   assetAddress?: Address;
   tokenAddress?: Address;
   poolAddress?: Address;
-  orcaleAddress?: Address;
+  oracleAddress?: Address;
   onSuccess: () => void;
 };
 
@@ -130,7 +130,7 @@ const InfoItem = styled.div`
 
 export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
   children,
-  orcaleAddress,
+  oracleAddress,
   tokenAddress,
   assetAddress,
   poolAddress,
@@ -248,21 +248,22 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
 
   useEffect(() => {
     if (
-      orcaleAddress &&
+      oracleAddress &&
       tokenAddress &&
       oraclesList.length &&
       poolIndex === undefined
     ) {
       const index = oraclesList.findIndex(
         item =>
-          item.oracleAddress === orcaleAddress &&
+          item.oracleAddress === oracleAddress &&
           item.tokenAddress === tokenAddress
       );
+
       if (index !== -1) {
         setPoolIndex(index.toString());
       }
     }
-  }, [oraclesList, orcaleAddress, poolIndex, tokenAddress]);
+  }, [oraclesList, oracleAddress, poolIndex, tokenAddress]);
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
@@ -360,25 +361,26 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                 <span>
                   {formatAmount(poolParam?.liquidity)} {marginToken?.symbol}
                   {/* TODO: */}
-                  ($123.12)
+                  ($ {poolParam?.liquidityValue})
                 </span>
               </InfoItem>
               <InfoItem>
                 <span>LP Price</span>
                 <span>
-                  {formatAmount(poolParam?.LPPrice)} {marginToken?.symbol}
+                  {formatAmount(poolParam?.LPPrice, 4, true)}{' '}
+                  {marginToken?.symbol}
                 </span>
               </InfoItem>
               <InfoItem>
                 <span>APY</span>
                 <TextWithDirection>
-                  {formatAmount(poolParam?.apy)}%
+                  {foramtPrecent(poolParam?.apy)}%
                 </TextWithDirection>
               </InfoItem>
               <InfoItem>
                 {/* TODO: 计算 */}
                 <span>Share Of Pool</span>
-                <span>{share ? formatAmount(share * 100, 2) : '-'}%</span>
+                <span>{share ? `${foramtPrecent(share * 100)}%` : '-'}</span>
               </InfoItem>
               <SubTitle
                 css={css`
@@ -389,20 +391,20 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </SubTitle>
               <InfoItem>
                 <span>Fee</span>
-                <span>{formatAmount(poolParam?.feeRatio, 2)} %</span>
+                <span>{foramtPrecent(poolParam?.feeRatio)} %</span>
               </InfoItem>
               <InfoItem>
                 <span>Leverage Rate (L)</span>
                 <span>
                   {poolParam?.assetLevel === undefined
                     ? '-'
-                    : formatAmount(poolParam?.assetLevel * 100, 2)}{' '}
+                    : foramtPrecent(poolParam?.assetLevel)}{' '}
                   %
                 </span>
               </InfoItem>
               <InfoItem>
                 <span>Min Margin Ratio (Dmin)</span>
-                <span>{formatAmount(poolParam?.marginRatio)}</span>
+                <span>{formatAmount(poolParam?.marginRatio)} %</span>
               </InfoItem>
             </div>
           </Contianer>

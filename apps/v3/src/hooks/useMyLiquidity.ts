@@ -20,7 +20,19 @@ export const useMyLiquidity = () => {
       return (
         result?.my_liquidity_list?.map(item => {
           const decimal = 18;
-          const { liquidity, lp_amount, user_lp_amount, roi, name } = item;
+          const {
+            oracle_address,
+            asset_address,
+            pool_address,
+            name,
+            liquidity,
+            lp_amount,
+            user_lp_amount,
+            roi,
+            user_liquidity,
+            user_liquidity_value,
+            token,
+          } = item;
 
           const share =
             (+formatUnits(user_lp_amount, decimal) * 100) /
@@ -31,14 +43,20 @@ export const useMyLiquidity = () => {
             .map(name => name.trim());
 
           return {
-            ...item,
+            // ...item,
+            token,
+            name,
             token0Symbol,
             token1Symbol,
             share,
-            // TODO: 和代币精度一样
+            oracleAddress: oracle_address,
+            assetAddress: asset_address,
+            poolAddress: pool_address,
             liquidity: formatUnits(liquidity, decimal),
-            lp_amount: formatUnits(lp_amount, decimal),
-            user_lp_amount: formatUnits(user_lp_amount, decimal),
+            LPAmount: formatUnits(lp_amount, decimal),
+            userLPAmount: formatUnits(user_lp_amount, decimal),
+            userLiquidity: formatUnits(user_liquidity, decimal),
+            userLiquidityValue: formatUnits(user_liquidity_value, decimal),
             roi: +formatUnits(roi, 4) * 100,
           };
         }) ?? []

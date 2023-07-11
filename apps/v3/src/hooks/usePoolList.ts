@@ -45,14 +45,16 @@ export const usePoolList = (withoutZero = true) => {
           const decimal = pool.asset_info.pool_decimal;
           const assetAddress = pool.asset_info.asset;
           const poolAddress = pool.pool_info.pool;
-          const orcaleAddress = pool.pool_info.oracle;
+          const oracleAddress = pool.pool_info.oracle;
 
           const marginTokenAddress = pool.asset_info.pool_token;
           const marginTokenSymbol = pool.asset_info.pool_name;
 
           const liquidity = pool.asset_info.liquidity;
+          const liquidity_value = pool.asset_info.liquidity_value;
           const LPAmount = pool.asset_info.lp_amount;
           const poolDecimal = pool.asset_info.pool_decimal;
+
           const apy = pool.apy;
 
           const LPPrice = BigNumber.from(liquidity).gt(0)
@@ -69,18 +71,21 @@ export const usePoolList = (withoutZero = true) => {
             pairName,
             assetAddress,
             poolAddress,
-            orcaleAddress,
+            oracleAddress,
             marginTokenAddress,
             marginTokenSymbol,
             token0Symbol,
             token1Symbol,
             LPPrice,
+            apy: apy ? +formatUnits(apy, 4) * 100 : apy,
             ID: pool.ID,
-            apy: apy === '-' ? undefined : +formatUnits(apy, 4) * 100,
-            volumn: formatUnits(volumn, decimal),
+            volumn: pool.volumn_24
+              ? formatUnits(volumn, decimal)
+              : pool.volumn_24,
             change: +formatUnits(change, 4) * 100,
             futurePrice: formatUnits(futurePrice, decimal),
             liquidity: formatUnits(liquidity, poolDecimal),
+            liquidityValue: +formatUnits(liquidity_value, decimal),
           };
         }) ?? []
       );
