@@ -20,7 +20,7 @@ export const usePoolList = (withoutZero = true) => {
       return chainId
         ? `/poolList?${qs.stringify({
             chain_id: chainId,
-            page_size: PAGE_SIZE,
+            page_size: withoutZero ? PAGE_SIZE : 1000,
             without_zero: withoutZero,
             page_index: index,
             search_info: searchInfo,

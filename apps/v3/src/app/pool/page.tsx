@@ -46,8 +46,10 @@ export default function Pool() {
       {
         title: 'Liquidity',
         key: 'userLiquidity',
-        render: (value: any) => {
-          return `${formatAmount(value)}`;
+        render: (value: any, item: any) => {
+          return `${formatAmount(value)}($ ${formatAmount(
+            item.userLiquidityValue
+          )})`;
         },
       },
       {
@@ -105,7 +107,8 @@ export default function Pool() {
       {
         title: 'Liquidity',
         key: 'liquidity',
-        render: (value: any) => `${formatAmount(value)}`,
+        render: (value: any, item: any) =>
+          `${formatAmount(value)}($ ${formatAmount(item.liquidityValue)})`,
       },
       {
         title: 'LP Price',
