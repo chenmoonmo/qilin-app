@@ -6,6 +6,7 @@ export * from './Header';
 export * from './LeverageRadio';
 export * from './NoData';
 export * from './OpenPositionDialog';
+export * from './Pagination';
 export * from './PairSelector';
 export * from './RemoveLiquidityDialog';
 export * from './SwapRadio';
