@@ -15,6 +15,7 @@ import {
   ClosePositionDialog,
   LeverageRadio,
   OpenPositionDialog,
+  Pagination,
   PairSelector,
   SwapRadio,
   TabContent,
@@ -332,8 +333,15 @@ const TableItem = styled.div`
 
 const PositionTable = forwardRef<any, { columns: any; isFilter: boolean }>(
   ({ columns, isFilter }, ref) => {
-    const { data } = usePositions(isFilter);
-    return <Table ref={ref} columns={columns} dataSource={data} />;
+    const { data, totalPage, page, setPage } = usePositions(isFilter);
+    return (
+      <div ref={ref}>
+        <Table columns={columns} dataSource={data} />
+        {data.length > 0 && (
+          <Pagination page={page} setPage={setPage} total={totalPage} />
+        )}
+      </div>
+    );
   }
 );
 
@@ -453,9 +461,16 @@ const HistoryTable = forwardRef<any, { isFilter: boolean }>(
       ];
     }, [chain?.blockExplorers?.default.url]);
 
-    const { data } = useHistoryPositions(isFilter);
+    const { data, page, setPage, totalPage } = useHistoryPositions(isFilter);
 
-    return <Table ref={ref} columns={HistoryColumns} dataSource={data} />;
+    return (
+      <div ref={ref}>
+        <Table columns={HistoryColumns} dataSource={data} />
+        {data.length > 0 && (
+          <Pagination page={page} setPage={setPage} total={totalPage} />
+        )}
+      </div>
+    );
   }
 );
 
@@ -724,7 +739,10 @@ export default function Home() {
         <PairPrice>{formatAmount(poolInfo?.futurePrice, 4, true)}</PairPrice>
         <PairDataItem>
           <div>Chainlink Price</div>
-          <div>$ {formatAmount(poolInfo?.spotPrice, 4, true)}</div>
+          <div>
+            {formatAmount(poolInfo?.spotPrice, 4, true)}{' '}
+            {poolInfo?.token1Symbol}
+          </div>
         </PairDataItem>
         <PairDataItem>
           <div>24h Change</div>

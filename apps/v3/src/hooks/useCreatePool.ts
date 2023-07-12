@@ -9,7 +9,6 @@ import {
   useBalance,
   useChainId,
   useContractWrite,
-  usePrepareContractWrite,
   useSigner,
 } from 'wagmi';
 
@@ -70,14 +69,13 @@ export const useCreatePool = ({
     return BigNumber.from(parseUnits(amount, marginToken.decimals));
   }, [amount, marginToken?.decimals]);
 
-  const { config } = usePrepareContractWrite({
+  const { writeAsync } = useContractWrite({
+    mode: 'recklesslyUnprepared',
     address: factory,
     abi: Factory.abi,
     functionName: 'createPool',
     args: [tokenAddress, oracleAddress, chainLink, false],
   });
-
-  const { writeAsync } = useContractWrite(config);
 
   const handleCreatePool = useCallback(async () => {
     showWalletToast({

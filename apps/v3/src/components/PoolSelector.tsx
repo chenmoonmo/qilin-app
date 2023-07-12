@@ -158,7 +158,9 @@ export const PoolSelector: React.FC<PoolSelectorPropsType> = ({
               type="text"
               value={searchInfo}
               placeholder="Search name or paste address"
-              onChange={e => onSearchInfoChange?.(e.target.value)}
+              onChange={e => {
+                onSearchInfoChange?.(e.target.value);
+              }}
             />
           </SearchContainer>
           <SelectContainer>

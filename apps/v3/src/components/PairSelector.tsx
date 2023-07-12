@@ -210,7 +210,9 @@ export const PairSelector: React.FC<PairSelectorType> = ({
                         {foramtPrecent(pool.change)}%
                       </TextWithDirection>
                     </td>
-                    <td>{formatAmount(pool.volumn)}</td>
+                    <td>
+                      <span>{`$${formatAmount(pool.volumn)}`}</span>
+                    </td>
                   </tr>
                 );
               })}

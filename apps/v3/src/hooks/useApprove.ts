@@ -6,7 +6,6 @@ import {
   useAccount,
   useContractRead,
   useContractWrite,
-  usePrepareContractWrite,
 } from 'wagmi';
 
 export const useApprove = (
@@ -33,7 +32,8 @@ export const useApprove = (
     [allowance, approveAmount]
   );
 
-  const { config } = usePrepareContractWrite({
+  const { writeAsync: approve } = useContractWrite({
+    mode: 'recklesslyUnprepared',
     address: token,
     abi: erc20ABI,
     functionName: 'approve',
@@ -43,10 +43,7 @@ export const useApprove = (
         '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
       ),
     ],
-    enabled: isNeedApprove && !!spender,
   });
-
-  const { writeAsync: approve } = useContractWrite(config);
 
   const handleApprove = useCallback(async () => {
     try {
