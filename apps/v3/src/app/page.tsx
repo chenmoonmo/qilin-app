@@ -724,7 +724,10 @@ export default function Home() {
         <PairPrice>{formatAmount(poolInfo?.futurePrice, 4, true)}</PairPrice>
         <PairDataItem>
           <div>Chainlink Price</div>
-          <div>$ {formatAmount(poolInfo?.spotPrice, 4, true)}</div>
+          <div>
+            {formatAmount(poolInfo?.spotPrice, 4, true)}{' '}
+            {poolInfo?.token1Symbol}
+          </div>
         </PairDataItem>
         <PairDataItem>
           <div>24h Change</div>
