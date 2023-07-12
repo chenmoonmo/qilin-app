@@ -23,8 +23,6 @@ export const useOracles = (currentIndex?: string) => {
     });
   });
 
-  console.log(data);
-
   return useMemo(() => {
     return {
       data:
