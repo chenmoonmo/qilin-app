@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Icon } from '@qilin/component';
-import { foramtPrecent, formatAmount } from '@qilin/utils';
+import { foramtPrecent, formatAmount, formatPrice } from '@qilin/utils';
 import * as Popover from '@radix-ui/react-popover';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
@@ -204,7 +204,7 @@ export const PairSelector: React.FC<PairSelectorType> = ({
                         <span>{pool.pairName}</span>
                       </div>
                     </td>
-                    <td>{formatAmount(pool.futurePrice, 4, true)}</td>
+                    <td>{formatPrice(pool.futurePrice)}</td>
                     <td>
                       <TextWithDirection>
                         {foramtPrecent(pool.change)}%

@@ -149,6 +149,7 @@ export type MyLiquidityItem = {
   user_lp_amount: string;
   user_liquidity: string;
   user_liquidity_value: string;
+  token_name: string;
 };
 
 export type OracleItem = {

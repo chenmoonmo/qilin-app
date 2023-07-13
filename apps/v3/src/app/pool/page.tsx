@@ -3,7 +3,7 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
-import { foramtPrecent, formatAmount } from '@qilin/utils';
+import { foramtPrecent, formatAmount, formatPrice } from '@qilin/utils';
 import { useCallback, useMemo } from 'react';
 
 import {
@@ -47,9 +47,14 @@ export default function Pool() {
         title: 'Liquidity',
         key: 'userLiquidity',
         render: (value: any, item: any) => {
-          return `${formatAmount(value)}($ ${formatAmount(
-            item.userLiquidityValue
-          )})`;
+          return (
+            <div>
+              <div>${formatAmount(item.userLiquidityValue)}</div>
+              <div>
+                {formatAmount(value)} {item.marginTokenSymbol}
+              </div>
+            </div>
+          );
         },
       },
       {
@@ -107,15 +112,21 @@ export default function Pool() {
       {
         title: 'Liquidity',
         key: 'liquidity',
-        render: (value: any, item: any) =>
-          `${formatAmount(value)}($ ${formatAmount(item.liquidityValue)})`,
+        render: (value: any, item: any) => (
+          <div>
+            <div>${formatAmount(item.liquidityValue)}</div>
+            <div>
+              {formatAmount(value)} {item.marginTokenSymbol}
+            </div>
+          </div>
+        ),
       },
       {
         title: 'LP Price',
         key: 'LPPrice',
         render: (value: any, item: any) =>
           value
-            ? `${formatAmount(value, 4, true)} ${item.marginTokenSymbol}`
+            ? `${formatPrice(value)} ${item.marginTokenSymbol}`
             : formatAmount(value),
       },
       {

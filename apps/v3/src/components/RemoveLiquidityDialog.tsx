@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { foramtPrecent, formatAmount } from '@qilin/utils';
+import { foramtPrecent, formatAmount, formatPrice } from '@qilin/utils';
 import * as Slider from '@radix-ui/react-slider';
 import { BigNumber } from 'ethers';
 import { useMemo, useState } from 'react';
@@ -329,7 +329,7 @@ export const RemoveLiquidityDialog: React.FC<
             <SubTitle>Summary</SubTitle>
             <InfoItem>
               <span>Lp Price</span>
-              <span>{formatAmount(poolInfo?.LPPrice, 4, true)}</span>
+              <span>{formatPrice(poolInfo?.LPPrice)}</span>
             </InfoItem>
             <InfoItem>
               <span>Share Of Pool</span>

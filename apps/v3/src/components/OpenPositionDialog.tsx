@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { formatAmount } from '@qilin/utils';
+import { formatAmount, formatPrice } from '@qilin/utils';
 import { useMemo, useState } from 'react';
 
 type OpenPositionDialogPropsType = {
@@ -120,7 +120,7 @@ export const OpenPositionDialog = ({
           <PositionInfoItem>
             <span>Open Price</span>
             <span>
-              {formatAmount(openPrice, 4, true)} {token1Symbol}
+              {formatPrice(openPrice)} {token1Symbol}
             </span>
           </PositionInfoItem>
           <PositionInfoItem>

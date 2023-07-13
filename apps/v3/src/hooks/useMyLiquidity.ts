@@ -32,6 +32,7 @@ export const useMyLiquidity = () => {
             user_liquidity,
             user_liquidity_value,
             token,
+            token_name,
           } = item;
 
           const share =
@@ -57,6 +58,7 @@ export const useMyLiquidity = () => {
             userLPAmount: formatUnits(user_lp_amount, decimal),
             userLiquidity: formatUnits(user_liquidity, decimal),
             userLiquidityValue: formatUnits(user_liquidity_value, decimal),
+            marginTokenSymbol: token_name,
             roi: +formatUnits(roi, 4) * 100,
           };
         }) ?? []
