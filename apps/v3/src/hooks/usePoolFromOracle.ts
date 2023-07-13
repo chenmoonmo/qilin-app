@@ -75,7 +75,7 @@ export const usePoolFromOracle = ({
         liquidity: +formatUnitsAmount(liquidity, 18),
         LPPrice: +formatUnitsAmount(lp_price, 18),
         LPAmount: +formatUnitsAmount(lp_amount, 18),
-        assetLevel: +formatUnitsAmount(asset_level, 4) * 100,
+        assetLevel: +asset_level,
         liquidityValue: +formatUnitsAmount(liquidity_value, 18),
       };
     },

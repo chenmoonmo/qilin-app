@@ -81,10 +81,13 @@ const AmountInput = styled.div`
   background: #2c2f38;
   input {
     flex: 1;
-    color: #737884;
     font-size: 16px;
     font-family: PT Mono;
     font-weight: 700;
+    color: #fff;
+    &::placeholder {
+      color: #737884;
+    }
   }
 `;
 
@@ -173,7 +176,13 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
       return undefined;
     }
     const { LPAmount } = poolParam;
-    return Math.min((+LPToken?.formatted + +amount) / LPAmount, 1);
+
+    const addLPAmount = +amount / poolParam?.LPPrice;
+
+    const totalLP = LPAmount + addLPAmount;
+    const totalUserLP = +LPToken?.formatted + addLPAmount;
+
+    return Math.min(totalUserLP / totalLP, 1);
   }, [LPToken, amount, poolParam]);
 
   // if has poolParam, means the pool is exist
@@ -408,7 +417,7 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                 <span>
                   {poolParam?.assetLevel === undefined
                     ? '-'
-                    : `${foramtPrecent(poolParam?.assetLevel)}%`}
+                    : `${foramtPrecent(poolParam?.assetLevel)}`}
                 </span>
               </InfoItem>
               <InfoItem>
