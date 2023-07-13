@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers';
 import { formatUnits } from 'ethers/lib/utils.js';
 import qs from 'querystring';
 import { useCallback, useMemo, useState } from 'react';
@@ -58,9 +57,8 @@ export const usePoolList = (withoutZero = true) => {
 
           const apy = pool.apy;
 
-          const LPPrice = BigNumber.from(liquidity).gt(0)
-            ? BigNumber.from(liquidity).div(LPAmount).toString()
-            : undefined;
+          const LPPrice =
+            +formatUnits(liquidity, decimal) / +formatUnits(LPAmount, decimal);
 
           const pairName = pool.pool_info.name;
 
