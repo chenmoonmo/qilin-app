@@ -2,7 +2,12 @@
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
-import { foramtPrecent, formatAmount, formatInput } from '@qilin/utils';
+import {
+  foramtPrecent,
+  formatAmount,
+  formatInput,
+  formatPrice,
+} from '@qilin/utils';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -617,7 +622,7 @@ export default function Home() {
         key: 'openPrice',
         render: (value: string, item: any) => (
           <TableItem>
-            <div>{formatAmount(value, 4, true)}</div>
+            <div>{formatPrice(value)}</div>
             <div>{item.token1Symbol}</div>
           </TableItem>
         ),
@@ -736,12 +741,11 @@ export default function Home() {
             </svg>
           </PairInfo>
         </PairSelector>
-        <PairPrice>{formatAmount(poolInfo?.futurePrice, 4, true)}</PairPrice>
+        <PairPrice>{formatPrice(poolInfo?.futurePrice)}</PairPrice>
         <PairDataItem>
           <div>Chainlink Price</div>
           <div>
-            {formatAmount(poolInfo?.spotPrice, 4, true)}{' '}
-            {poolInfo?.token1Symbol}
+            {formatPrice(poolInfo?.spotPrice)} {poolInfo?.token1Symbol}
           </div>
         </PairDataItem>
         <PairDataItem>

@@ -52,3 +52,9 @@ export const foramtPrecent = (
 ): string => {
   return formatAmount(num, 2);
 };
+
+export const formatPrice = (
+  num: number | string | undefined | null
+): string => {
+  return formatAmount(num, 4, true);
+};

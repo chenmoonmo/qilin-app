@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { formatAmount } from '@qilin/utils';
+import { formatAmount, formatPrice } from '@qilin/utils';
 import { useMemo, useState } from 'react';
 
 import type { usePositions } from '@/hooks';
@@ -106,14 +106,13 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
           <InfoItem>
             <span>Open Price</span>
             <span>
-              {formatAmount(data.openPrice, 4, true)} {data.token1Symbol}
+              {formatPrice(data.openPrice)} {data.token1Symbol}
             </span>
           </InfoItem>
           <InfoItem>
             <span>Close Price</span>
             <span>
-              {formatAmount(positionValue?.closePrice, 4, true)}{' '}
-              {data.token1Symbol}
+              {formatPrice(positionValue?.closePrice)} {data.token1Symbol}
             </span>
           </InfoItem>
           <InfoItem>

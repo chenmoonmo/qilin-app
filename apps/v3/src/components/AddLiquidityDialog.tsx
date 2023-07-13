@@ -1,7 +1,12 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { foramtPrecent, formatAmount, formatInput } from '@qilin/utils';
+import {
+  foramtPrecent,
+  formatAmount,
+  formatInput,
+  formatPrice,
+} from '@qilin/utils';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type Address, useAccount, useBalance } from 'wagmi';
 
@@ -368,8 +373,7 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
               <InfoItem>
                 <span>LP Price</span>
                 <span>
-                  {formatAmount(poolParam?.LPPrice, 4, true)}{' '}
-                  {marginToken?.symbol}
+                  {formatPrice(poolParam?.LPPrice)} {marginToken?.symbol}
                 </span>
               </InfoItem>
               <InfoItem>
