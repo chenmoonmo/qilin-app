@@ -11,7 +11,7 @@ import {
   PoolTable,
   RemoveLiquidityDialog,
 } from '@/components';
-import { useMyLiquidity, usePoolList } from '@/hooks';
+import { useMyLiquidity, usePoolList, useSwitchNetwork } from '@/hooks';
 
 const Main = styled.main`
   max-width: 1440px;
@@ -20,12 +20,14 @@ const Main = styled.main`
 `;
 
 const TableTitle = styled.div`
-  font-weight: 600;
+  font-weight: 500;
   font-size: 16px;
   line-height: 24px;
 `;
 
 export default function Pool() {
+  const { isErrorNetwork, switchNetwork } = useSwitchNetwork();
+
   const { data: poolList, mutate: refreshPoolList } = usePoolList(false);
   const { data: myLiquidityList, mutate: refreshMyLiquidity } =
     useMyLiquidity();
@@ -84,7 +86,17 @@ export default function Pool() {
                 oracleAddress={item.oracleAddress}
                 onSuccess={handleSuccess}
               >
-                <Button>Add</Button>
+                <Button
+                  onClick={e => {
+                    if (isErrorNetwork) {
+                      switchNetwork();
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Add
+                </Button>
               </AddLiquidityDialog>
               <RemoveLiquidityDialog data={item} onSuccess={handleSuccess}>
                 <Button
@@ -92,6 +104,13 @@ export default function Pool() {
                   css={css`
                     margin-left: 6px;
                   `}
+                  onClick={e => {
+                    if (isErrorNetwork) {
+                      switchNetwork();
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }
+                  }}
                 >
                   Remove
                 </Button>
@@ -148,13 +167,23 @@ export default function Pool() {
               tokenAddress={item.marginTokenAddress}
               onSuccess={handleSuccess}
             >
-              <Button>Add</Button>
+              <Button
+                onClick={e => {
+                  if (isErrorNetwork) {
+                    switchNetwork();
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                }}
+              >
+                Add
+              </Button>
             </AddLiquidityDialog>
           );
         },
       },
     ];
-  }, [handleSuccess]);
+  }, [handleSuccess, isErrorNetwork, switchNetwork]);
 
   return (
     <Main>
@@ -168,7 +197,17 @@ export default function Pool() {
       >
         <TableTitle>My Liquidity</TableTitle>
         <AddLiquidityDialog onSuccess={handleSuccess}>
-          <Button>New Position </Button>
+          <Button
+            onClick={e => {
+              if (isErrorNetwork) {
+                switchNetwork();
+                e.stopPropagation();
+                e.preventDefault();
+              }
+            }}
+          >
+            New Position{' '}
+          </Button>
         </AddLiquidityDialog>
       </div>
       <PoolTable columns={liquidityColumns} dataSource={myLiquidityList} />

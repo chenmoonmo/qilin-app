@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import type { Address } from 'wagmi';
 
 import { PoolTable } from '@/components';
-import { useLiquidationList, usePoolInfo } from '@/hooks';
+import { useLiquidationList, usePoolInfo, useSwitchNetwork } from '@/hooks';
 import { useLiquidity } from '@/hooks/useLiquidity';
 
 const Main = styled.main`
@@ -34,7 +34,7 @@ const TableTitle = styled.h1`
   margin: 57px 0 17px;
   font-size: 18px;
   font-weight: 600;
-  color: #ffffff;
+  color: #e0e0e0;
 `;
 
 export default function Liquidate({
@@ -42,6 +42,8 @@ export default function Liquidate({
 }: {
   params: { addresses: [Address, Address] };
 }) {
+  const { isErrorNetwork, switchNetwork } = useSwitchNetwork();
+
   const [assetAddress, poolAddress] = addresses;
 
   const { data: poolInfo } = usePoolInfo({
@@ -98,15 +100,24 @@ export default function Liquidate({
         key: 'positionId',
         render: (positionId: number) => {
           return (
-            <Button onClick={() => handleLiquidate(positionId)}>
+            <Button
+              onClick={e => {
+                if (isErrorNetwork) {
+                  switchNetwork();
+                  e.stopPropagation();
+                  e.preventDefault();
+                } else {
+                  handleLiquidate(positionId);
+                }
+              }}
+            >
               Liqudate
             </Button>
           );
         },
       },
     ];
-  }, [handleLiquidate]);
-  console.log(data);
+  }, [handleLiquidate, isErrorNetwork, switchNetwork]);
 
   return (
     <Main>

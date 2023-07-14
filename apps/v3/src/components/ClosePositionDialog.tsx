@@ -15,7 +15,7 @@ type AddLiquidityDialogPropsType = {
 };
 
 const Content = styled(Dialog.Content)`
-  border-radius: 24px;
+  border-radius: 10px;
   border: 2px solid #323640;
   background: #262930;
   overscroll-behavior: contain;
@@ -26,6 +26,8 @@ const Title = styled(Dialog.Title)`
   align-items: center;
   margin-bottom: 28px;
   svg {
+    width: 10px;
+    height: 16px;
     margin-right: 10px;
     cursor: pointer;
   }

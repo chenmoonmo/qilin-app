@@ -32,14 +32,14 @@ export const usePoolInfo = ({
 
       const {
         pool: {
-          spot_price: spotPrice,
+          spot_price,
           nake_position: nakePosition,
           funding_8: funding,
           pair_info: {
             ID,
             asset_info,
             pool_info,
-            future_price: futurePrice,
+            future_price,
             volumn_24: volume,
             future_chang_24: change,
           },
@@ -48,11 +48,14 @@ export const usePoolInfo = ({
             position_short: positionShort,
             rebase_long: rebaseLong,
             rebase_short: rebaseShort,
+            request_time: requestTime,
+            last_rebase_time: lastRebaseTime,
           },
           setting: {
             margin_ratio: marginRatio,
             fee_ratio: closeRatio,
             legal_level: leverages,
+            price_threshold_Ratio,
           },
         },
       } = result;
@@ -68,6 +71,46 @@ export const usePoolInfo = ({
       } = asset_info;
 
       const { name: pairName, oracle: oracleAddress } = pool_info;
+
+      const futurePrice = +formatUnits(future_price, decimal);
+      const spotPrice = +formatUnits(spot_price, decimal);
+
+      const priceThresholdRatio = +formatUnits(price_threshold_Ratio, 4);
+
+      // 时间差
+      const timeDiff = requestTime - lastRebaseTime;
+      const isDiffLargeThan5Min = timeDiff > 300;
+
+      // 弹簧是否开启
+      let isSpringOpen = false;
+
+      // 现货价上边界
+      const spotPriceUpper = spotPrice * (1 + priceThresholdRatio);
+      // 现货价下边界
+      const spotPriceLower = spotPrice * (1 - priceThresholdRatio);
+
+      // 计算时使用的价格
+      let longPrice = futurePrice,
+        shortPrice = futurePrice;
+
+      if (futurePrice > spotPriceUpper) {
+        isSpringOpen = true;
+        longPrice = isDiffLargeThan5Min
+          ? spotPriceUpper
+          : Math.max(spotPriceUpper, futurePrice);
+        shortPrice = isDiffLargeThan5Min
+          ? spotPriceUpper
+          : Math.min(spotPriceUpper, futurePrice);
+      }
+      if (+futurePrice < spotPriceLower) {
+        isSpringOpen = true;
+        longPrice = isDiffLargeThan5Min
+          ? spotPriceLower
+          : Math.max(spotPriceLower, futurePrice);
+        shortPrice = isDiffLargeThan5Min
+          ? spotPriceLower
+          : Math.min(spotPriceLower, futurePrice);
+      }
 
       const LPPrice = BigNumber.from(liquidity)
         .div(BigNumber.from(LPAmount))
@@ -89,14 +132,17 @@ export const usePoolInfo = ({
         LPAddress,
         LPPrice,
         marginTokenSymbol,
+        longPrice,
+        shortPrice,
+        spotPrice,
+        futurePrice,
+        isSpringOpen,
         leverages: leverages.map(item => item.toString()),
         positionLong: +formatUnits(positionLong, decimal),
         positionShort: +formatUnits(positionShort, decimal),
         rebaseLong: +formatUnits(rebaseLong, decimal),
         rebaseShort: +formatUnits(rebaseShort, decimal),
         liquidity: +formatUnits(liquidity, poolDecimal),
-        futurePrice: +formatUnits(futurePrice, decimal),
-        spotPrice: +formatUnits(spotPrice, decimal),
         nakePosition: formatUnits(nakePosition, decimal),
         volume: formatUnits(volume, decimal),
         funding: +formatUnits(funding, 4) * 100,

@@ -5,7 +5,7 @@
   --active-border-color: #636363;
 
   /* text */
-  --text-color: #ffffff;
+  --text-color: #e0e0e0;
   --text-color-sub: #737884;
   --text-l: 14px;
   --text-xl: 16px;
@@ -44,4 +44,5 @@ body {
 button,
 input {
   all: unset;
+  color: #fff;
 }

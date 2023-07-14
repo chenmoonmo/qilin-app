@@ -18,7 +18,7 @@ export const TabTrigger = styled(Tabs.Trigger)`
     margin-left: 30px;
   }
   &[data-state='active'] {
-    color: #ffffff;
+    color: #e0e0e0;
   }
 `;
 

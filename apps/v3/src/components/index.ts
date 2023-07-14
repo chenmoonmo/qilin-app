@@ -13,5 +13,6 @@ export * from './SwapRadio';
 export * from './Tab';
 export * from './Table';
 export * from './TextWithDirection';
+export * from './TextWithWarning';
 export * from './TokenIcon';
 export * from './TradingView';

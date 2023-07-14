@@ -33,9 +33,12 @@ export const useOracles = (currentIndex?: string) => {
           const lowerSearchInfo = searchInfo.toLowerCase();
 
           return (
-            [oraclePairName, oracleAddress, tokenAddress].some(item => {
+            [oraclePairName].some(item => {
               return item.includes(lowerSearchInfo);
             }) ||
+            [oracleAddress, tokenAddress].some(
+              item => item === lowerSearchInfo
+            ) ||
             (currentIndex && index.toString() === currentIndex)
           );
         }) ?? [],
