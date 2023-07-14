@@ -331,7 +331,9 @@ export const RemoveLiquidityDialog: React.FC<
             <SubTitle>Summary</SubTitle>
             <InfoItem>
               <span>Lp Price</span>
-              <span>{formatPrice(poolInfo?.LPPrice)}</span>
+              <span>
+                {formatPrice(poolInfo?.LPPrice)} {poolInfo?.marginTokenSymbol}
+              </span>
             </InfoItem>
             <InfoItem>
               <span>Share Of Pool</span>

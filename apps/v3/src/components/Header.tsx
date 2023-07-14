@@ -1,7 +1,7 @@
 'use client';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Button, Icon, Tooltip } from '@qilin/component';
+import { Button, Icon } from '@qilin/component';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type FC, useCallback, useEffect, useMemo } from 'react';
@@ -82,6 +82,8 @@ const More = styled(ChainInfo)`
 More.defaultProps = {
   children: 'More',
 };
+
+// const;
 
 export const Header: FC<HeaderPropsType> = ({ routes }) => {
   const pathname = usePathname();
@@ -176,9 +178,7 @@ export const Header: FC<HeaderPropsType> = ({ routes }) => {
                   margin-right: 11px;
                 `}
               />
-              <Tooltip text={address}>
-                <span>{shortAddress}</span>
-              </Tooltip>
+              <span>{shortAddress}</span>
             </div>
           </ChainInfo>
         ) : (
