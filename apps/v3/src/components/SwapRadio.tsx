@@ -23,6 +23,7 @@ const Item = styled(RadioGroup.Item)`
   text-align: center;
   border-radius: 6px;
   transition: background 0.1s ease, color 0.1s ease;
+  font-weight: 600;
 
   &:first-of-type[data-state='checked'] {
     background: #44c27f;

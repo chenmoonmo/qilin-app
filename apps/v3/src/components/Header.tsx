@@ -28,7 +28,7 @@ const HeaderContainer = styled.header`
 
 const Logo = styled.svg`
   grid-column: 1 / 2;
-  margin-right: 37px;
+  margin-right: 44.5px;
 `;
 
 const RoutesContainer = styled.div`
@@ -43,14 +43,14 @@ const RoutesContainer = styled.div`
 `;
 
 const Route = styled(Link)<{ active?: boolean }>`
-  padding: 20px 30px;
+  padding: 20px 22.5px;
   text-decoration: none;
   color: #9699a3;
   cursor: pointer;
   user-select: none;
   &[data-active='true'],
   &:hover {
-    color: #ffffff;
+    color: #e0e0e0;
   }
   &[data-active='true'] {
     pointer-events: none;
@@ -58,6 +58,7 @@ const Route = styled(Link)<{ active?: boolean }>`
 `;
 
 const ChainInfo = styled.div`
+  height: 33px;
   grid-column: 4 / 5;
   display: flex;
   align-items: center;
@@ -72,6 +73,7 @@ const ChainInfo = styled.div`
 `;
 
 const More = styled(ChainInfo)`
+  height: 33px;
   margin-left: 14px;
   grid-column: 5/ 6;
   cursor: pointer;
@@ -181,6 +183,9 @@ export const Header: FC<HeaderPropsType> = ({ routes }) => {
           </ChainInfo>
         ) : (
           <Button
+            css={css`
+              height: 33px;
+            `}
             backgroundColor="#e15c48"
             onClick={() => handleSwitchNetwork(chains[0]?.id)}
           >

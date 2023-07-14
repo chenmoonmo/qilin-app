@@ -16,7 +16,7 @@ const Container = styled.div`
   padding: 32px 0;
   font-size: 12px;
   font-weight: 500;
-  color: #ffffff;
+  color: #e0e0e0;
   button {
     all: unset;
     padding: 0 15px;

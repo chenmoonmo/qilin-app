@@ -1,4 +1,3 @@
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { type FC, forwardRef } from 'react';
 
@@ -42,9 +41,16 @@ const Tr = styled.tr`
 const Th = styled.th`
   padding: 16px;
   text-align: left;
+  font-weight: 500;
+  &:first-of-type {
+    padding-left: 0px;
+  }
 `;
 
-const Td = styled(Th.withComponent('td'))`
+const Td = styled.td`
+  padding: 16px;
+  text-align: left;
+  font-weight: 500;
   :has([data-direction='long']) {
     font-weight: 600;
     color: #44c27f;
@@ -116,11 +122,15 @@ const PoolTr = styled(Tr)`
 
 const PoolTh = styled(Th)`
   padding: 12px 23px;
-  color: #737884;
+  color: #888e9d;
+  &:first-of-type {
+    padding-left: 23px;
+  }
 `;
 
-const PoolTd = styled(PoolTh.withComponent('td'))`
-  color: #ffffff;
+const PoolTd = styled.td`
+  padding: 12px 23px;
+  color: #e0e0e0;
 `;
 
 export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
@@ -161,11 +171,6 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
             </td>
           </tr>
         )}
-        <tr
-          css={css`
-            height: 93px;
-          `}
-        />
       </tbody>
     </PoolTableLayout>
   );

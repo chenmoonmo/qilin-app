@@ -90,7 +90,7 @@ const SelectContainer = styled.div`
 
 const SelectItem = styled.div<{ active: boolean }>`
   padding: 16px 14px;
-  color: #fff;
+  color: #e0e0e0;
   font-size: 12px;
   font-weight: 500;
   line-height: 12px;

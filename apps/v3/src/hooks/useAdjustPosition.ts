@@ -31,6 +31,7 @@ export const useAdjustPosition = (
 
   const estLiqPrice = useMemo(() => {
     if (!poolInfo) return undefined;
+
     const { side, margin, openPrice, openRebase, size } = data;
 
     const { marginRatio, rebaseLong, closeRatio } = poolInfo;

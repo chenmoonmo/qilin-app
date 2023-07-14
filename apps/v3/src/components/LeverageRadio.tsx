@@ -23,14 +23,14 @@ const Item = styled(RadioGroup.Item)`
   justify-content: center;
   padding: 12px;
   flex: 1;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   color: #737884;
   cursor: pointer;
   &[data-state='checked'],
   &:hover {
     background: #464a56;
-    color: #ffffff;
+    color: #fff;
   }
 `;
 

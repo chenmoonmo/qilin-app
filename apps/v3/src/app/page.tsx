@@ -29,6 +29,7 @@ import {
   TabRoot,
   TabTrigger,
   TextWithDirection,
+  TextWithWarning,
   TokenIcon,
   TradingView,
 } from '@/components';
@@ -41,6 +42,7 @@ import {
   usePoolInfo,
   usePoolList,
   usePositions,
+  useSwitchNetwork,
 } from '@/hooks';
 
 const Main = styled.main`
@@ -58,6 +60,7 @@ const PairInfoContainer = styled.div`
   grid-row: 1 / 2;
   display: flex;
   align-items: center;
+  padding: 0 0 24px;
   > div {
     position: relative;
     &::after {
@@ -89,7 +92,7 @@ const PairInfo = styled.div`
   padding-right: 24px;
   font-size: 16px;
   font-weight: 600;
-  color: #ffffff;
+  color: #e0e0e0;
   cursor: pointer;
   svg {
     margin-left: 5px;
@@ -97,34 +100,35 @@ const PairInfo = styled.div`
 `;
 
 const PairPrice = styled.div`
-  padding: 0 21px;
-  color: #fff;
+  padding: 0 20px;
+  color: #e0e0e0;
   font-size: 14px;
   line-height: 21px;
+  font-weight: 600;
 `;
 
 const PairDataItem = styled.div`
   align-self: stretch;
-  padding: 12px 24px 30px;
+  padding: 0 24px;
   > div:first-of-type {
     font-size: 12px;
     font-family: Poppins;
-    font-weight: 400;
+    font-weight: 600;
     color: #737884;
   }
 
   > div:nth-of-type(2) {
-    margin-top: 4px;
+    /* margin-top: 4px; */
     font-size: 10px;
     font-family: Poppins;
-    font-weight: 500;
-    color: #ffffff;
+    font-weight: 600;
+    color: #e0e0e0;
   }
 
   > div:nth-of-type(3) {
     font-size: 10px;
     font-family: Poppins;
-    font-weight: 500;
+    font-weight: 600;
     color: #e15c48;
   }
 `;
@@ -161,7 +165,7 @@ const FormInput = styled.div`
     font-size: 24px;
     font-family: PT Mono;
     font-weight: bold;
-    color: #dbdde5;
+    color: #fff;
 
     &::placeholder {
       color: #737884;
@@ -214,7 +218,7 @@ const TokenInfo = styled.div`
 
 const TokenSymbol = styled.span`
   padding: 0 12px 0 5px;
-  color: #fff;
+  color: #e0e0e0;
 `;
 
 const Token2 = styled.div`
@@ -265,7 +269,7 @@ const TableTabTitle = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: #9699a3;
 `;
@@ -317,12 +321,12 @@ const LiquidateLink = styled(Link)`
   span {
     font-size: 14px;
     line-height: 11px;
-    color: #fff;
+    color: #e0e0e0;
   }
 `;
 
 const TableItem = styled.div`
-  color: #fff;
+  color: #e0e0e0;
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
@@ -482,6 +486,7 @@ const HistoryTable = forwardRef<any, { isFilter: boolean }>(
 HistoryTable.displayName = 'HistoryTable';
 
 export default function Home() {
+  const { isErrorNetwork, switchNetwork } = useSwitchNetwork();
   const { address } = useAccount();
   const router = useRouter();
 
@@ -596,7 +601,7 @@ export default function Home() {
                 margin-left: 8px;
                 border-radius: 2px;
                 background: #2c2f38;
-                color: #fff;
+                color: #e0e0e0;
                 font-size: 10px;
                 font-style: normal;
                 font-weight: 400;
@@ -634,10 +639,25 @@ export default function Home() {
           let { marginRatio } = item;
           const positionRatio = value * 100;
           marginRatio = marginRatio * 100;
+
           const ratiaText = positionRatio >= marginRatio * 2 ? 'safe' : 'risk';
-          return `${foramtPrecent(positionRatio)}%(> ${foramtPrecent(
-            marginRatio
-          )}% ${ratiaText})`;
+
+          return (
+            <>
+              <span
+                css={css`
+                  color: ${ratiaText === 'risk'
+                    ? 'rgba(225, 92, 72, 1)'
+                    : '#fff'};
+                `}
+              >
+                {foramtPrecent(positionRatio)}%
+              </span>
+              <span>
+                ({'>'} {foramtPrecent(marginRatio)}% {ratiaText})
+              </span>
+            </>
+          );
         },
       },
       {
@@ -668,7 +688,15 @@ export default function Home() {
         render: (_: any, item: any) => (
           <>
             <AdjustMarginDialog data={item} onSuccess={handleSuccsee}>
-              <Button>
+              <Button
+                onClick={e => {
+                  if (isErrorNetwork) {
+                    switchNetwork();
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                }}
+              >
                 <svg
                   width="8"
                   height="8"
@@ -697,6 +725,13 @@ export default function Home() {
                 css={css`
                   margin-left: 8px;
                 `}
+                onClick={e => {
+                  if (isErrorNetwork) {
+                    switchNetwork();
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                }}
               >
                 Close
               </Button>
@@ -705,7 +740,13 @@ export default function Home() {
         ),
       },
     ],
-    [handleSuccsee, poolInfo?.assetAddress, poolInfo?.poolAddress]
+    [
+      handleSuccsee,
+      isErrorNetwork,
+      poolInfo?.assetAddress,
+      poolInfo?.poolAddress,
+      switchNetwork,
+    ]
   );
 
   useEffect(() => {
@@ -839,7 +880,24 @@ export default function Home() {
           onChange={setLeverage}
         />
         <BudgetResultItem>
-          <span>Est.Open Price</span>
+          <TextWithWarning
+            text={
+              <div>
+                <div>
+                  Warning: Unfavorable opening price due to large futures-spot
+                </div>
+                <div>
+                  spread.We recommend waiting for spread to narrow before
+                  trading.
+                </div>
+              </div>
+            }
+            isWarning={poolInfo?.isSpringOpen}
+          >
+            {poolInfo?.isSpringOpen
+              ? 'Est.Open Price Warning'
+              : 'Est.Open Price'}
+          </TextWithWarning>
           <span>
             1 {poolInfo?.token0Symbol} = {formatAmount(estPrice)}{' '}
             {poolInfo?.token1Symbol}
@@ -869,7 +927,17 @@ export default function Home() {
           marginTokenName={marginToken?.symbol}
           onConfirm={hanldeOpenPosition}
         >
-          <OpenButton disabled={disabledConfirm} backgroundColor={buttonColor}>
+          <OpenButton
+            disabled={disabledConfirm}
+            backgroundColor={buttonColor}
+            onClick={e => {
+              if (isErrorNetwork) {
+                switchNetwork();
+                e.stopPropagation();
+                e.preventDefault();
+              }
+            }}
+          >
             {buttonText}
           </OpenButton>
         </OpenPositionDialog>

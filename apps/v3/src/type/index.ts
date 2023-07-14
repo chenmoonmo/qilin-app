@@ -53,6 +53,8 @@ export type Pool = {
     rebase_short: string;
     size_long: string;
     size_short: string;
+    last_rebase_time: number;
+    request_time: number;
   };
   setting: {
     asset_level: number;
@@ -63,6 +65,7 @@ export type Pool = {
     price_threshold: number;
     rebase_block: number;
     rebase_ratio: number;
+    price_threshold_Ratio: number;
   };
 };
 

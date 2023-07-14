@@ -90,9 +90,7 @@ const TableLayout = styled.table`
       table-layout: fixed;
       width: 100%;
       cursor: pointer;
-      &:hover {
-        background: rgba(54, 58, 69, 0.3);
-      }
+      &:hover,
       &[data-active='true'] {
         background: rgba(54, 58, 69, 0.6);
       }

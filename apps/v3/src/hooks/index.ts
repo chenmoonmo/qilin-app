@@ -15,3 +15,4 @@ export * from './usePoolInfo';
 export * from './usePoolList';
 export * from './usePositions';
 export * from './useRemoveLiquidity';
+export * from './useSwitchNetwork';

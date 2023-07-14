@@ -33,7 +33,7 @@ type AddLiquidityDialogPropsType = {
 const Content = styled(Dialog.Content)`
   width: 858px;
   max-width: 858px;
-  border-radius: 24px;
+  border-radius: 10px;
   border: 2px solid #323640;
   background: #262930;
   overscroll-behavior: contain;
@@ -43,6 +43,8 @@ const Title = styled(Dialog.Title)`
   display: flex;
   align-items: center;
   svg {
+    width: 10px;
+    height: 16px;
     margin-right: 10px;
     cursor: pointer;
   }
@@ -84,7 +86,6 @@ const AmountInput = styled.div`
     font-size: 16px;
     font-family: PT Mono;
     font-weight: 700;
-    color: #fff;
     &::placeholder {
       color: #737884;
     }
@@ -175,11 +176,12 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     if (!poolParam || !LPToken) {
       return undefined;
     }
-    const { LPAmount } = poolParam;
+    const { LPAmount, LPPrice } = poolParam;
 
-    const addLPAmount = +amount / poolParam?.LPPrice;
+    const addLPAmount = +amount / LPPrice;
 
     const totalLP = LPAmount + addLPAmount;
+
     const totalUserLP = +LPToken?.formatted + addLPAmount;
 
     return Math.min(totalUserLP / totalLP, 1);
