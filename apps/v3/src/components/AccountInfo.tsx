@@ -3,12 +3,7 @@ import styled from '@emotion/styled';
 import { Button, Dialog, Icon } from '@qilin/component';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi';
 
 const AccountInfoContainer = styled.div`
@@ -124,6 +119,9 @@ export const AccountInfo = () => {
   const { connect, connectors } = useConnect({
     onSuccess: () => {
       setAccountOpen(false);
+      setConnectOpen(false);
+    },
+    onError: () => {
       setConnectOpen(false);
     },
   });

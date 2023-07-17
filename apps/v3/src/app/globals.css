@@ -46,3 +46,7 @@ input {
   all: unset;
   color: #fff;
 }
+
+#walletconnect-wrapper {
+  color: #000;
+}

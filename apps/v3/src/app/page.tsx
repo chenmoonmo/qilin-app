@@ -240,7 +240,7 @@ const FormLeverageLabel = styled.div`
 `;
 
 // 预算结果项
-const BudgetResultItem = styled.p`
+const BudgetResultItem = styled.div`
   all: unset;
   display: flex;
   justify-content: space-between;
@@ -249,9 +249,6 @@ const BudgetResultItem = styled.p`
   font-size: 12px;
   font-weight: 400;
   color: #737884;
-  &:first-of-type {
-    margin-top: 20px;
-  }
 `;
 
 const OpenButton = styled(Button)`
@@ -880,7 +877,11 @@ export default function Home() {
           leverages={poolInfo?.leverages}
           onChange={setLeverage}
         />
-        <BudgetResultItem>
+        <BudgetResultItem
+          css={css`
+            margin-top: 20px;
+          `}
+        >
           <TextWithWarning
             text={
               <div>
