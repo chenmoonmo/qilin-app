@@ -56,6 +56,8 @@ export const usePositions = (isFilter = false) => {
             margin_ratio,
             position_ratio,
             open_rebase,
+            asset_address,
+            position_id,
           } = item;
 
           const decimal = 18;
@@ -64,11 +66,16 @@ export const usePositions = (isFilter = false) => {
             .split('/')
             .map(item => item.trim());
 
+          const needLiquidation = position_ratio < margin_ratio;
+
           return {
             ...item,
             token0Symbol,
             token1Symbol,
             poolName: pool_name,
+            needLiquidation,
+            positionId: position_id,
+            assetAddress: asset_address,
             fundingFee: -+formatUnits(funding_fee, decimal),
             margin: +formatUnits(margin, decimal),
             openPrice: +formatUnits(open_price, decimal),
