@@ -11,7 +11,7 @@ import {
   PoolTable,
   RemoveLiquidityDialog,
 } from '@/components';
-import { useMyLiquidity, usePoolList, useSwitchNetwork } from '@/hooks';
+import { useMyLiquidity, usePoolLiquidity, useSwitchNetwork } from '@/hooks';
 
 const Main = styled.main`
   max-width: 1440px;
@@ -28,7 +28,8 @@ const TableTitle = styled.div`
 export default function Pool() {
   const { isErrorNetwork, switchNetwork } = useSwitchNetwork();
 
-  const { data: poolList, mutate: refreshPoolList } = usePoolList(false);
+  const { data: poolList, mutate: refreshPoolList } = usePoolLiquidity();
+
   const { data: myLiquidityList, mutate: refreshMyLiquidity } =
     useMyLiquidity();
 

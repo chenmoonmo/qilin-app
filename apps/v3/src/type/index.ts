@@ -178,3 +178,16 @@ export type PositionValue = {
   close_price: string;
   size: string;
 };
+
+export type liquidityItem = {
+  apy: string;
+  asset_address: Address;
+  liquidity: string;
+  liquidity_value: string;
+  lp_amount: string;
+  name: string;
+  oracle_address: Address;
+  pool_address: Address;
+  token: Address;
+  token_name: string;
+};

@@ -39,10 +39,10 @@ export const usePoolList = (withoutZero = true) => {
       });
       return (
         result.pool_list?.map(pool => {
+          const decimal = 18;
           const change = pool.future_chang_24;
           const futurePrice = pool.future_price;
           const volumn = pool.volumn_24;
-          const decimal = pool.asset_info.pool_decimal;
           const assetAddress = pool.asset_info.asset;
           const poolAddress = pool.pool_info.pool;
           const oracleAddress = pool.pool_info.oracle;
