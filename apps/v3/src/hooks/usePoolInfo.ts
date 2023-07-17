@@ -18,7 +18,6 @@ export const usePoolInfo = ({
   enabled?: boolean;
 }) => {
   const chainId = useChainId();
-
   return useSWR(
     enabled
       ? `/poolInfo?chain_id=${chainId}&asset_address=${assetAddress}&pool_address=${poolAddress}`
@@ -79,39 +78,7 @@ export const usePoolInfo = ({
       const priceThresholdRatio = +formatUnits(price_threshold_Ratio, 4);
 
       // 时间差
-      const timeDiff = requestTime - lastRebaseTime;
-      const isDiffLargeThan5Min = timeDiff > 300;
-
-      // 弹簧是否开启
-      let isSpringOpen = false;
-
-      // 现货价上边界
-      const spotPriceUpper = spotPrice * (1 + priceThresholdRatio);
-      // 现货价下边界
-      const spotPriceLower = spotPrice * (1 - priceThresholdRatio);
-
-      // 计算时使用的价格
-      let longPrice = futurePrice,
-        shortPrice = futurePrice;
-
-      if (futurePrice > spotPriceUpper) {
-        isSpringOpen = true;
-        longPrice = isDiffLargeThan5Min
-          ? spotPriceUpper
-          : Math.max(spotPriceUpper, futurePrice);
-        shortPrice = isDiffLargeThan5Min
-          ? spotPriceUpper
-          : Math.min(spotPriceUpper, futurePrice);
-      }
-      if (+futurePrice < spotPriceLower) {
-        isSpringOpen = true;
-        longPrice = isDiffLargeThan5Min
-          ? spotPriceLower
-          : Math.max(spotPriceLower, futurePrice);
-        shortPrice = isDiffLargeThan5Min
-          ? spotPriceLower
-          : Math.min(spotPriceLower, futurePrice);
-      }
+      // const timeDiff = requestTime - lastRebaseTime;
 
       const LPPrice = BigNumber.from(liquidity)
         .div(BigNumber.from(LPAmount))
@@ -133,12 +100,12 @@ export const usePoolInfo = ({
         LPAddress,
         LPPrice,
         marginTokenSymbol,
-        longPrice,
-        shortPrice,
         spotPrice,
         futurePrice,
-        isSpringOpen,
         assetLevels,
+        priceThresholdRatio,
+        requestTime,
+        lastRebaseTime,
         leverages: leverages.map(item => item.toString()),
         positionLong: +formatUnits(positionLong, decimal),
         positionShort: +formatUnits(positionShort, decimal),
@@ -152,6 +119,9 @@ export const usePoolInfo = ({
         marginRatio: +formatUnits(marginRatio, 4),
         closeRatio: +formatUnits(closeRatio, 4),
       };
+    },
+    {
+      refreshInterval: 10_000,
     }
   );
 };

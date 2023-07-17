@@ -510,8 +510,8 @@ export default function Home() {
   const { data: poolList, mutate: refreshPoolList } = usePoolList();
 
   const {
-    data: poolInfo,
     error,
+    data: poolInfo,
     mutate: refreshPoolInfo,
   } = usePoolInfo({
     assetAddress,
@@ -542,6 +542,7 @@ export default function Home() {
     hanldeOpenPosition,
     slippage,
     estLiqPrice,
+    isSpringOpen,
   } = useOpenPositon(poolInfo, handleSuccsee);
 
   const { data: marginToken } = useBalance({
@@ -892,11 +893,9 @@ export default function Home() {
                 </div>
               </div>
             }
-            isWarning={poolInfo?.isSpringOpen}
+            isWarning={isSpringOpen}
           >
-            {poolInfo?.isSpringOpen
-              ? 'Est.Open Price Warning'
-              : 'Est.Open Price'}
+            {isSpringOpen ? 'Est.Open Price Warning' : 'Est.Open Price'}
           </TextWithWarning>
           <span>
             1 {poolInfo?.token0Symbol} = {formatAmount(estPrice)}{' '}
