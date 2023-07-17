@@ -39,21 +39,24 @@ export const useOpenPositon = (
     return BigNumber.from(parseUnits(margin, marginTokenDecimals));
   }, [margin, marginTokenDecimals]);
 
-  const [estPrice, size, slippage, estLiqPrice] = useMemo(() => {
+  const [estPrice, size, slippage, estLiqPrice, isSpringOpen] = useMemo(() => {
     if (!poolInfo) return [undefined, undefined, undefined, undefined];
 
     let { liquidity, positionLong, positionShort } = poolInfo;
 
     const {
       marginRatio,
-      // spotPrice: price,
-      longPrice,
-      shortPrice,
+      spotPrice,
       futurePrice,
       assetLevels,
+      priceThresholdRatio,
+      requestTime,
+      lastRebaseTime,
     } = poolInfo;
 
-    const price = direction === '1' ? longPrice : shortPrice;
+    const timeDiff = requestTime - lastRebaseTime;
+    const isDiffLargeThan5Min = timeDiff > 300;
+
     const position = +margin * +leverage;
 
     liquidity = liquidity * assetLevels;
@@ -64,15 +67,47 @@ export const useOpenPositon = (
       positionShort = positionShort + position;
     }
 
-    const VY = (liquidity / 2) * price + positionLong;
-    const VX = liquidity / 2 + positionShort / price;
+    const VY = (liquidity / 2) * spotPrice + positionLong;
+    const VX = liquidity / 2 + positionShort / spotPrice;
 
-    const estPrice = VY / VX;
+    let estPrice = VY / VX;
+
+    // 弹簧是否开启
+    let isSpringOpen = false;
+
+    // 现货价上边界
+    const spotPriceUpper = spotPrice * (1 + priceThresholdRatio);
+    // 现货价下边界
+    const spotPriceLower = spotPrice * (1 - priceThresholdRatio);
+
+    if (estPrice > spotPriceUpper) {
+      isSpringOpen = true;
+      if (direction === '1') {
+        estPrice = isDiffLargeThan5Min
+          ? spotPriceUpper
+          : Math.max(spotPriceUpper, estPrice);
+      } else {
+        estPrice = isDiffLargeThan5Min
+          ? spotPriceUpper
+          : Math.min(spotPriceUpper, estPrice);
+      }
+    }
+
+    if (estPrice < spotPriceLower) {
+      isSpringOpen = true;
+      if (direction === '1') {
+        estPrice = isDiffLargeThan5Min
+          ? spotPriceLower
+          : Math.max(spotPriceLower, estPrice);
+      } else {
+        estPrice = isDiffLargeThan5Min
+          ? spotPriceLower
+          : Math.min(spotPriceLower, estPrice);
+      }
+    }
 
     const size: number = +position / +estPrice;
-
     const slippage = Math.abs((estPrice - futurePrice) / futurePrice) * 100;
-
     const closeRatio = poolInfo.closeRatio;
     const level = +leverage;
     const estLiqPrice =
@@ -80,7 +115,7 @@ export const useOpenPositon = (
         ? ((marginRatio + level) * estPrice) / (level * (1 - closeRatio))
         : ((level - marginRatio) * estPrice) / (level * (1 + closeRatio));
 
-    return [estPrice, size, slippage, estLiqPrice];
+    return [estPrice, size, slippage, estLiqPrice, isSpringOpen];
   }, [direction, leverage, margin, poolInfo]);
 
   const { isNeedApprove, approve } = useApprove(
@@ -160,6 +195,7 @@ export const useOpenPositon = (
       estLiqPrice,
       size,
       slippage,
+      isSpringOpen,
       isNeedApprove,
       hanldeOpenPosition,
     };
@@ -172,6 +208,7 @@ export const useOpenPositon = (
     leverage,
     margin,
     size,
+    isSpringOpen,
     slippage,
   ]);
 };
