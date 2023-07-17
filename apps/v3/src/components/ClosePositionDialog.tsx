@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 
 import type { usePositions } from '@/hooks';
 import { useClosePosition } from '@/hooks/useClosePosition';
+import { useLiquidity } from '@/hooks/useLiquidity';
 
 import { TextWithDirection } from './TextWithDirection';
 
@@ -74,6 +75,11 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
     onSuccess,
   });
 
+  const { handleLiquidate } = useLiquidity({
+    assetAddress: data.assetAddress,
+    onSuccess,
+  });
+
   const realizedPNL = useMemo(() => {
     return +data.pnl + +data.fundingFee - +data.serviceFee;
   }, [data.fundingFee, data.pnl, data.serviceFee]);
@@ -132,7 +138,11 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
           </InfoItem>
           <SubmitButton
             onClick={() => {
-              handleClosePosition();
+              if (data.needLiquidation) {
+                handleLiquidate(data.positionId);
+              } else {
+                handleClosePosition();
+              }
               setOpen(false);
             }}
           >

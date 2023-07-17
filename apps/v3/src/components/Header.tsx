@@ -1,11 +1,10 @@
 'use client';
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Button, Icon, Tooltip } from '@qilin/component';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type FC, useCallback, useEffect, useMemo } from 'react';
-import { useAccount, useConnect, useNetwork, useSwitchNetwork } from 'wagmi';
+import { type FC } from 'react';
+
+import { AccountInfo } from './AccountInfo';
 
 type HeaderPropsType = {
   routes: Array<{
@@ -83,36 +82,10 @@ More.defaultProps = {
   children: 'More',
 };
 
+// const;
+
 export const Header: FC<HeaderPropsType> = ({ routes }) => {
   const pathname = usePathname();
-  const { address, isConnected } = useAccount();
-  const { chain, chains } = useNetwork();
-  const { connect, connectors } = useConnect();
-  const { switchNetwork } = useSwitchNetwork();
-
-  const shortAddress = useMemo(
-    () => address?.slice(0, 6) + '...' + address?.slice(-4),
-    [address]
-  );
-
-  const isErrorNetwork = useMemo(
-    () => !chains.find(item => item.id === chain?.id),
-    [chains, chain]
-  );
-
-  const handleConnect = useCallback(() => {
-    connect({
-      connector: connectors[0],
-    });
-  }, [connect, connectors]);
-
-  const handleSwitchNetwork = (id: number) => {
-    switchNetwork?.(id);
-  };
-
-  useEffect(() => {
-    handleConnect();
-  }, [handleConnect]);
 
   return (
     <HeaderContainer>
@@ -143,58 +116,7 @@ export const Header: FC<HeaderPropsType> = ({ routes }) => {
         ))}
       </RoutesContainer>
       <div />
-      {isConnected ? (
-        !isErrorNetwork ? (
-          <ChainInfo>
-            <span
-              css={css`
-                position: relative;
-                margin-right: 36px;
-                &::after {
-                  content: '';
-                  position: absolute;
-                  top: 50%;
-                  right: -22px;
-                  transform: translate(-50%, -50%);
-                  width: 1px;
-                  height: 16px;
-                  background: #363a45;
-                }
-              `}
-            >
-              {chain?.name}
-            </span>
-            <div
-              css={css`
-                display: flex;
-                align-items: center;
-              `}
-            >
-              <Icon.MetaMaskIcon
-                css={css`
-                  position: relative;
-                  margin-right: 11px;
-                `}
-              />
-              <Tooltip text={address}>
-                <span>{shortAddress}</span>
-              </Tooltip>
-            </div>
-          </ChainInfo>
-        ) : (
-          <Button
-            css={css`
-              height: 33px;
-            `}
-            backgroundColor="#e15c48"
-            onClick={() => handleSwitchNetwork(chains[0]?.id)}
-          >
-            Switch Network
-          </Button>
-        )
-      ) : (
-        <Button onClick={handleConnect}>Connect Wallet</Button>
-      )}
+      <AccountInfo />
       <More />
     </HeaderContainer>
   );

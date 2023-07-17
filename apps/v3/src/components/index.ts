@@ -1,3 +1,4 @@
+export * from './AccountInfo';
 export * from './AddLiquidityDialog';
 export * from './AdjustMarginDialog';
 export * from './Checkbox';
