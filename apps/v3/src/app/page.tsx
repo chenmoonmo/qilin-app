@@ -893,24 +893,36 @@ export default function Home() {
                 </div>
               </div>
             }
-            isWarning={isSpringOpen}
+            isWarning={isSpringOpen && !!+margin}
           >
-            {isSpringOpen ? 'Est.Open Price Warning' : 'Est.Open Price'}
+            {isSpringOpen && !!+margin
+              ? 'Est.Open Price Warning'
+              : 'Est.Open Price'}
           </TextWithWarning>
           <span>
-            1 {poolInfo?.token0Symbol} = {formatAmount(estPrice)}{' '}
-            {poolInfo?.token1Symbol}
+            {+margin
+              ? `
+              1 ${poolInfo?.token0Symbol} = ${formatAmount(estPrice)} ${
+                  poolInfo?.token1Symbol
+                }
+              `
+              : '-'}
           </span>
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Slippage</span>
-          <span>{foramtPrecent(slippage)}%</span>
+          <span>{+margin ? `${foramtPrecent(slippage)}%` : '-'}</span>
         </BudgetResultItem>
         <BudgetResultItem>
           <span>Est.Liq Price</span>
           <span>
-            1 {poolInfo?.token0Symbol} = {formatAmount(estLiqPrice)}{' '}
-            {poolInfo?.token1Symbol}
+            {+margin
+              ? `
+              1 ${poolInfo?.token0Symbol} = ${formatAmount(estLiqPrice)} ${
+                  poolInfo?.token1Symbol
+                }
+              `
+              : '-'}
           </span>
         </BudgetResultItem>
         <OpenPositionDialog
