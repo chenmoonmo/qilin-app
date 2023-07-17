@@ -12,6 +12,7 @@ export * from './useOracles';
 export * from './usePoolAddress';
 export * from './usePoolFromOracle';
 export * from './usePoolInfo';
+export * from './usePoolLiquidity';
 export * from './usePoolList';
 export * from './usePositions';
 export * from './useRemoveLiquidity';
