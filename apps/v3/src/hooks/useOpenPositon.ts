@@ -42,30 +42,33 @@ export const useOpenPositon = (
   const [estPrice, size, slippage, estLiqPrice] = useMemo(() => {
     if (!poolInfo) return [undefined, undefined, undefined, undefined];
 
+    let { liquidity, positionLong, positionShort } = poolInfo;
+
     const {
-      liquidity,
-      positionLong,
-      positionShort,
       marginRatio,
       // spotPrice: price,
       longPrice,
       shortPrice,
       futurePrice,
+      assetLevels,
     } = poolInfo;
 
     const price = direction === '1' ? longPrice : shortPrice;
     const position = +margin * +leverage;
 
-    const x = liquidity / 2;
-    let y = x * price + positionLong - positionShort;
+    liquidity = liquidity * assetLevels;
 
     if (direction === '1') {
-      y = y + position;
+      positionLong = positionLong + position;
     } else {
-      y = y - position;
+      positionShort = positionShort + position;
     }
 
-    const estPrice = y / x;
+    const VY = (liquidity / 2) * price + positionLong;
+    const VX = liquidity / 2 + positionShort / price;
+
+    const estPrice = VY / VX;
+
     const size: number = +position / +estPrice;
 
     const slippage = Math.abs((estPrice - futurePrice) / futurePrice) * 100;

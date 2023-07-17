@@ -56,6 +56,7 @@ export const usePoolInfo = ({
             fee_ratio: closeRatio,
             legal_level: leverages,
             price_threshold_Ratio,
+            asset_level: assetLevels,
           },
         },
       } = result;
@@ -137,6 +138,7 @@ export const usePoolInfo = ({
         spotPrice,
         futurePrice,
         isSpringOpen,
+        assetLevels,
         leverages: leverages.map(item => item.toString()),
         positionLong: +formatUnits(positionLong, decimal),
         positionShort: +formatUnits(positionShort, decimal),

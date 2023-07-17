@@ -120,7 +120,7 @@ export default function Pool() {
         },
       },
     ];
-  }, [handleSuccess]);
+  }, [handleSuccess, isErrorNetwork, switchNetwork]);
 
   const poolsColumns = useMemo(() => {
     return [
