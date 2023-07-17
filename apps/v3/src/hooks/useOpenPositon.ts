@@ -70,39 +70,28 @@ export const useOpenPositon = (
     const VY = (liquidity / 2) * spotPrice + positionLong;
     const VX = liquidity / 2 + positionShort / spotPrice;
 
-    let estPrice = VY / VX;
+    const PF = VY / VX;
+
+    // 期现价差
+    const d = (2 * (PF - spotPrice)) / (PF + spotPrice);
 
     // 弹簧是否开启
-    let isSpringOpen = false;
+    const isSpringOpen =
+      Math.abs(d) > priceThresholdRatio && !isDiffLargeThan5Min;
 
-    // 现货价上边界
-    const spotPriceUpper = spotPrice * (1 + priceThresholdRatio);
-    // 现货价下边界
-    const spotPriceLower = spotPrice * (1 - priceThresholdRatio);
+    // 估算期货价格
+    let estPrice = PF;
 
-    if (estPrice > spotPriceUpper) {
-      isSpringOpen = true;
+    if (isSpringOpen) {
+      const PF_ =
+        d > 0
+          ? ((spotPrice + PF) / 2) * (1 + priceThresholdRatio)
+          : ((spotPrice + PF) / 2) * (1 - priceThresholdRatio);
+
       if (direction === '1') {
-        estPrice = isDiffLargeThan5Min
-          ? spotPriceUpper
-          : Math.max(spotPriceUpper, estPrice);
+        estPrice = Math.max(PF_, PF);
       } else {
-        estPrice = isDiffLargeThan5Min
-          ? spotPriceUpper
-          : Math.min(spotPriceUpper, estPrice);
-      }
-    }
-
-    if (estPrice < spotPriceLower) {
-      isSpringOpen = true;
-      if (direction === '1') {
-        estPrice = isDiffLargeThan5Min
-          ? spotPriceLower
-          : Math.max(spotPriceLower, estPrice);
-      } else {
-        estPrice = isDiffLargeThan5Min
-          ? spotPriceLower
-          : Math.min(spotPriceLower, estPrice);
+        estPrice = Math.min(PF_, PF);
       }
     }
 
