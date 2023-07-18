@@ -3,7 +3,7 @@ export const fetcher = <T = any>(
   options: Parameters<typeof fetch>[1]
 ): Promise<T> => {
   const baseUrl =
-    process.env.NEXT_PUBLIC_DOMAIN_ENV === 'production' ? '/api' : '/api';
+    process.env.NEXT_PUBLIC_DOMAIN_ENV === 'production' ? '/api' : '/request';
   return fetch(`${baseUrl}${url}`, options).then(async res => {
     const data = await res.json();
     if (data.errCode === 200) {

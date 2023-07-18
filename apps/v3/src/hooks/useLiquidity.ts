@@ -26,7 +26,6 @@ export const useLiquidity = ({
 
   const handleLiquidate = useCallback(
     async (positionId: number) => {
-      console.log(positionId);
       showWalletToast({
         title: 'Transaction Confirmation',
         message: 'Please confirm the transaction in your wallet',
