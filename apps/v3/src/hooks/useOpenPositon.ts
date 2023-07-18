@@ -72,8 +72,8 @@ export const useOpenPositon = (
       positionShort_ = positionShort + position;
     }
 
-    const VY = (liquidity / 2) * spotPrice + positionLong_;
-    const VX = liquidity / 2 + positionShort_ / spotPrice;
+    const VY = (liquidity / 2) * spotPrice + positionLong_ * spotPrice;
+    const VX = liquidity / 2 + positionShort_;
 
     const PF = VY / VX;
 
