@@ -42,16 +42,18 @@ export const useOpenPositon = (
   const [estPrice, size, slippage, estLiqPrice, isSpringOpen] = useMemo(() => {
     if (!poolInfo) return [undefined, undefined, undefined, undefined];
 
-    let { liquidity, positionLong, positionShort } = poolInfo;
+    let { liquidity } = poolInfo;
 
     const {
       marginRatio,
       spotPrice,
-      futurePrice,
+      // futurePrice,
       assetLevels,
       priceThresholdRatio,
       requestTime,
       lastRebaseTime,
+      positionLong,
+      positionShort,
     } = poolInfo;
 
     const timeDiff = requestTime - lastRebaseTime;
@@ -61,14 +63,17 @@ export const useOpenPositon = (
 
     liquidity = liquidity * assetLevels;
 
+    let positionLong_ = positionLong;
+    let positionShort_ = positionShort;
+
     if (direction === '1') {
-      positionLong = positionLong + position;
+      positionLong_ = positionLong + position;
     } else {
-      positionShort = positionShort + position;
+      positionShort_ = positionShort + position;
     }
 
-    const VY = (liquidity / 2) * spotPrice + positionLong;
-    const VX = liquidity / 2 + positionShort / spotPrice;
+    const VY = (liquidity / 2) * spotPrice + positionLong_;
+    const VX = liquidity / 2 + positionShort_ / spotPrice;
 
     const PF = VY / VX;
 
@@ -96,7 +101,18 @@ export const useOpenPositon = (
     }
 
     const size: number = +position / +estPrice;
+    // 计算 slippage
+    const x = liquidity / 2 + positionShort / spotPrice;
+    const y = (liquidity / 2) * spotPrice + positionLong;
+
+    const futurePrice = y / x;
+
     const slippage = Math.abs((estPrice - futurePrice) / futurePrice) * 100;
+    console.log({
+      estPrice,
+      futurePrice,
+      slippage,
+    });
     const closeRatio = poolInfo.closeRatio;
     const level = +leverage;
     const estLiqPrice =
