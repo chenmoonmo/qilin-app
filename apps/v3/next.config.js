@@ -23,12 +23,15 @@ const nextConfig = {
   reactStrictMode: false,
   transpilePackages: ['@qilin/wagmi-provider'],
   env,
-  rewrites: async () => [
-    {
-      source: '/request/:path*',
-      destination: `${env.SERVICE_API_URL}/:path*`,
-    },
-  ],
+  rewrites: async () =>
+    isDevelopment
+      ? [
+          {
+            source: '/request/:path*',
+            destination: `${env.SERVICE_API_URL}/:path*`,
+          },
+        ]
+      : [],
 };
 
 module.exports = nextConfig;
