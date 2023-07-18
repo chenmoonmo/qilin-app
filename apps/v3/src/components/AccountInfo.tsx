@@ -96,7 +96,7 @@ const ChainInfo = styled.div`
 
 const ConnectIcons: any = {
   MetaMask: '/images/metamask.png',
-  WalletConnectLegacy: '/images/walletconnect.png',
+  WalletConnect: '/images/walletconnect.png',
 };
 
 export const AccountInfo = () => {
@@ -145,143 +145,150 @@ export const AccountInfo = () => {
   }, [handleConnect]);
 
   return (
-    <Dialog.Root open={accountOpen} onOpenChange={setAccountOpen}>
-      {isConnected ? (
-        !isErrorNetwork ? (
-          <Dialog.Trigger asChild>
-            <ChainInfo>
-              <span
-                css={css`
-                  position: relative;
-                  margin-right: 36px;
-                  &::after {
-                    content: '';
-                    position: absolute;
-                    top: 50%;
-                    right: -22px;
-                    transform: translate(-50%, -50%);
-                    width: 1px;
-                    height: 16px;
-                    background: #363a45;
-                  }
-                `}
-              >
-                {chain?.name}
-              </span>
-              <div
-                css={css`
-                  display: flex;
-                  align-items: center;
-                `}
-              >
-                <Icon.MetaMaskIcon
+    <>
+      <Dialog.Root open={accountOpen} onOpenChange={setAccountOpen}>
+        {isConnected ? (
+          !isErrorNetwork ? (
+            <Dialog.Trigger asChild>
+              <ChainInfo>
+                <span
                   css={css`
                     position: relative;
-                    margin-right: 11px;
+                    margin-right: 36px;
+                    &::after {
+                      content: '';
+                      position: absolute;
+                      top: 50%;
+                      right: -22px;
+                      transform: translate(-50%, -50%);
+                      width: 1px;
+                      height: 16px;
+                      background: #363a45;
+                    }
                   `}
-                />
-                <span>{shortAddress}</span>
-              </div>
-            </ChainInfo>
-          </Dialog.Trigger>
-        ) : (
-          <Button
-            css={css`
-              height: 33px;
-            `}
-            backgroundColor="#e15c48"
-            onClick={() => handleSwitchNetwork(chains[0]?.id)}
-          >
-            Switch Network
-          </Button>
-        )
-      ) : (
-        <Button onClick={handleConnect}>Connect Wallet</Button>
-      )}
-      <Dialog.Portal>
-        <Dialog.Overlay />
-        <Dialog.Content>
-          <Dialog.Title>Account</Dialog.Title>
-          <Dialog.Close>
-            <Dialog.CloseIcon />
-          </Dialog.Close>
-          <AccountInfoContainer>
-            <Address>{shortAddress}</Address>
-            <Actions>
-              <ActionItem>
-                <span>Copy Address</span>
-                <Image
-                  src="/images/copy.png"
-                  width={13.8}
-                  height={13.8}
-                  alt={''}
-                  onClick={handleCopyAddress}
-                />
-              </ActionItem>
-              <ActionItem>
-                <span>View on Etherscan</span>
-                <Link
-                  href={`${chain?.blockExplorers?.default.url}address/${address}`}
-                  target="__blank"
                 >
-                  <Image
-                    src="/images/link-to.png"
-                    width={12.3}
-                    height={12.3}
-                    alt={''}
+                  {chain?.name}
+                </span>
+                <div
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                  `}
+                >
+                  <Icon.MetaMaskIcon
+                    css={css`
+                      position: relative;
+                      margin-right: 11px;
+                    `}
                   />
-                </Link>
-              </ActionItem>
-            </Actions>
-          </AccountInfoContainer>
-          <ButtonContainer>
-            <Dialog.Root open={connectOpen} onOpenChange={setConnectOpen}>
-              <Dialog.Trigger asChild>
-                <ChangeButton backgroundColor="transprent">Change</ChangeButton>
-              </Dialog.Trigger>
-              <Dialog.Portal>
-                <Dialog.Overlay
-                  css={css`
-                    z-index: 101;
-                  `}
-                />
-                <Dialog.Content
-                  css={css`
-                    z-index: 102;
-                  `}
-                >
-                  <Dialog.Title>Connect to a wallet</Dialog.Title>
-                  <Dialog.Close>
-                    <Dialog.CloseIcon />
-                  </Dialog.Close>
-                  <Connectors>
-                    {connectors.map(connector => {
-                      return (
-                        <Connector
-                          key={connector.id}
-                          onClick={() => {
-                            connect({
-                              connector,
-                            });
-                          }}
-                        >
-                          <span>{connector.name}</span>
-                          <Image
-                            src={ConnectIcons[connector.name]}
-                            width="18"
-                            height="16"
-                            alt={''}
-                          />
-                        </Connector>
-                      );
-                    })}
-                  </Connectors>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
-          </ButtonContainer>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+                  <span>{shortAddress}</span>
+                </div>
+              </ChainInfo>
+            </Dialog.Trigger>
+          ) : (
+            <Button
+              css={css`
+                height: 33px;
+              `}
+              backgroundColor="#e15c48"
+              onClick={() => handleSwitchNetwork(chains[0]?.id)}
+            >
+              Switch Network
+            </Button>
+          )
+        ) : (
+          <Button onClick={() => setConnectOpen(true)}>Connect Wallet</Button>
+        )}
+        <Dialog.Portal>
+          <Dialog.Overlay />
+          <Dialog.Content>
+            <Dialog.Title>Account</Dialog.Title>
+            <Dialog.Close>
+              <Dialog.CloseIcon />
+            </Dialog.Close>
+            <AccountInfoContainer>
+              <Address>{shortAddress}</Address>
+              <Actions>
+                <ActionItem>
+                  <span>Copy Address</span>
+                  <Image
+                    src="/images/copy.png"
+                    width={13.8}
+                    height={13.8}
+                    alt={''}
+                    onClick={handleCopyAddress}
+                  />
+                </ActionItem>
+                <ActionItem>
+                  <span>View on Etherscan</span>
+                  <Link
+                    href={`${chain?.blockExplorers?.default.url}address/${address}`}
+                    target="__blank"
+                  >
+                    <Image
+                      src="/images/link-to.png"
+                      width={12.3}
+                      height={12.3}
+                      alt={''}
+                    />
+                  </Link>
+                </ActionItem>
+              </Actions>
+            </AccountInfoContainer>
+            <ButtonContainer>
+              <ChangeButton
+                backgroundColor="transprent"
+                onClick={() => setConnectOpen(true)}
+              >
+                Change
+              </ChangeButton>
+            </ButtonContainer>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+      <Dialog.Root open={connectOpen} onOpenChange={setConnectOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay
+            css={css`
+              z-index: 101;
+            `}
+          />
+          <Dialog.Content
+            css={css`
+              z-index: 102;
+            `}
+          >
+            <Dialog.Title>Connect to a wallet</Dialog.Title>
+            <Dialog.Close>
+              <Dialog.CloseIcon />
+            </Dialog.Close>
+            <Connectors>
+              {connectors.map(connector => {
+                return (
+                  <Connector
+                    key={connector.id}
+                    onClick={() => {
+                      connect({
+                        connector,
+                      });
+                      setAccountOpen(false);
+                      setConnectOpen(false);
+                    }}
+                  >
+                    <span>{connector.name}</span>
+                    <Image
+                      src={ConnectIcons[connector.name]}
+                      width="18"
+                      height="16"
+                      alt={''}
+                    />
+                  </Connector>
+                );
+              })}
+            </Connectors>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    </>
   );
 };

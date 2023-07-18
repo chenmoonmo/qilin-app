@@ -23,6 +23,7 @@
   --tooltip-content-border-color: #585d6c;
 
   --rs-bg-overlay: var(--background-color);
+  --w3m-z-index: 1000;
 }
 
 html[data-theme='light'] {

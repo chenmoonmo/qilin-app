@@ -108,11 +108,7 @@ export const useOpenPositon = (
     const futurePrice = y / x;
 
     const slippage = Math.abs((estPrice - futurePrice) / futurePrice) * 100;
-    console.log({
-      estPrice,
-      futurePrice,
-      slippage,
-    });
+
     const closeRatio = poolInfo.closeRatio;
     const level = +leverage;
     const estLiqPrice =

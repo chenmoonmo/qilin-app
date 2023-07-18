@@ -6,13 +6,15 @@ export type ConnectorNameType =
   | 'MetaMask'
   | 'CoinbaseWallet'
   | 'WalletConnectLegacy'
+  | 'WallectConnect'
   | 'Ledger'
   | 'Injected';
 
 export async function createClient<TChain extends Chain = Chain>(
   defaultChains: TChain[],
   connectorNames: ConnectorNameType[],
-  autoConnect = true
+  autoConnect = true,
+  projectId = '5b47312331baf1b7f1fc093e03e7ce89'
 ) {
   const { chains, provider, webSocketProvider } = configureChains(
     defaultChains,
@@ -56,6 +58,20 @@ export async function createClient<TChain extends Chain = Chain>(
               chains,
               options: {
                 qrcode: true,
+              },
+            });
+          }
+        )
+      );
+    }
+    if (connectorName === 'WallectConnect') {
+      connectorsFactory.push(
+        import('wagmi/connectors/walletConnect').then(
+          ({ WalletConnectConnector }) => {
+            return new WalletConnectConnector({
+              chains,
+              options: {
+                projectId,
               },
             });
           }

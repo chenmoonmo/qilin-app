@@ -44,7 +44,7 @@ export default function RootLayout({
         </head>
         <Web3Provider
           defaultChains={[arbitrumGoerli]}
-          connectorNames={['MetaMask', 'WalletConnectLegacy']}
+          connectorNames={['MetaMask', 'WallectConnect']}
         >
           <ToastProvider>
             <Header routes={routes} />
