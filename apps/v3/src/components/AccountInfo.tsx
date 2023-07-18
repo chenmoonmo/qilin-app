@@ -198,7 +198,6 @@ export const AccountInfo = () => {
       ) : (
         <Button onClick={handleConnect}>Connect Wallet</Button>
       )}
-
       <Dialog.Portal>
         <Dialog.Overlay />
         <Dialog.Content>
@@ -237,10 +236,9 @@ export const AccountInfo = () => {
           </AccountInfoContainer>
           <ButtonContainer>
             <Dialog.Root open={connectOpen} onOpenChange={setConnectOpen}>
-              <Dialog.Trigger>
+              <Dialog.Trigger asChild>
                 <ChangeButton backgroundColor="transprent">Change</ChangeButton>
               </Dialog.Trigger>
-
               <Dialog.Portal>
                 <Dialog.Overlay
                   css={css`
