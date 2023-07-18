@@ -102,8 +102,8 @@ export const useOpenPositon = (
 
     const size: number = +position / +estPrice;
     // 计算 slippage
-    const x = liquidity / 2 + positionShort / spotPrice;
-    const y = (liquidity / 2) * spotPrice + positionLong;
+    const x = liquidity / 2 + positionShort;
+    const y = (liquidity / 2) * spotPrice + positionLong * spotPrice;
 
     const futurePrice = y / x;
 
