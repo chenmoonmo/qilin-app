@@ -47,7 +47,7 @@ export const useOpenPositon = (
     const {
       marginRatio,
       spotPrice,
-      // futurePrice,
+      futurePrice,
       assetLevels,
       priceThresholdRatio,
       requestTime,
@@ -77,35 +77,33 @@ export const useOpenPositon = (
 
     const PF = VY / VX;
 
-    // 期现价差
-    const d = (2 * (PF - spotPrice)) / (PF + spotPrice);
+    // 标准价格
+    const standardPrice = (PF + spotPrice) / 2;
+
+    // 标准价格和期货价格的差值
+    const d = (2 * (PF - standardPrice)) / (PF + standardPrice);
+
+    // 是否价差过大
+    const isPriceDiffLarge = Math.abs(d) > priceThresholdRatio;
 
     // 弹簧是否开启
-    const isSpringOpen =
-      Math.abs(d) > priceThresholdRatio && !isDiffLargeThan5Min;
+    const isSpringOpen = isPriceDiffLarge && !isDiffLargeThan5Min;
+
+    const PF_ =
+      d > 0
+        ? standardPrice * (1 + priceThresholdRatio)
+        : standardPrice * (1 - priceThresholdRatio);
 
     // 估算期货价格
     let estPrice = PF;
 
-    if (isSpringOpen) {
-      const PF_ =
-        d > 0
-          ? ((spotPrice + PF) / 2) * (1 + priceThresholdRatio)
-          : ((spotPrice + PF) / 2) * (1 - priceThresholdRatio);
-
-      if (direction === '1') {
-        estPrice = Math.max(PF_, PF);
-      } else {
-        estPrice = Math.min(PF_, PF);
-      }
+    // 当价差过大时 使用对用户不利的价格
+    if (isPriceDiffLarge) {
+      const getPrice = direction === '1' ? Math.max : Math.min;
+      estPrice = isDiffLargeThan5Min ? PF_ : getPrice(PF_, PF);
     }
 
-    const size: number = +position / +estPrice;
-    // 计算 slippage
-    const x = liquidity / 2 + positionShort;
-    const y = (liquidity / 2) * spotPrice + positionLong * spotPrice;
-
-    const futurePrice = y / x;
+    const size: number = position / estPrice;
 
     const slippage = Math.abs((estPrice - futurePrice) / futurePrice) * 100;
 
