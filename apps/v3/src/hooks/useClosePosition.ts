@@ -35,9 +35,10 @@ export const useClosePosition = ({
       });
       const { position_value } = result;
 
-      const { close_price } = position_value;
+      const { close_price, can_close } = position_value;
       return {
         ...position_value,
+        limited: !can_close,
         closePrice: +formatUnits(close_price, 18),
       };
     }

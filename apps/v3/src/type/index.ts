@@ -55,6 +55,7 @@ export type Pool = {
     size_short: string;
     last_rebase_time: number;
     request_time: number;
+    last_price: string;
   };
   setting: {
     asset_level: number;
@@ -66,6 +67,8 @@ export type Pool = {
     rebase_block: number;
     rebase_ratio: number;
     price_threshold_Ratio: number;
+    price_effective_time: number;
+    price_shock_ratio: number;
   };
 };
 
@@ -177,6 +180,7 @@ export type PositionValue = {
   open_price: string;
   close_price: string;
   size: string;
+  can_close: boolean;
 };
 
 export type liquidityItem = {

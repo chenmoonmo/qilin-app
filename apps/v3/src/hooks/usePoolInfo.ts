@@ -49,6 +49,7 @@ export const usePoolInfo = ({
             rebase_short: rebaseShort,
             request_time: requestTime,
             last_rebase_time: lastRebaseTime,
+            last_price: lastPrice,
           },
           setting: {
             margin_ratio: marginRatio,
@@ -56,6 +57,8 @@ export const usePoolInfo = ({
             legal_level: leverages,
             price_threshold_Ratio,
             asset_level: assetLevels,
+            price_shock_ratio: priceShockRatio,
+            price_effective_time: priceEffectiveTime,
           },
         },
       } = result;
@@ -106,7 +109,9 @@ export const usePoolInfo = ({
         priceThresholdRatio,
         requestTime,
         lastRebaseTime,
+        priceEffectiveTime,
         leverages: leverages.map(item => item.toString()),
+        lastPrice: +formatUnits(lastPrice, decimal),
         positionLong: +formatUnits(positionLong, decimal),
         positionShort: +formatUnits(positionShort, decimal),
         rebaseLong: +formatUnits(rebaseLong, decimal),
@@ -118,6 +123,7 @@ export const usePoolInfo = ({
         change: +formatUnits(change, 4) * 100,
         marginRatio: +formatUnits(marginRatio, 4),
         closeRatio: +formatUnits(closeRatio, 4),
+        priceShockRatio: +formatUnits(priceShockRatio, 4),
       };
     },
     {

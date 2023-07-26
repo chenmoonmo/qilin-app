@@ -1,3 +1,4 @@
+'use client';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog, Icon } from '@qilin/component';
