@@ -22,14 +22,12 @@ import {
   OpenPositionDialog,
   Pagination,
   PairSelector,
-  SwapRadio,
   TabContent,
   Table,
   TabList,
   TabRoot,
   TabTrigger,
   TextWithDirection,
-  TextWithWarning,
   TokenIcon,
   TradingView,
 } from '@/components';
@@ -137,7 +135,7 @@ const FormInputContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: stretch;
-  margin-top: 10px;
+  /* margin-top: 10px; */
   padding: 13px 14px 8px;
   background: #2c2f38;
   border-radius: 6px;
@@ -221,40 +219,59 @@ const TokenSymbol = styled.span`
   color: #e0e0e0;
 `;
 
-const Token2 = styled.div`
-  align-self: flex-end;
-  padding: 5px 10px;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 18px;
-  color: #828792;
-  background: #464a56;
-  border-radius: 100px;
-`;
-
 const FormLeverageLabel = styled.div`
-  margin: 23px 0 14px;
+  margin: 16px 0 8px;
   font-size: 12px;
   font-weight: 500;
   color: #9699a3;
 `;
 
-// 预算结果项
-const BudgetResultItem = styled.div`
-  all: unset;
+const OpenInfos = styled.div`
   display: flex;
-  justify-content: space-between;
+  align-items: stretch;
+  margin-top: 24px;
+  gap: 10px;
+`;
+
+const PositionInfo = styled.div`
+  padding: 10px 12px 17px;
+`;
+
+const PositionInfoItem = styled.div`
+  display: flex;
   align-items: center;
-  margin-top: 9px;
-  font-size: 12px;
+  justify-content: space-between;
+  font-size: 10px;
+  font-style: normal;
   font-weight: 400;
-  color: #737884;
+  /* white-space: nowrap; */
+  &:not(:first-of-type) {
+    margin-top: 13px;
+  }
+  > div:first-of-type {
+    color: #9699a3;
+  }
+  > div:last-of-type {
+    line-break: anywhere;
+    text-align: right;
+  }
+`;
+
+const OpenInfoContainer = styled.div`
+  flex: 1;
+  border-radius: 6px;
+  border: 1px dashed #2c2f38;
+  &:hover {
+    border-color: #44c27f;
+    &:last-of-type {
+      border-color: #e15c48;
+    }
+  }
 `;
 
 const OpenButton = styled(Button)`
   width: 100%;
   height: 40px;
-  margin-top: 34px;
   transition: background 0.3s ease;
 `;
 
@@ -531,15 +548,10 @@ export default function Home() {
     setMargin,
     leverage,
     setLeverage,
-    direction,
-    setDirection,
-    size,
-    estPrice,
+    long,
+    short,
     isNeedApprove,
     hanldeOpenPosition,
-    slippage,
-    estLiqPrice,
-    isSpringOpen,
   } = useOpenPositon(poolInfo, handleSuccsee);
 
   const { data: marginToken } = useBalance({
@@ -551,10 +563,6 @@ export default function Home() {
     if (!marginToken?.formatted || !margin) return true;
     return +margin > +marginToken.formatted;
   }, [margin, marginToken]);
-
-  const [buttonText, buttonColor] = useMemo(() => {
-    return direction === '1' ? ['Long', '#44c27f'] : ['Short', '#e15c48'];
-  }, [direction]);
 
   const positionColumns = useMemo(
     () => [
@@ -828,8 +836,11 @@ export default function Home() {
       {/* chart */}
       <TradingView data={kLine} />
       {/* form */}
-      <div>
-        <SwapRadio value={direction} onChange={setDirection} />
+      <div
+        css={css`
+          padding-bottom: 112px;
+        `}
+      >
         <FormInputContainer>
           <FormInput>
             <label>Pay</label>
@@ -859,100 +870,105 @@ export default function Home() {
             </TokenInfoContainer>
           </PayRight>
         </FormInputContainer>
-        <FormInputContainer>
-          <FormInput>
-            <label>Size</label>
-            <input
-              type="text"
-              placeholder="0.0"
-              value={size ? formatAmount(size) : ''}
-              disabled
-            />
-          </FormInput>
-          <Token2>{poolInfo?.token0Symbol}</Token2>
-        </FormInputContainer>
+
         <FormLeverageLabel>Leverage</FormLeverageLabel>
         <LeverageRadio
           value={leverage}
           leverages={poolInfo?.leverages}
           onChange={setLeverage}
         />
-        <BudgetResultItem
-          css={css`
-            margin-top: 20px;
-          `}
-        >
-          <TextWithWarning
-            text={
-              <div>
+        <OpenInfos>
+          <OpenInfoContainer>
+            <PositionInfo>
+              <PositionInfoItem>
+                <div>Bid Price</div>
+                <div>{formatPrice(long.estPrice)}</div>
+              </PositionInfoItem>
+              <PositionInfoItem>
+                <div>Size</div>
                 <div>
-                  Warning: Unfavorable opening price due to large futures-spot
+                  {+margin
+                    ? `${formatAmount(long.size)} ${poolInfo?.token0Symbol}`
+                    : '-'}
                 </div>
+              </PositionInfoItem>
+              <PositionInfoItem>
+                <div>Est.Liq.Price</div>
+                <div>{+margin ? formatPrice(long.estLiqPrice) : '-'}</div>
+              </PositionInfoItem>
+            </PositionInfo>
+            <OpenPositionDialog
+              {...long}
+              margin={margin}
+              direction={'1'}
+              isNeedApprove={isNeedApprove}
+              pairName={poolInfo?.pairName}
+              token0Symbol={poolInfo?.token0Symbol}
+              token1Symbol={poolInfo?.token1Symbol}
+              marginTokenName={marginToken?.symbol}
+              onConfirm={() => hanldeOpenPosition('1')}
+            >
+              <OpenButton
+                backgroundColor="#44c27f"
+                disabled={disabledConfirm}
+                onClick={e => {
+                  if (isErrorNetwork) {
+                    switchNetwork();
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                }}
+              >
+                Buy
+              </OpenButton>
+            </OpenPositionDialog>
+          </OpenInfoContainer>
+          <OpenInfoContainer>
+            <PositionInfo>
+              <PositionInfoItem>
+                <div>Ask Price</div>
+                <div>{formatPrice(short.estPrice)}</div>
+              </PositionInfoItem>
+              <PositionInfoItem>
+                <div>Size</div>
                 <div>
-                  spread.We recommend waiting for spread to narrow before
-                  trading.
+                  {+margin
+                    ? `${formatAmount(short.size)} ${poolInfo?.token0Symbol}`
+                    : '-'}
                 </div>
-              </div>
-            }
-            isWarning={isSpringOpen && !!+margin}
-          >
-            {isSpringOpen && !!+margin
-              ? 'Est.Open Price Warning'
-              : 'Est.Open Price'}
-          </TextWithWarning>
-          <span>
-            {+margin
-              ? `
-              1 ${poolInfo?.token0Symbol} = ${formatAmount(estPrice)} ${
-                  poolInfo?.token1Symbol
-                }
-              `
-              : '-'}
-          </span>
-        </BudgetResultItem>
-        <BudgetResultItem>
-          <span>Slippage</span>
-          <span>{+margin ? `${foramtPrecent(slippage)}%` : '-'}</span>
-        </BudgetResultItem>
-        <BudgetResultItem>
-          <span>Est.Liq Price</span>
-          <span>
-            {+margin
-              ? `
-              1 ${poolInfo?.token0Symbol} = ${formatAmount(estLiqPrice)} ${
-                  poolInfo?.token1Symbol
-                }
-              `
-              : '-'}
-          </span>
-        </BudgetResultItem>
-        <OpenPositionDialog
-          margin={margin}
-          openPrice={estPrice}
-          estLiqPrice={estLiqPrice}
-          size={size}
-          direction={direction}
-          isNeedApprove={isNeedApprove}
-          pairName={poolInfo?.pairName}
-          token0Symbol={poolInfo?.token0Symbol}
-          token1Symbol={poolInfo?.token1Symbol}
-          marginTokenName={marginToken?.symbol}
-          onConfirm={hanldeOpenPosition}
-        >
-          <OpenButton
-            disabled={disabledConfirm}
-            backgroundColor={buttonColor}
-            onClick={e => {
-              if (isErrorNetwork) {
-                switchNetwork();
-                e.stopPropagation();
-                e.preventDefault();
-              }
-            }}
-          >
-            {buttonText}
-          </OpenButton>
-        </OpenPositionDialog>
+              </PositionInfoItem>
+              <PositionInfoItem>
+                <div>Est.Liq.Price</div>
+                <div>{+margin ? formatPrice(short.estLiqPrice) : '-'}</div>
+              </PositionInfoItem>
+            </PositionInfo>
+            <OpenPositionDialog
+              {...short}
+              margin={margin}
+              direction={'2'}
+              isNeedApprove={isNeedApprove}
+              pairName={poolInfo?.pairName}
+              token0Symbol={poolInfo?.token0Symbol}
+              token1Symbol={poolInfo?.token1Symbol}
+              marginTokenName={marginToken?.symbol}
+              onConfirm={() => hanldeOpenPosition('2')}
+            >
+              <OpenButton
+                backgroundColor="#e15c48"
+                disabled={disabledConfirm}
+                onClick={e => {
+                  if (isErrorNetwork) {
+                    switchNetwork();
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }
+                }}
+              >
+                Sell
+              </OpenButton>
+            </OpenPositionDialog>
+          </OpenInfoContainer>
+        </OpenInfos>
       </div>
       {/* table */}
       <TableContainer>

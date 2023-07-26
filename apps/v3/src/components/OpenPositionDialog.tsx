@@ -8,13 +8,15 @@ type OpenPositionDialogPropsType = {
   direction?: string;
   pairName?: string;
   margin?: string;
-  openPrice?: number;
+  estPrice?: number;
   size?: number;
   estLiqPrice?: number;
   token0Symbol?: string;
   token1Symbol?: string;
   marginTokenName?: string;
   isNeedApprove?: boolean;
+  slippageWarning: boolean;
+  limited: boolean;
   onConfirm?: () => void;
 };
 
@@ -54,17 +56,31 @@ const PositionInfoItem = styled.div`
   }
 `;
 
-const SubmitButton = styled(Button)`
+const Note = styled.div`
+  margin-top: 22px;
+  color: #737884;
+  font-family: Poppins;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 18px;
+`;
+
+const SubmitButton = styled(Button)<{
+  slippageWarning: boolean;
+}>`
   width: 100%;
   height: 40px;
-  margin-top: 34px;
+  margin-top: 6px;
+  background-color: ${({ slippageWarning }) =>
+    slippageWarning ? '#E15C48' : '#0083FF'};
 `;
 
 export const OpenPositionDialog = ({
   children,
   pairName,
   margin,
-  openPrice,
+  estPrice,
   size,
   estLiqPrice,
   token0Symbol,
@@ -72,6 +88,8 @@ export const OpenPositionDialog = ({
   marginTokenName,
   direction,
   onConfirm,
+  slippageWarning,
+  limited,
   isNeedApprove,
 }: OpenPositionDialogPropsType) => {
   const [open, setOpen] = useState(false);
@@ -122,7 +140,7 @@ export const OpenPositionDialog = ({
           <PositionInfoItem>
             <span>Open Price</span>
             <span>
-              {formatPrice(openPrice)} {token1Symbol}
+              {formatPrice(estPrice)} {token1Symbol}
             </span>
           </PositionInfoItem>
           <PositionInfoItem>
@@ -137,8 +155,18 @@ export const OpenPositionDialog = ({
               {formatAmount(estLiqPrice)} {token1Symbol}
             </span>
           </PositionInfoItem>
-          <SubmitButton onClick={handleConfirm}>
+          <Note>
+            {slippageWarning && (
+              <>Warning: -73.280% price impact on the market price. Continue?</>
+            )}
+          </Note>
+          <SubmitButton
+            disabled={limited}
+            slippageWarning={slippageWarning}
+            onClick={handleConfirm}
+          >
             {isNeedApprove ? 'Approve' : 'Confirm'}
+            {slippageWarning && ' Anyway'}
           </SubmitButton>
         </Content>
       </Dialog.Portal>

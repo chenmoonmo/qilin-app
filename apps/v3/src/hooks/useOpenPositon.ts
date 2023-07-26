@@ -27,7 +27,6 @@ export const useOpenPositon = (
   });
 
   // 多空方向
-  const [direction, setDirection] = useState('1');
 
   const [margin, setMargin] = useState<string>('');
 
@@ -39,83 +38,18 @@ export const useOpenPositon = (
     return BigNumber.from(parseUnits(margin, marginTokenDecimals));
   }, [margin, marginTokenDecimals]);
 
-  const [estPrice, size, slippage, estLiqPrice, isSpringOpen] = useMemo(() => {
-    if (!poolInfo) return [undefined, undefined, undefined, undefined];
+  const { long, short } = useMemo(() => {
+    const [long, short] = (['1', '2'] as const).map(direction =>
+      getOpenPrice(poolInfo, direction, leverage, margin)
+    );
 
-    let { liquidity } = poolInfo;
+    return { long, short };
+  }, [leverage, margin, poolInfo]);
 
-    const {
-      marginRatio,
-      spotPrice,
-      futurePrice,
-      assetLevels,
-      priceThresholdRatio,
-      requestTime,
-      lastRebaseTime,
-      positionLong,
-      positionShort,
-    } = poolInfo;
-
-    const timeDiff = requestTime - lastRebaseTime;
-    const isDiffLargeThan5Min = timeDiff > 300;
-
-    const position = +margin * +leverage;
-
-    liquidity = liquidity * assetLevels;
-
-    let positionLong_ = positionLong;
-    let positionShort_ = positionShort;
-
-    if (direction === '1') {
-      positionLong_ = positionLong + position;
-    } else {
-      positionShort_ = positionShort + position;
-    }
-
-    const VY = (liquidity / 2) * spotPrice + positionLong_ * spotPrice;
-    const VX = liquidity / 2 + positionShort_;
-
-    const PF = VY / VX;
-
-    // 标准价格
-    const standardPrice = (PF + spotPrice) / 2;
-
-    // 标准价格和期货价格的差值
-    const d = (2 * (PF - standardPrice)) / (PF + standardPrice);
-
-    // 是否价差过大
-    const isPriceDiffLarge = Math.abs(d) > priceThresholdRatio;
-
-    // 弹簧是否开启
-    const isSpringOpen = isPriceDiffLarge && !isDiffLargeThan5Min;
-
-    const PF_ =
-      d > 0
-        ? standardPrice * (1 + priceThresholdRatio)
-        : standardPrice * (1 - priceThresholdRatio);
-
-    // 估算期货价格
-    let estPrice = PF;
-
-    // 当价差过大时 使用对用户不利的价格
-    if (isPriceDiffLarge) {
-      const getPrice = direction === '1' ? Math.max : Math.min;
-      estPrice = isDiffLargeThan5Min ? PF_ : getPrice(PF_, PF);
-    }
-
-    const size: number = position / estPrice;
-
-    const slippage = Math.abs((estPrice - futurePrice) / futurePrice) * 100;
-
-    const closeRatio = poolInfo.closeRatio;
-    const level = +leverage;
-    const estLiqPrice =
-      direction === '1'
-        ? ((marginRatio + level) * estPrice) / (level * (1 - closeRatio))
-        : ((level - marginRatio) * estPrice) / (level * (1 + closeRatio));
-
-    return [estPrice, size, slippage, estLiqPrice, isSpringOpen];
-  }, [direction, leverage, margin, poolInfo]);
+  console.log({
+    long,
+    short,
+  });
 
   const { isNeedApprove, approve } = useApprove(
     poolInfo?.marginTokenAddress,
@@ -128,86 +62,174 @@ export const useOpenPositon = (
     address: assetAddress!,
     abi: Assest.abi,
     functionName: 'openPosition',
-    args: [
-      poolAddress,
-      {
-        amount: marginWithDecimals,
-        payerAddress: address,
-        payType: 1,
-      },
-      abi.encode(['uint8', 'uint16'], [direction, leverage]),
-    ],
   });
 
-  const hanldeOpenPosition = useCallback(async () => {
-    showWalletToast({
-      title: 'Transaction Confirmation',
-      message: 'Please confirm the transaction in your wallet',
-      type: 'loading',
-    });
-
-    try {
-      if (isNeedApprove) {
-        await approve?.();
-      }
-      const res = await writeAsync();
+  const hanldeOpenPosition = useCallback(
+    async (direction: '1' | '2') => {
       showWalletToast({
         title: 'Transaction Confirmation',
-        message: 'Transaction Pending',
+        message: 'Please confirm the transaction in your wallet',
         type: 'loading',
       });
-      await res.wait();
-      showWalletToast({
-        title: 'Transaction Confirmation',
-        message: 'Transaction Confirmed',
-        type: 'success',
-      });
-      setTimeout(() => {
-        onSuccess();
-      }, 2000);
-    } catch (e) {
-      showWalletToast({
-        title: 'Transaction Error',
-        message: 'Please try again',
-        type: 'error',
-      });
-    }
-    setTimeout(closeWalletToast, 3000);
-  }, [
-    approve,
-    closeWalletToast,
-    isNeedApprove,
-    onSuccess,
-    showWalletToast,
-    writeAsync,
-  ]);
+
+      try {
+        if (isNeedApprove) {
+          await approve?.();
+        }
+        const res = await writeAsync({
+          recklesslySetUnpreparedArgs: [
+            poolAddress,
+            {
+              amount: marginWithDecimals,
+              payerAddress: address,
+              payType: 1,
+            },
+            abi.encode(['uint8', 'uint16'], [direction, leverage]),
+          ],
+        });
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Pending',
+          type: 'loading',
+        });
+        await res.wait();
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Confirmed',
+          type: 'success',
+        });
+        setTimeout(() => {
+          onSuccess();
+        }, 2000);
+      } catch (e) {
+        showWalletToast({
+          title: 'Transaction Error',
+          message: 'Please try again',
+          type: 'error',
+        });
+      }
+      setTimeout(closeWalletToast, 3000);
+    },
+    [
+      address,
+      approve,
+      closeWalletToast,
+      isNeedApprove,
+      leverage,
+      marginWithDecimals,
+      onSuccess,
+      poolAddress,
+      showWalletToast,
+      writeAsync,
+    ]
+  );
 
   return useMemo(() => {
     return {
-      direction,
       margin,
       leverage,
-      setDirection,
       setLeverage,
       setMargin,
-      estPrice,
-      estLiqPrice,
-      size,
-      slippage,
-      isSpringOpen,
+      long,
+      short,
       isNeedApprove,
       hanldeOpenPosition,
     };
-  }, [
-    direction,
-    estLiqPrice,
-    estPrice,
-    hanldeOpenPosition,
-    isNeedApprove,
-    leverage,
-    margin,
-    size,
-    isSpringOpen,
-    slippage,
-  ]);
+  }, [hanldeOpenPosition, isNeedApprove, leverage, long, margin, short]);
+};
+
+const getOpenPrice = (
+  poolInfo: ReturnType<typeof usePoolInfo>['data'],
+  direction: '1' | '2',
+  leverage: string,
+  margin: string
+) => {
+  if (!poolInfo)
+    return {
+      estPrice: undefined,
+      size: undefined,
+      slippage: undefined,
+      estLiqPrice: undefined,
+      slippageWarning: false,
+      limited: false,
+    };
+
+  let { liquidity } = poolInfo;
+
+  const {
+    marginRatio,
+    spotPrice: pc2,
+    futurePrice,
+    assetLevels,
+    priceThresholdRatio,
+    requestTime,
+    lastRebaseTime,
+    positionLong,
+    positionShort,
+    priceEffectiveTime,
+    lastPrice,
+  } = poolInfo;
+
+  // 上一次交易的现货价格和预言机价格的差值
+  const spotOraclePriceDiff = lastPrice - pc2;
+  // 漂移周期
+  const driftPeriod = Math.min(
+    requestTime - lastRebaseTime,
+    priceEffectiveTime
+  );
+
+  const spotPrice =
+    lastPrice - (spotOraclePriceDiff * driftPeriod) / priceEffectiveTime;
+
+  const position = +margin * +leverage;
+
+  liquidity = liquidity * assetLevels;
+
+  let positionLong_ = positionLong;
+  let positionShort_ = positionShort;
+
+  if (direction === '1') {
+    positionLong_ = positionLong + position;
+  } else {
+    positionShort_ = positionShort + position;
+  }
+
+  const VY = (liquidity / 2) * spotPrice + positionLong_ * spotPrice;
+  const VX = liquidity / 2 + positionShort_;
+
+  const PF = VY / VX;
+
+  let estPrice = PF;
+  let limited = false;
+
+  // 价格上边界
+  const priceUpperBound = spotPrice * (1 + priceThresholdRatio);
+  // 价格下边界
+  const priceLowerBound = spotPrice * (1 - priceThresholdRatio);
+
+  if (PF > priceUpperBound) {
+    // 限制开多，不限制开空
+    estPrice = Math.min(priceUpperBound, PF);
+    limited = direction === '1';
+  }
+  if (PF < priceLowerBound) {
+    //限制开空，不限制开多
+    estPrice = Math.max(priceLowerBound, PF);
+    limited = direction === '2';
+  }
+
+  const size: number = position / estPrice;
+
+  const slippage = ((estPrice - futurePrice) / futurePrice) * 100;
+  // 当滑点>3%
+  const slippageWarning = Math.abs(slippage) > 3;
+
+  const closeRatio = poolInfo.closeRatio;
+  const level = +leverage;
+  const estLiqPrice =
+    direction === '1'
+      ? ((marginRatio + level) * estPrice) / (level * (1 - closeRatio))
+      : ((level - marginRatio) * estPrice) / (level * (1 + closeRatio));
+
+  return { estPrice, size, slippage, estLiqPrice, limited, slippageWarning };
 };

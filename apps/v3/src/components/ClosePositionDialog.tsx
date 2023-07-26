@@ -37,7 +37,7 @@ const Title = styled(Dialog.Title)`
 const SubmitButton = styled(Button)`
   width: 100%;
   height: 40px;
-  margin-top: 34px;
+  margin-top: 6px;
 `;
 
 const InfoItem = styled.div`
@@ -60,6 +60,16 @@ const SplitLine = styled.div`
   height: 1px;
   background-color: #363a45;
   margin: 20px 0;
+`;
+
+const Note = styled.div`
+  margin-top: 22px;
+  color: #737884;
+  font-family: Poppins;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 18px;
 `;
 
 export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
@@ -136,7 +146,16 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </TextWithDirection>
             </span>
           </InfoItem>
+          <Note>
+            {positionValue?.limited && (
+              <>
+                Warning: Price difference between spot and futures markets too
+                large. Can&apos;t proceed.
+              </>
+            )}
+          </Note>
           <SubmitButton
+            disabled={positionValue?.limited}
             onClick={() => {
               if (data.needLiquidation) {
                 handleLiquidate(data.positionId);
