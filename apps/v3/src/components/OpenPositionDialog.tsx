@@ -10,6 +10,7 @@ type OpenPositionDialogPropsType = {
   margin?: string;
   estPrice?: number;
   size?: number;
+  slippage?: number;
   estLiqPrice?: number;
   token0Symbol?: string;
   token1Symbol?: string;
@@ -82,6 +83,7 @@ export const OpenPositionDialog = ({
   margin,
   estPrice,
   size,
+  slippage,
   estLiqPrice,
   token0Symbol,
   token1Symbol,
@@ -101,11 +103,14 @@ export const OpenPositionDialog = ({
 
   const warningText = useMemo(() => {
     if (slippageWarning)
-      return 'Warning: -73.280% price impact on the market price. Continue?';
+      return `Warning: ${formatAmount(
+        slippage,
+        2
+      )}% price impact on the market price. Continue?`;
     if (limited)
       return "Warning: Price difference between spot and futures markets too large. Can't proceed.";
     return undefined;
-  }, []);
+  }, [limited, slippage, slippageWarning]);
 
   const handleConfirm = () => {
     setOpen(false);
