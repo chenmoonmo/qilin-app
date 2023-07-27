@@ -102,13 +102,15 @@ export const OpenPositionDialog = ({
   );
 
   const warningText = useMemo(() => {
+    if (limited)
+      return "Warning: Price difference between spot and futures markets too large. Can't proceed.";
+
     if (slippageWarning)
       return `Warning: ${formatAmount(
         slippage,
         2
       )}% price impact on the market price. Continue?`;
-    if (limited)
-      return "Warning: Price difference between spot and futures markets too large. Can't proceed.";
+
     return undefined;
   }, [limited, slippage, slippageWarning]);
 
@@ -171,11 +173,11 @@ export const OpenPositionDialog = ({
           <Note>{warningText}</Note>
           <SubmitButton
             disabled={limited}
-            slippageWarning={slippageWarning}
+            slippageWarning={slippageWarning && !limited}
             onClick={handleConfirm}
           >
             {isNeedApprove ? 'Approve' : 'Confirm'}
-            {slippageWarning && ' Anyway'}
+            {slippageWarning && !limited && ' Anyway'}
           </SubmitButton>
         </Content>
       </Dialog.Portal>
