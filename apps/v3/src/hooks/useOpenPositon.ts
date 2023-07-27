@@ -209,14 +209,36 @@ const getOpenPrice = (
 
   if (PF > priceUpperBound) {
     // 限制开多，不限制开空
-    estPrice = Math.min(priceUpperBound, PF);
     limited = direction === '1';
   }
   if (PF < priceLowerBound) {
     //限制开空，不限制开多
-    estPrice = Math.max(priceLowerBound, PF);
     limited = direction === '2';
   }
+
+  if (pc2 > spotPrice) {
+    // 开多
+    estPrice =
+      direction === '1' ? Math.max(PF, pc2) : Math.min(PF, priceUpperBound);
+  }
+  if (pc2 < spotPrice) {
+    // 开空
+    estPrice =
+      direction === '1' ? Math.max(PF, priceLowerBound) : Math.min(PF, pc2);
+  }
+
+  console.log({
+    direction,
+    PF,
+    estPrice,
+    ps1: lastPrice,
+    pc2,
+    spotPrice,
+    priceUpperBound,
+    priceLowerBound,
+    isUpper: PF > priceUpperBound,
+    isLower: PF < priceLowerBound,
+  });
 
   const size: number = position / estPrice;
 
