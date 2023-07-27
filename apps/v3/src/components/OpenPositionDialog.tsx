@@ -99,6 +99,14 @@ export const OpenPositionDialog = ({
     [direction]
   );
 
+  const warningText = useMemo(() => {
+    if (slippageWarning)
+      return 'Warning: -73.280% price impact on the market price. Continue?';
+    if (limited)
+      return "Warning: Price difference between spot and futures markets too large. Can't proceed.";
+    return undefined;
+  }, []);
+
   const handleConfirm = () => {
     setOpen(false);
     onConfirm && onConfirm();
@@ -155,11 +163,7 @@ export const OpenPositionDialog = ({
               {formatAmount(estLiqPrice)} {token1Symbol}
             </span>
           </PositionInfoItem>
-          <Note>
-            {slippageWarning && (
-              <>Warning: -73.280% price impact on the market price. Continue?</>
-            )}
-          </Note>
+          <Note>{warningText}</Note>
           <SubmitButton
             disabled={limited}
             slippageWarning={slippageWarning}
