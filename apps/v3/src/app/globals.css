@@ -26,10 +26,12 @@
   --w3m-z-index: 1000;
 }
 
-html[data-theme='light'] {
+body::-webkit-scrollbar {
+  background-color: var(--background-color);
 }
 
-html[data-theme='dark'] {
+body::-webkit-scrollbar-thumb {
+  background-color: var(--background-color);
 }
 
 body {
