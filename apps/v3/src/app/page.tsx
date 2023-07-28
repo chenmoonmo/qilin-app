@@ -234,6 +234,7 @@ const OpenInfos = styled.div`
 `;
 
 const PositionInfo = styled.div`
+  flex: auto;
   padding: 10px 12px 17px;
 `;
 
@@ -258,6 +259,8 @@ const PositionInfoItem = styled.div`
 `;
 
 const OpenInfoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
   flex: 1;
   border-radius: 6px;
   border: 1px dashed #2c2f38;

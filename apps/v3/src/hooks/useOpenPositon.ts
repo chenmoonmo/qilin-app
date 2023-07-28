@@ -248,10 +248,11 @@ const getOpenPrice = (
 
   const closeRatio = poolInfo.closeRatio;
   const level = +leverage;
+
   const estLiqPrice =
     direction === '1'
-      ? ((marginRatio + level) * estPrice) / (level * (1 - closeRatio))
-      : ((level - marginRatio) * estPrice) / (level * (1 + closeRatio));
+      ? ((marginRatio - 1 + level) * estPrice) / ((1 - closeRatio) * level)
+      : ((level - marginRatio + 1) * estPrice) / (level * (1 + closeRatio));
 
   return { estPrice, size, slippage, estLiqPrice, limited, slippageWarning };
 };
