@@ -40,14 +40,19 @@ export const useAdjustPosition = (
 
     let price = 0;
 
+    //     看多
+    // closePRice > (margin*marginRatio - margin + size*openPrice)/((1+openRebase-rebaseLong - closeRatio)*size)
+    // 看空
+    // closePrice < (size*openPrice+ margin - margin*marginRatio) / (size*(1+rebaseShort - openRebase + closeRatio))
+
     if (side === 'long') {
       price =
-        (newMargin * (marginRatio - 1) + openPrice * size) /
-        (size - (rebaseLong - openRebase) * size - size * closeRatio);
+        (newMargin * marginRatio - newMargin + size * openPrice) /
+        (size * (1 + openRebase - rebaseLong - closeRatio));
     } else {
       price =
-        (openPrice * size - newMargin * (marginRatio - 1)) /
-        (size - (rebaseLong - openRebase) * size - size * closeRatio);
+        ((size * openPrice + newMargin - newMargin * marginRatio) / size) *
+        (1 + rebaseLong - openRebase + closeRatio);
     }
 
     return price > 0 ? price : undefined;
