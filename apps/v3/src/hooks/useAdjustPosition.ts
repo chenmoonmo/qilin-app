@@ -34,13 +34,13 @@ export const useAdjustPosition = (
 
     const { side, margin, openPrice, openRebase, size } = data;
 
-    const { marginRatio, rebaseLong, closeRatio } = poolInfo;
+    const { marginRatio, rebaseLong, rebaseShort, closeRatio } = poolInfo;
 
     const newMargin = margin + +amount;
 
     let price = 0;
 
-    //     看多
+    // 看多
     // closePRice > (margin*marginRatio - margin + size*openPrice)/((1+openRebase-rebaseLong - closeRatio)*size)
     // 看空
     // closePrice < (size*openPrice+ margin - margin*marginRatio) / (size*(1+rebaseShort - openRebase + closeRatio))
@@ -51,8 +51,8 @@ export const useAdjustPosition = (
         (size * (1 + openRebase - rebaseLong - closeRatio));
     } else {
       price =
-        ((size * openPrice + newMargin - newMargin * marginRatio) / size) *
-        (1 + rebaseLong - openRebase + closeRatio);
+        (newMargin - newMargin * marginRatio + size * openPrice) /
+        (size * (1 + rebaseShort - openRebase + closeRatio));
     }
 
     return price > 0 ? price : undefined;
