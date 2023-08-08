@@ -81,6 +81,8 @@ export const usePoolFromOracle = ({
     },
     {
       shouldRetryOnError: false,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     }
   );
   return {

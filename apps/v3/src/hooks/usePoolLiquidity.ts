@@ -58,15 +58,18 @@ export const usePoolLiquidity = () => {
           token0Symbol,
           token1Symbol,
           marginTokenSymbol: token_name,
-          epochStartTime: dayjs
-            .unix(epochStartTime)
-            .utc()
-            .format('YYYY.MM.DD HH:mm:ss UTC'),
-          epochEndTime: dayjs
-            .unix(epochEndTime)
-            .utc()
-            .format('YYYY.MM.DD HH:mm:ss UTC'),
-          epochIndex,
+          epochStartTime:
+            epochIndex > 0
+              ? dayjs
+                  .unix(epochStartTime)
+                  .utc()
+                  .format('YYYY.MM.DD HH:mm:ss UTC')
+              : '-',
+          epochEndTime:
+            epochIndex > 0
+              ? dayjs.unix(epochEndTime).utc().format('YYYY.MM.DD HH:mm:ss UTC')
+              : '-',
+          epochIndex: epochIndex > 0 ? epochIndex : '-',
           apy: +apy ? +formatUnits(apy, 4) * 100 : apy,
           liquidityValue: +formatUnits(liquidity_value, decimal),
           liquidity: +formatUnits(liquidity, decimal),
