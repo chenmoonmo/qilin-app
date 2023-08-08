@@ -536,6 +536,8 @@ export default function Home() {
     enabled,
   });
 
+  console.log(error);
+
   const { data: kLine, mutate: refreshKLine } = useKLine(
     poolInfo?.oracleAddress
   );
