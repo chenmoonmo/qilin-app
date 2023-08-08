@@ -124,9 +124,6 @@ export const useAddLiquidity = ({
               message: 'Transaction Confirmed',
               type: 'success',
             });
-            setTimeout(() => {
-              onSuccess();
-            }, 2000);
           } catch (e) {
             showWalletToast({
               title: 'Transaction Error',
