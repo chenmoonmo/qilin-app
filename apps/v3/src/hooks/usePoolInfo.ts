@@ -92,7 +92,7 @@ export const usePoolInfo = ({
       // 时间差
       // const timeDiff = requestTime - lastRebaseTime;
 
-      const LPPrice = BigNumber.from(liquidity)
+      const LPPrice = BigNumber.from(asset_info.liquidity)
         .div(BigNumber.from(LPAmount))
         .toNumber();
 
