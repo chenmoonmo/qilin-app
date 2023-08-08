@@ -172,7 +172,14 @@ export const useCreatePool = ({
             });
 
             await res2?.wait();
-            onSuccess?.();
+            setTimeout(() => {
+              onSuccess?.();
+            }, 2000);
+            showWalletToast({
+              title: 'Transaction Confirmation',
+              message: 'Transaction Confirmed',
+              type: 'success',
+            });
           } catch {
             showWalletToast({
               title: 'Transaction Error',

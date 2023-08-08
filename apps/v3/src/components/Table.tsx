@@ -16,6 +16,7 @@ type ColumnType = {
 type TableType = {
   columns: ColumnType[];
   dataSource?: any[];
+  noData?: string;
 };
 
 const TableLayout = styled.table`
@@ -64,7 +65,7 @@ const Td = styled.td`
 `;
 
 export const Table = forwardRef<any, TableType>(
-  ({ columns, dataSource }, ref) => {
+  ({ columns, dataSource, noData }, ref) => {
     return (
       <TableLayout ref={ref}>
         <thead>
@@ -98,7 +99,7 @@ export const Table = forwardRef<any, TableType>(
           {dataSource?.length === 0 && (
             <tr>
               <td colSpan={columns.length}>
-                <NoData />
+                <NoData text={noData} />
               </td>
             </tr>
           )}
@@ -133,7 +134,7 @@ const PoolTd = styled.td`
   color: #e0e0e0;
 `;
 
-export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
+export const PoolTable: FC<TableType> = ({ columns, dataSource, noData }) => {
   return (
     <PoolTableLayout>
       <thead>
@@ -167,7 +168,7 @@ export const PoolTable: FC<TableType> = ({ columns, dataSource }) => {
         {dataSource?.length === 0 && (
           <tr>
             <td colSpan={columns.length}>
-              <NoData />
+              <NoData text={noData} />
             </td>
           </tr>
         )}
