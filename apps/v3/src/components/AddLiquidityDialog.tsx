@@ -150,6 +150,8 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
   const [open, setOpen] = useState(false);
   const [stepOpen, setStepOpen] = useState(false);
 
+  const [activeStep, setActiveStep] = useState(0);
+
   const [poolIndex, setPoolIndex] = useState<string | undefined>();
   const [amount, setAmount] = useState('');
 
@@ -194,22 +196,19 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     return !poolParam;
   }, [poolParam]);
 
-  const handleSuccess = useCallback(() => {
-    onSuccess?.();
-    setOpen(false);
-  }, [onSuccess]);
-
-  const { handleAddLiquidty, steps: addLiquiditySteps } = useAddLiquidity({
+  const {
+    handleAddLiquidty,
+    isNeedApprove,
+    steps: addLiquiditySteps,
+  } = useAddLiquidity({
     marginTokenAddress: currentItem?.tokenAddress,
     assetAddress: poolParam?.assetAddress,
-    onSuccess: handleSuccess,
     amount,
   });
 
   const { handleCreatePool, steps } = useCreatePool({
     oracleAddress: currentItem?.oracleAddress,
     tokenAddress: currentItem?.tokenAddress,
-    onSuccess: handleSuccess,
     amount,
   });
 
@@ -257,19 +256,30 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     );
   }, [amount, marginToken?.formatted, poolIndex]);
 
+  const handleSuccess = useCallback(() => {
+    onSuccess?.();
+    setOpen(false);
+    setStepOpen(false);
+  }, [onSuccess]);
+
   const handleSubmit = useCallback(async () => {
+    setActiveStep(0);
     if (isNewPool) {
-      await handleCreatePool();
       setStepOpen(true);
       setOpen(false);
+      await handleCreatePool();
+      setActiveStep(1);
     } else {
-      const isNeedStep = await handleAddLiquidty();
-      if (isNeedStep) {
+      if (isNeedApprove) {
         setStepOpen(true);
         setOpen(false);
       }
+      await handleAddLiquidty();
+      if (isNeedApprove) {
+        setActiveStep(1);
+      }
     }
-  }, [handleAddLiquidty, handleCreatePool, isNewPool]);
+  }, [handleAddLiquidty, handleCreatePool, isNeedApprove, isNewPool]);
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
@@ -453,8 +463,10 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
         title={titleText}
         steps={currentSteps}
         open={stepOpen}
-        defaultStep={1}
+        activeStep={activeStep}
+        onActiveStepChange={setActiveStep}
         onOpenChange={setStepOpen}
+        onSuccess={handleSuccess}
       />
     </>
   );
