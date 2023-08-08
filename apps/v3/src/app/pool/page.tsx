@@ -68,7 +68,7 @@ const ClaimTable = () => {
       },
       {
         title: 'Withdraw Date',
-        key: 'withdrawDate',
+        key: 'outTime',
       },
       {
         title: 'Operation',

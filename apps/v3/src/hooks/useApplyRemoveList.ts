@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { formatUnits } from 'ethers/lib/utils.js';
 import useSWR from 'swr';
 import { useAccount, useChainId } from 'wagmi';
@@ -26,6 +27,7 @@ export const useApplyRemoveList = () => {
           index,
           status,
           name,
+          out_time,
           asset_address: assetAddress,
           lp_amount: LPAmount,
         } = item;
@@ -36,6 +38,7 @@ export const useApplyRemoveList = () => {
           status,
           assetAddress,
           LPAmount: formatUnits(LPAmount, 18),
+          outTime: dayjs.unix(out_time).utc().format('YYYY-MM-DD HH:mm:ss UTC'),
         };
       });
     },
