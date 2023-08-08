@@ -191,6 +191,7 @@ export type PositionValue = {
   close_price: string;
   size: string;
   can_close: boolean;
+  margin_exist: boolean;
 };
 
 export type liquidityItem = {
