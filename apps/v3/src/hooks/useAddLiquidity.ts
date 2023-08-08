@@ -13,12 +13,10 @@ export const useAddLiquidity = ({
   marginTokenAddress,
   assetAddress,
   amount,
-  onSuccess,
 }: {
   marginTokenAddress?: Address;
   assetAddress?: Address;
   amount: string;
-  onSuccess: () => void;
 }) => {
   const { showWalletToast, closeWalletToast } = useToast();
   const { address } = useAccount();
@@ -54,6 +52,44 @@ export const useAddLiquidity = ({
       },
     ],
   });
+
+  const handleAddLiquidty = useCallback(async () => {
+    try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
+      if (isNeedApprove) {
+        await approve();
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Confirmed',
+          type: 'success',
+        });
+      } else {
+        const res = await writeAsync?.();
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Pending',
+          type: 'loading',
+        });
+        await res?.wait();
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Confirmed',
+          type: 'success',
+        });
+      }
+    } catch (e) {
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
+    }
+    setTimeout(closeWalletToast, 2000);
+  }, [approve, closeWalletToast, isNeedApprove, showWalletToast, writeAsync]);
 
   const steps = useMemo(() => {
     return [
@@ -102,112 +138,13 @@ export const useAddLiquidity = ({
         },
       },
     ];
-  }, [
-    approve,
-    closeWalletToast,
-    isNeedApprove,
-    onSuccess,
-    showWalletToast,
-    writeAsync,
-  ]);
-
-  const handleAddLiquidty = useCallback(async () => {
-    try {
-      showWalletToast({
-        title: 'Transaction Confirmation',
-        message: 'Please confirm the transaction in your wallet',
-        type: 'loading',
-      });
-      if (isNeedApprove) {
-        await approve();
-        showWalletToast({
-          title: 'Transaction Confirmation',
-          message: 'Transaction Confirmed',
-          type: 'success',
-        });
-        return true;
-      } else {
-        const res = await writeAsync?.();
-        showWalletToast({
-          title: 'Transaction Confirmation',
-          message: 'Transaction Pending',
-          type: 'loading',
-        });
-        await res?.wait();
-        showWalletToast({
-          title: 'Transaction Confirmation',
-          message: 'Transaction Confirmed',
-          type: 'success',
-        });
-        setTimeout(() => {
-          onSuccess();
-        }, 2000);
-      }
-    } catch (e) {
-      showWalletToast({
-        title: 'Transaction Error',
-        message: 'Please try again',
-        type: 'error',
-      });
-    }
-    setTimeout(closeWalletToast, 2000);
-    return false;
-  }, [
-    approve,
-    closeWalletToast,
-    isNeedApprove,
-    onSuccess,
-    showWalletToast,
-    writeAsync,
-  ]);
-
-  // const handleAddLiquidty = useCallback(async () => {
-  //   showWalletToast({
-  //     title: 'Transaction Confirmation',
-  //     message: 'Please confirm the transaction in your wallet',
-  //     type: 'loading',
-  //   });
-  //   try {
-  //     if (isNeedApprove) {
-  //       await approve();
-  //     }
-
-  //     const res = await writeAsync?.();
-  //     showWalletToast({
-  //       title: 'Transaction Confirmation',
-  //       message: 'Transaction Pending',
-  //       type: 'loading',
-  //     });
-  //     await res?.wait();
-  //     showWalletToast({
-  //       title: 'Transaction Confirmation',
-  //       message: 'Transaction Confirmed',
-  //       type: 'success',
-  //     });
-  //     setTimeout(() => {
-  //       onSuccess();
-  //     }, 2000);
-  //   } catch (e) {
-  //     showWalletToast({
-  //       title: 'Transaction Error',
-  //       message: 'Please try again',
-  //       type: 'error',
-  //     });
-  //   }
-  //   setTimeout(closeWalletToast, 3000);
-  // }, [
-  //   approve,
-  //   closeWalletToast,
-  //   isNeedApprove,
-  //   onSuccess,
-  //   showWalletToast,
-  //   writeAsync,
-  // ]);
+  }, [approve, closeWalletToast, isNeedApprove, showWalletToast, writeAsync]);
 
   return useMemo(() => {
     return {
+      isNeedApprove,
       handleAddLiquidty,
       steps,
     };
-  }, [handleAddLiquidty, steps]);
+  }, [handleAddLiquidty, isNeedApprove, steps]);
 };

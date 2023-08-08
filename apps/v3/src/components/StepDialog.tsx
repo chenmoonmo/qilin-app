@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import type { FC } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { Step } from './Step';
 
@@ -13,10 +13,13 @@ type StepDialogProps = {
     buttonText: string;
     onClick: () => void;
   }[];
+  activeStep: number;
+  onActiveStepChange: (step: number) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSettled?: () => void;
-  defaultStep?: number;
+  onSuccess?: () => void;
+  onError?: () => void;
+  // defaultStep?: number;
 };
 const Content = styled(Dialog.Content)`
   width: 858px;
@@ -54,27 +57,45 @@ export const StepDialog: FC<StepDialogProps> = ({
   title,
   open,
   steps,
-  defaultStep,
+  activeStep,
+  onActiveStepChange,
   onOpenChange,
-  onSettled,
+  onSuccess,
+  onError,
 }) => {
-  const [activeStep, setActiveStep] = useState(defaultStep ?? 0);
+  const currentStep = useMemo(
+    () => steps[Math.min(steps.length, activeStep)],
+    [activeStep, steps]
+  );
 
   const currentHandle = useCallback(async () => {
-    await steps[activeStep].onClick();
-    if (activeStep < steps.length - 1) {
-      setActiveStep(activeStep + 1);
-    } else {
-      setTimeout(() => {
-        onOpenChange(false);
-        onSettled?.();
-      }, 2000);
+    try {
+      await currentStep.onClick();
+      if (activeStep < steps.length - 1) {
+        onActiveStepChange(activeStep + 1);
+      } else {
+        onActiveStepChange(activeStep + 1);
+        setTimeout(() => {
+          onOpenChange(false);
+          onSuccess?.();
+        }, 2000);
+      }
+    } catch {
+      onError?.();
     }
-  }, [activeStep, onOpenChange, onSettled, steps]);
+  }, [
+    activeStep,
+    currentStep,
+    onActiveStepChange,
+    onError,
+    onOpenChange,
+    onSuccess,
+    steps.length,
+  ]);
 
   const currentButtonText = useMemo(
-    () => steps[activeStep].buttonText,
-    [activeStep, steps]
+    () => currentStep.buttonText,
+    [currentStep.buttonText]
   );
 
   return (
