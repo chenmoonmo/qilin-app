@@ -3,14 +3,25 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { Button } from '@qilin/component';
 import { foramtPrecent, formatAmount, formatPrice } from '@qilin/utils';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import {
   AddLiquidityDialog,
+  PoolTabContent,
   PoolTable,
+  PoolTabList,
+  PoolTabRoot,
+  PoolTabTrigger,
   RemoveLiquidityDialog,
+  TextWithDirection,
 } from '@/components';
-import { useMyLiquidity, usePoolLiquidity, useSwitchNetwork } from '@/hooks';
+import {
+  useApplyRemoveList,
+  useMyLiquidity,
+  usePoolLiquidity,
+  useRemoveLiquidityAfterApply,
+  useSwitchNetwork,
+} from '@/hooks';
 
 const Main = styled.main`
   max-width: 1440px;
@@ -24,20 +35,64 @@ const TableTitle = styled.div`
   line-height: 24px;
 `;
 
-export default function Pool() {
+const ClaimTable = () => {
+  const { data, mutate } = useApplyRemoveList();
+
+  const { handleRemoveLiquidityAfterApply } = useRemoveLiquidityAfterApply();
+
+  const handleClaim = useCallback(
+    (item: any) => {
+      handleRemoveLiquidityAfterApply({
+        assetAddress: item.assetAddress,
+        removeIndex: item.index,
+      });
+      setTimeout(() => {
+        mutate();
+      }, 2000);
+    },
+    [handleRemoveLiquidityAfterApply, mutate]
+  );
+
+  const claimColumns = useMemo(() => {
+    return [
+      {
+        title: 'Pool',
+        key: 'name',
+      },
+      {
+        title: 'Liquidity',
+        key: 'LPAmount',
+        render: (_: any, item: any) => {
+          return formatAmount(item.LPAmount);
+        },
+      },
+      {
+        title: 'Withdraw Date',
+        key: 'withdrawDate',
+      },
+      {
+        title: 'Operation',
+        key: 'operation',
+        render: (_: any, item: any) => {
+          return (
+            <Button
+              disabled={item.status === 1}
+              onClick={() => handleClaim(item)}
+            >
+              Claim
+            </Button>
+          );
+        },
+      },
+    ];
+  }, [handleClaim]);
+  return <PoolTable columns={claimColumns} dataSource={data} />;
+};
+
+const MyLiquidityTable = () => {
   const { isErrorNetwork, switchNetwork } = useSwitchNetwork();
 
-  const { data: poolList, mutate: refreshPoolList } = usePoolLiquidity();
-
-  const { data: myLiquidityList, mutate: refreshMyLiquidity } =
-    useMyLiquidity();
-
-  const handleSuccess = useCallback(() => {
-    setTimeout(() => {
-      refreshPoolList();
-      refreshMyLiquidity();
-    }, 2000);
-  }, [refreshMyLiquidity, refreshPoolList]);
+  const { data: myLiquidityList, mutate: handleSuccess } = useMyLiquidity();
 
   const liquidityColumns = useMemo(() => {
     return [
@@ -60,11 +115,17 @@ export default function Pool() {
         },
       },
       {
-        title: 'Share',
-        key: 'share',
-        render: (value: any) => {
-          return `${foramtPrecent(value)}%`;
-        },
+        title: 'Withdraw Request',
+        key: 'withdrawRequest',
+        render: (value: any) => formatAmount(value),
+      },
+      {
+        title: 'LP Price',
+        key: 'LPPrice',
+        render: (value: any, item: any) =>
+          value
+            ? `${formatPrice(value)} ${item.marginTokenSymbol}`
+            : formatAmount(value),
       },
       {
         title: 'Rol',
@@ -112,7 +173,7 @@ export default function Pool() {
                     }
                   }}
                 >
-                  Remove
+                  Widthdraw
                 </Button>
               </RemoveLiquidityDialog>
             </>
@@ -121,6 +182,22 @@ export default function Pool() {
       },
     ];
   }, [handleSuccess, isErrorNetwork, switchNetwork]);
+
+  return <PoolTable columns={liquidityColumns} dataSource={myLiquidityList} />;
+};
+
+export default function Pool() {
+  const { isErrorNetwork, switchNetwork } = useSwitchNetwork();
+  const { data: poolList, mutate: refreshPoolList } = usePoolLiquidity();
+
+  const [activeTab, setActiveTab] = useState('list');
+
+  const handleSuccess = useCallback(() => {
+    setTimeout(() => {
+      refreshPoolList();
+      // refreshMyLiquidity();
+    }, 2000);
+  }, [refreshPoolList]);
 
   const poolsColumns = useMemo(() => {
     return [
@@ -152,7 +229,49 @@ export default function Pool() {
         title: 'APY',
         key: 'apy',
         render: (value: any) => {
-          return value ? foramtPrecent(value) + '%' : foramtPrecent(value);
+          return (
+            <TextWithDirection>
+              {value ? foramtPrecent(value) + '%' : foramtPrecent(value)}
+            </TextWithDirection>
+          );
+        },
+      },
+      {
+        title: 'Epoch',
+        key: 'epochIndex',
+        render: (value: number, item: any) => {
+          return (
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+              `}
+            >
+              <div
+                css={css`
+                  padding: 4px;
+                  margin-right: 13px;
+                  /* font-size: 14px; */
+                  line-height: 21px;
+                  font-weight: 500;
+                  border-radius: 4px;
+                  background: #464a56;
+                `}
+              >
+                {value}
+              </div>
+              <div
+                css={css`
+                  /* font-size: 14px; */
+                  font-weight: 500;
+                  line-height: normal;
+                `}
+              >
+                <div>Start：{item.epochStartTime}</div>
+                <div>End：{item.epochEndTime}</div>
+              </div>
+            </div>
+          );
         },
       },
       {
@@ -187,17 +306,37 @@ export default function Pool() {
 
   return (
     <Main>
+      <TableTitle>My Liquidity</TableTitle>
+      <PoolTabRoot value={activeTab} onValueChange={setActiveTab}>
+        <PoolTabList
+          css={css`
+            margin: 25px 0 12px;
+          `}
+        >
+          <PoolTabTrigger value="list">List</PoolTabTrigger>
+          <PoolTabTrigger value="claim">Claim</PoolTabTrigger>
+        </PoolTabList>
+        <PoolTabContent value="list">
+          <MyLiquidityTable />
+        </PoolTabContent>
+        <PoolTabContent value="claim">
+          <ClaimTable />
+        </PoolTabContent>
+      </PoolTabRoot>
       <div
         css={css`
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 11px;
+          margin: 37px 0 9px;
         `}
       >
-        <TableTitle>My Liquidity</TableTitle>
+        <TableTitle>Pools</TableTitle>
         <AddLiquidityDialog onSuccess={handleSuccess}>
           <Button
+            css={css`
+              height: 38px;
+            `}
             onClick={e => {
               if (isErrorNetwork) {
                 switchNetwork();
@@ -206,18 +345,10 @@ export default function Pool() {
               }
             }}
           >
-            New Position{' '}
+            New Position
           </Button>
         </AddLiquidityDialog>
       </div>
-      <PoolTable columns={liquidityColumns} dataSource={myLiquidityList} />
-      <TableTitle
-        css={css`
-          margin: 20px 0 17px;
-        `}
-      >
-        Pools
-      </TableTitle>
       <PoolTable columns={poolsColumns} dataSource={poolList} />
     </Main>
   );

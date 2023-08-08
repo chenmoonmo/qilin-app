@@ -1,21 +1,24 @@
 import { useToast } from '@qilin/component';
 import type { BigNumber } from 'ethers';
-import { useCallback, useMemo } from 'react';
 import { type Address, useAccount, useContractWrite } from 'wagmi';
 
 import Asset from '@/abis/Asset.json';
 
 import { useApprove } from './useApprove';
 
-export const useRemoveLiquidity = (
-  assetAddress: Address,
-  LPTokenAddress?: Address,
-  amount?: BigNumber,
-  onSuccess?: () => void
-) => {
-  const { showWalletToast, closeWalletToast } = useToast();
-
+export const useApplyRemove = ({
+  assetAddress,
+  LPTokenAddress,
+  amount,
+  onSuccess,
+}: {
+  assetAddress: Address;
+  LPTokenAddress?: Address;
+  amount: BigNumber;
+  onSuccess: () => void;
+}) => {
   const { address } = useAccount();
+  const { showWalletToast, closeWalletToast } = useToast();
 
   const { isNeedApprove, approve } = useApprove(
     LPTokenAddress,
@@ -27,7 +30,7 @@ export const useRemoveLiquidity = (
     mode: 'recklesslyUnprepared',
     address: assetAddress,
     abi: Asset.abi,
-    functionName: 'removeLiquidity',
+    functionName: 'applyRemove',
     args: [
       address,
       {
@@ -38,13 +41,13 @@ export const useRemoveLiquidity = (
     ],
   });
 
-  const handleRemoveLiquidity = useCallback(async () => {
-    showWalletToast({
-      title: 'Transaction Confirmation',
-      message: 'Please confirm the transaction in your wallet',
-      type: 'loading',
-    });
+  const handleApplyRemove = async () => {
     try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
       if (isNeedApprove) {
         await approve();
       }
@@ -61,7 +64,7 @@ export const useRemoveLiquidity = (
         type: 'success',
       });
       setTimeout(() => {
-        onSuccess?.();
+        onSuccess();
       }, 2000);
     } catch (e) {
       showWalletToast({
@@ -71,19 +74,7 @@ export const useRemoveLiquidity = (
       });
     }
     setTimeout(closeWalletToast, 3000);
-  }, [
-    approve,
-    closeWalletToast,
-    isNeedApprove,
-    onSuccess,
-    showWalletToast,
-    writeAsync,
-  ]);
+  };
 
-  return useMemo(() => {
-    return {
-      handleRemoveLiquidity,
-      isNeedApprove,
-    };
-  }, [handleRemoveLiquidity, isNeedApprove]);
+  return { handleApplyRemove, isNeedApprove };
 };

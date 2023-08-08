@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { formatUnits } from 'ethers/lib/utils.js';
 import useSWR from 'swr';
 import { useChainId } from 'wagmi';
@@ -30,6 +31,9 @@ export const usePoolLiquidity = () => {
           pool_address: poolAddress,
           token: marginTokenAddress,
           name: pairName,
+          epoch_end_time: epochEndTime,
+          epoch_index: epochIndex,
+          epoch_start_time: epochStartTime,
           lp_amount,
           liquidity_value,
           liquidity,
@@ -54,6 +58,15 @@ export const usePoolLiquidity = () => {
           token0Symbol,
           token1Symbol,
           marginTokenSymbol: token_name,
+          epochStartTime: dayjs
+            .unix(epochStartTime)
+            .utc()
+            .format('YYYY.MM.DD HH:mm:ss UTC'),
+          epochEndTime: dayjs
+            .unix(epochEndTime)
+            .utc()
+            .format('YYYY.MM.DD HH:mm:ss UTC'),
+          epochIndex,
           apy: +apy ? +formatUnits(apy, 4) * 100 : apy,
           liquidityValue: +formatUnits(liquidity_value, decimal),
           liquidity: +formatUnits(liquidity, decimal),

@@ -15,7 +15,7 @@ export const usePoolFromOracle = ({
   tokenAddress,
   assetAddress,
   poolAddress,
-  enabled,
+  enabled = true,
 }: {
   oracleAddress?: Address;
   tokenAddress?: Address;

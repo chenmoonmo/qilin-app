@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
-import { foramtPrecent, formatAmount, formatPrice } from '@qilin/utils';
+import { formatAmount, formatPrice } from '@qilin/utils';
 import * as Slider from '@radix-ui/react-slider';
+import { addDays } from 'date-fns';
+import dayjs from 'dayjs';
 import { BigNumber } from 'ethers';
 import { useMemo, useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 
-import { type useMyLiquidity, usePoolInfo, useRemoveLiquidity } from '@/hooks';
-
-import { TokenIcon } from './TokenIcon';
+import { useApplyRemove, type useMyLiquidity, usePoolInfo } from '@/hooks';
 
 type RemoveLiquidityDialogPropsType = {
   children: React.ReactNode;
@@ -38,13 +38,16 @@ const PoolInfo = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 20px;
   font-size: 12px;
   font-weight: 500;
+  margin-top: 5px;
+  &:first-of-type {
+    margin-top: 20px;
+  }
 `;
 
 const AmountPrecent = styled.div`
-  margin-top: 8px;
+  margin: 15px 0;
   padding: 6px 12px 26px;
   border-radius: 6px;
   background: #2c2f38;
@@ -95,7 +98,13 @@ const PrecentRadio = styled.div<{ active: boolean }>`
 const SubmitButton = styled(Button)`
   width: 100%;
   height: 40px;
-  margin-top: 34px;
+`;
+
+const Note = styled.div`
+  margin: 23px 0 9px;
+  color: #737884;
+  font-size: 12px;
+  font-weight: 500;
 `;
 
 const SliderRoot = styled(Slider.Root)`
@@ -135,76 +144,6 @@ const SliderThumb = styled(Slider.Thumb)`
   cursor: pointer;
 `;
 
-const LpAmount = styled.div`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 6px;
-  padding: 32px 12px 12px;
-  border-radius: 6px;
-  background: #2c2f38;
-  > span {
-    font-size: 24px;
-    font-family: PT Mono;
-    font-weight: 700;
-    color: #737884;
-  }
-  &::before {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: 50%;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    border: 2px solid #1f2127;
-    background: #2c2f38;
-    transform: translate(-50%, -50%);
-    background-image: url('/images/arrow-down.svg');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 12px;
-  }
-`;
-
-const TokenInfo = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 2px;
-  margin-left: 6px;
-  border-radius: 100px;
-  background: #464a56;
-  font-size: 14px;
-  font-weight: 500;
-`;
-
-const TokenSymbol = styled.span`
-  padding: 0 12px 0 5px;
-`;
-
-const SubTitle = styled.div`
-  margin-top: 14px;
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 21px;
-`;
-
-const InfoItem = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 18px;
-  > span:first-of-type {
-    color: #737884;
-  }
-  &:not(:first-of-type) {
-    margin-top: 9px;
-  }
-`;
-
 export const RemoveLiquidityDialog: React.FC<
   RemoveLiquidityDialogPropsType
 > = ({ children, data, onSuccess }) => {
@@ -223,15 +162,41 @@ export const RemoveLiquidityDialog: React.FC<
     address,
   });
 
-  const shareWillRemove = useMemo(() => {
-    return (data.share * precent) / 100;
-  }, [data.share, precent]);
+  const [epochNumber, epochEndTimeDate] = useMemo(() => {
+    if (!poolInfo) return ['-', '-'];
+    let epoch = 0;
+    const { epochEndTime } = data;
+    const { spotPrice, futurePrice, priceThresholdRatio } = poolInfo;
+    const priceDiff = futurePrice - spotPrice / spotPrice;
+
+    if (priceDiff >= priceThresholdRatio) {
+      epoch = 3;
+    } else if (priceDiff >= priceThresholdRatio / 2) {
+      epoch = 2;
+    } else if (priceDiff >= 0) {
+      epoch = 1;
+    }
+
+    const epochEndTimeDate = addDays(
+      new Date(epochEndTime * 1000),
+      epoch * 2
+    ).valueOf();
+
+    return [
+      epoch,
+      dayjs(epochEndTimeDate).utc().format('YYYY.MM.DD HH:mm:ss UTC'),
+    ];
+  }, [data, poolInfo]);
+
+  // const shareWillRemove = useMemo(() => {
+  //   return (data.share * precent) / 100;
+  // }, [data.share, precent]);
 
   const marginAmount = useMemo(() => {
     return (
-      ((+(LPToken?.formatted ?? 0) * precent) / 100) * (poolInfo?.LPPrice ?? 1)
+      ((+(LPToken?.formatted ?? 0) * precent) / 100) * (data?.LPPrice ?? 1)
     );
-  }, [LPToken?.formatted, poolInfo?.LPPrice, precent]);
+  }, [LPToken?.formatted, data?.LPPrice, precent]);
 
   const LPAmount = useMemo(() => {
     return LPToken?.value
@@ -239,12 +204,19 @@ export const RemoveLiquidityDialog: React.FC<
       : BigNumber.from(0);
   }, [LPToken?.value, precent]);
 
-  const { isNeedApprove, handleRemoveLiquidity } = useRemoveLiquidity(
-    data.assetAddress,
-    poolInfo?.LPAddress,
-    LPAmount,
-    onSuccess
-  );
+  // const { isNeedApprove, handleRemoveLiquidity } = useRemoveLiquidity(
+  //   data.assetAddress,
+  //   poolInfo?.LPAddress,
+  //   LPAmount,
+  //   onSuccess
+  // );
+
+  const { isNeedApprove, handleApplyRemove } = useApplyRemove({
+    assetAddress: data.assetAddress,
+    LPTokenAddress: poolInfo?.LPAddress,
+    amount: LPAmount,
+    onSuccess,
+  });
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -255,17 +227,31 @@ export const RemoveLiquidityDialog: React.FC<
           <Dialog.Close asChild>
             <Dialog.CloseIcon />
           </Dialog.Close>
-          <Title>Remove Liquidity</Title>
+          <Title>Withdrawal Request</Title>
           <div>
             <PoolInfo>
               <span>Pool</span>
               <span>{data?.name}</span>
             </PoolInfo>
+            <PoolInfo>
+              <span>Current wait period</span>
+              {/* TODO: 计算期限价差和 epochs */}
+              <span>{epochNumber} epochs</span>
+            </PoolInfo>
+            <PoolInfo>
+              <span>Withdraw date</span>
+              {/* TODO: 计算期限价差和 epochs 结束时间 */}
+              <span>{epochEndTimeDate}</span>
+            </PoolInfo>
+            <PoolInfo>
+              <span>Amount</span>
+              <span>Balance: {formatAmount(LPToken?.formatted)}</span>
+            </PoolInfo>
             <AmountPrecent>
-              <h1>
+              {/* <h1>
                 <span>Remove Amount</span>
                 <span>Balance: {formatAmount(LPToken?.formatted)}</span>
-              </h1>
+              </h1> */}
               <PrecentValue>
                 <span>{precent}%</span>
                 <PrecentRadioContainer>
@@ -308,32 +294,27 @@ export const RemoveLiquidityDialog: React.FC<
                 <SliderThumb></SliderThumb>
               </SliderRoot>
             </AmountPrecent>
-            <LpAmount>
-              <span>{formatAmount(marginAmount)}</span>
-              <TokenInfo>
-                <TokenIcon size={26} />
-                <TokenSymbol>{poolInfo?.marginTokenSymbol}</TokenSymbol>
-              </TokenInfo>
-            </LpAmount>
-            <SubTitle>Summary</SubTitle>
-            <InfoItem>
+            <PoolInfo>
+              <span>Current value</span>
+              <span>
+                {formatAmount(marginAmount)} {poolInfo?.marginTokenSymbol}
+              </span>
+            </PoolInfo>
+            <PoolInfo>
               <span>Lp Price</span>
               <span>
-                {formatPrice(poolInfo?.LPPrice)} {poolInfo?.marginTokenSymbol}
+                {formatPrice(data?.LPPrice)} {poolInfo?.marginTokenSymbol}
               </span>
-            </InfoItem>
-            <InfoItem>
-              <span>Share Of Pool</span>
-              <span>{foramtPrecent(shareWillRemove)}%</span>
-            </InfoItem>
+            </PoolInfo>
+            <Note>Note: Position value calculated at withdrawal time.</Note>
             <SubmitButton
               disabled={precent === 0}
               onClick={() => {
-                handleRemoveLiquidity();
+                handleApplyRemove();
                 setOpen(false);
               }}
             >
-              {isNeedApprove ? 'Approve' : 'Remove Liquidity'}
+              {isNeedApprove ? 'Approve' : 'Request'}
             </SubmitButton>
           </div>
         </Content>

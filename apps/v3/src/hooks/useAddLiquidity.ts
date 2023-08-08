@@ -55,40 +55,53 @@ export const useAddLiquidity = ({
     ],
   });
 
-  const handleAddLiquidty = useCallback(async () => {
-    showWalletToast({
-      title: 'Transaction Confirmation',
-      message: 'Please confirm the transaction in your wallet',
-      type: 'loading',
-    });
-    try {
-      if (isNeedApprove) {
-        await approve();
-      }
-
-      const res = await writeAsync?.();
-      showWalletToast({
-        title: 'Transaction Confirmation',
-        message: 'Transaction Pending',
-        type: 'loading',
-      });
-      await res?.wait();
-      showWalletToast({
-        title: 'Transaction Confirmation',
-        message: 'Transaction Confirmed',
-        type: 'success',
-      });
-      setTimeout(() => {
-        onSuccess();
-      }, 2000);
-    } catch (e) {
-      showWalletToast({
-        title: 'Transaction Error',
-        message: 'Please try again',
-        type: 'error',
-      });
-    }
-    setTimeout(closeWalletToast, 3000);
+  const steps = useMemo(() => {
+    return [
+      {
+        title: 'Approve',
+        buttonText: 'Approve',
+        onClick: async () => {
+          if (isNeedApprove) {
+            await approve();
+          }
+        },
+      },
+      {
+        title: 'Add Liquidity',
+        buttonText: 'Add Liquidity',
+        onClick: async () => {
+          showWalletToast({
+            title: 'Transaction Confirmation',
+            message: 'Please confirm the transaction in your wallet',
+            type: 'loading',
+          });
+          try {
+            const res = await writeAsync?.();
+            showWalletToast({
+              title: 'Transaction Confirmation',
+              message: 'Transaction Pending',
+              type: 'loading',
+            });
+            await res?.wait();
+            showWalletToast({
+              title: 'Transaction Confirmation',
+              message: 'Transaction Confirmed',
+              type: 'success',
+            });
+            setTimeout(() => {
+              onSuccess();
+            }, 2000);
+          } catch (e) {
+            showWalletToast({
+              title: 'Transaction Error',
+              message: 'Please try again',
+              type: 'error',
+            });
+          }
+          setTimeout(closeWalletToast, 2000);
+        },
+      },
+    ];
   }, [
     approve,
     closeWalletToast,
@@ -98,9 +111,103 @@ export const useAddLiquidity = ({
     writeAsync,
   ]);
 
+  const handleAddLiquidty = useCallback(async () => {
+    try {
+      showWalletToast({
+        title: 'Transaction Confirmation',
+        message: 'Please confirm the transaction in your wallet',
+        type: 'loading',
+      });
+      if (isNeedApprove) {
+        await approve();
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Confirmed',
+          type: 'success',
+        });
+        return true;
+      } else {
+        const res = await writeAsync?.();
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Pending',
+          type: 'loading',
+        });
+        await res?.wait();
+        showWalletToast({
+          title: 'Transaction Confirmation',
+          message: 'Transaction Confirmed',
+          type: 'success',
+        });
+        setTimeout(() => {
+          onSuccess();
+        }, 2000);
+      }
+    } catch (e) {
+      showWalletToast({
+        title: 'Transaction Error',
+        message: 'Please try again',
+        type: 'error',
+      });
+    }
+    setTimeout(closeWalletToast, 2000);
+    return false;
+  }, [
+    approve,
+    closeWalletToast,
+    isNeedApprove,
+    onSuccess,
+    showWalletToast,
+    writeAsync,
+  ]);
+
+  // const handleAddLiquidty = useCallback(async () => {
+  //   showWalletToast({
+  //     title: 'Transaction Confirmation',
+  //     message: 'Please confirm the transaction in your wallet',
+  //     type: 'loading',
+  //   });
+  //   try {
+  //     if (isNeedApprove) {
+  //       await approve();
+  //     }
+
+  //     const res = await writeAsync?.();
+  //     showWalletToast({
+  //       title: 'Transaction Confirmation',
+  //       message: 'Transaction Pending',
+  //       type: 'loading',
+  //     });
+  //     await res?.wait();
+  //     showWalletToast({
+  //       title: 'Transaction Confirmation',
+  //       message: 'Transaction Confirmed',
+  //       type: 'success',
+  //     });
+  //     setTimeout(() => {
+  //       onSuccess();
+  //     }, 2000);
+  //   } catch (e) {
+  //     showWalletToast({
+  //       title: 'Transaction Error',
+  //       message: 'Please try again',
+  //       type: 'error',
+  //     });
+  //   }
+  //   setTimeout(closeWalletToast, 3000);
+  // }, [
+  //   approve,
+  //   closeWalletToast,
+  //   isNeedApprove,
+  //   onSuccess,
+  //   showWalletToast,
+  //   writeAsync,
+  // ]);
+
   return useMemo(() => {
     return {
       handleAddLiquidty,
+      steps,
     };
-  }, [handleAddLiquidty]);
+  }, [handleAddLiquidty, steps]);
 };

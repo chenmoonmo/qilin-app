@@ -27,7 +27,6 @@ export const useOpenPositon = (
   });
 
   // 多空方向
-
   const [margin, setMargin] = useState<string>('');
 
   const [leverage, setLeverage] = useState<string>('2');
@@ -45,11 +44,6 @@ export const useOpenPositon = (
 
     return { long, short };
   }, [leverage, margin, poolInfo]);
-
-  console.log({
-    long,
-    short,
-  });
 
   const { isNeedApprove, approve } = useApprove(
     poolInfo?.marginTokenAddress,
@@ -226,19 +220,6 @@ const getOpenPrice = (
     estPrice =
       direction === '1' ? Math.max(PF, priceLowerBound) : Math.min(PF, pc2);
   }
-
-  console.log({
-    direction,
-    PF,
-    estPrice,
-    ps1: lastPrice,
-    pc2,
-    spotPrice,
-    priceUpperBound,
-    priceLowerBound,
-    isUpper: PF > priceUpperBound,
-    isLower: PF < priceLowerBound,
-  });
 
   const size: number = position / estPrice;
 

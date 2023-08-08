@@ -77,6 +77,128 @@ export const useCreatePool = ({
     args: [tokenAddress, oracleAddress, chainLink, false],
   });
 
+  const steps = useMemo(() => {
+    return [
+      {
+        title: 'Create Pool',
+        buttonText: 'Create Pool',
+        onClick: async () => {},
+      },
+      {
+        title: 'Approve',
+        buttonText: 'Approve',
+        onClick: async () => {
+          const { pool_param: poolParam } = await roundFetcher<{
+            pool_param: PoolParam;
+          }>(
+            `/poolFromOracle?chain_id=${chainId}&oracle=${oracleAddress}&token=${tokenAddress}`
+          );
+
+          try {
+            showWalletToast({
+              title: 'Transaction Confirmation',
+              message: 'Please confirm the transaction in your wallet',
+              type: 'loading',
+            });
+            const tokenContract = new Contract(
+              tokenAddress!,
+              erc20ABI,
+              singer!
+            );
+
+            const allowance = await tokenContract.allowance(
+              address,
+              poolParam.asset_address
+            );
+
+            if (allowance.lt(amountWithDecimals)) {
+              const res = await tokenContract.approve(
+                poolParam.asset_address,
+                '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+              );
+
+              showWalletToast({
+                title: 'Transaction Confirmation',
+                message: 'Transaction Pending',
+                type: 'loading',
+              });
+              await res?.wait();
+            }
+          } catch {
+            showWalletToast({
+              title: 'Transaction Confirmation',
+              message: 'Transaction Confirmed',
+              type: 'success',
+            });
+          }
+          setTimeout(() => {
+            closeWalletToast();
+          }, 2000);
+        },
+      },
+      {
+        title: 'Add Liquidity',
+        buttonText: 'Add Liquidity',
+        onClick: async () => {
+          const { pool_param: poolParam } = await roundFetcher<{
+            pool_param: PoolParam;
+          }>(
+            `/poolFromOracle?chain_id=${chainId}&oracle=${oracleAddress}&token=${tokenAddress}`
+          );
+
+          try {
+            const contract = new Contract(
+              poolParam.asset_address,
+              Asset.abi,
+              singer!
+            );
+
+            showWalletToast({
+              title: 'Transaction Confirmation',
+              message: 'Please confirm the transaction in your wallet',
+              type: 'loading',
+            });
+
+            const res2 = await contract.addLiquidity(address, {
+              amount: amountWithDecimals,
+              payType: 1,
+              payerAddress: address,
+            });
+
+            showWalletToast({
+              title: 'Transaction Confirmation',
+              message: 'Transaction Pending',
+              type: 'loading',
+            });
+
+            await res2?.wait();
+            onSuccess?.();
+          } catch {
+            showWalletToast({
+              title: 'Transaction Error',
+              message: 'Please try again',
+              type: 'error',
+            });
+          }
+
+          setTimeout(() => {
+            closeWalletToast();
+          }, 2000);
+        },
+      },
+    ];
+  }, [
+    address,
+    amountWithDecimals,
+    chainId,
+    closeWalletToast,
+    onSuccess,
+    oracleAddress,
+    showWalletToast,
+    singer,
+    tokenAddress,
+  ]);
+
   const handleCreatePool = useCallback(async () => {
     showWalletToast({
       title: 'Transaction Confirmation',
@@ -91,49 +213,6 @@ export const useCreatePool = ({
         type: 'loading',
       });
       await res?.wait();
-
-      const { pool_param: poolParam } = await roundFetcher<{
-        pool_param: PoolParam;
-      }>(
-        `/poolFromOracle?chain_id=${chainId}&oracle=${oracleAddress}&token=${tokenAddress}`
-      );
-
-      const tokenContract = new Contract(tokenAddress!, erc20ABI, singer!);
-
-      const allowance = await tokenContract.allowance(
-        address,
-        poolParam.asset_address
-      );
-
-      if (allowance.lt(amountWithDecimals)) {
-        const res = await tokenContract.approve(
-          poolParam.asset_address,
-          amountWithDecimals
-        );
-        await res?.wait();
-      }
-
-      const contract = new Contract(
-        poolParam.asset_address,
-        Asset.abi,
-        singer!
-      );
-
-      const res2 = await contract.addLiquidity(address, {
-        amount: amountWithDecimals,
-        payType: 1,
-        payerAddress: address,
-      });
-
-      await res2?.wait();
-      showWalletToast({
-        title: 'Transaction Confirmation',
-        message: 'Transaction Confirmed',
-        type: 'success',
-      });
-      setTimeout(() => {
-        onSuccess?.();
-      }, 2000);
     } catch (e) {
       showWalletToast({
         title: 'Transaction Error',
@@ -141,23 +220,113 @@ export const useCreatePool = ({
         type: 'error',
       });
     }
-    setTimeout(closeWalletToast, 3000);
+
+    await roundFetcher<{
+      pool_param: PoolParam;
+    }>(
+      `/poolFromOracle?chain_id=${chainId}&oracle=${oracleAddress}&token=${tokenAddress}`
+    );
+
+    showWalletToast({
+      title: 'Transaction Confirmation',
+      message: 'Transaction Confirmed',
+      type: 'success',
+    });
+
+    setTimeout(() => {
+      closeWalletToast();
+    }, 2000);
   }, [
-    address,
-    amountWithDecimals,
     chainId,
     closeWalletToast,
-    onSuccess,
     oracleAddress,
     showWalletToast,
-    singer,
     tokenAddress,
     writeAsync,
   ]);
 
+  // const handleCreatePool = useCallback(async () => {
+  //   showWalletToast({
+  //     title: 'Transaction Confirmation',
+  //     message: 'Please confirm the transaction in your wallet',
+  //     type: 'loading',
+  //   });
+  //   try {
+  //     const res = await writeAsync?.();
+  //     showWalletToast({
+  //       title: 'Transaction Confirmation',
+  //       message: 'Transaction Pending',
+  //       type: 'loading',
+  //     });
+  //     await res?.wait();
+
+  //     const { pool_param: poolParam } = await roundFetcher<{
+  //       pool_param: PoolParam;
+  //     }>(
+  //       `/poolFromOracle?chain_id=${chainId}&oracle=${oracleAddress}&token=${tokenAddress}`
+  //     );
+
+  //     const tokenContract = new Contract(tokenAddress!, erc20ABI, singer!);
+
+  //     const allowance = await tokenContract.allowance(
+  //       address,
+  //       poolParam.asset_address
+  //     );
+
+  //     if (allowance.lt(amountWithDecimals)) {
+  //       const res = await tokenContract.approve(
+  //         poolParam.asset_address,
+  //         amountWithDecimals
+  //       );
+  //       await res?.wait();
+  //     }
+
+  //     const contract = new Contract(
+  //       poolParam.asset_address,
+  //       Asset.abi,
+  //       singer!
+  //     );
+
+  //     const res2 = await contract.addLiquidity(address, {
+  //       amount: amountWithDecimals,
+  //       payType: 1,
+  //       payerAddress: address,
+  //     });
+
+  //     await res2?.wait();
+  //     showWalletToast({
+  //       title: 'Transaction Confirmation',
+  //       message: 'Transaction Confirmed',
+  //       type: 'success',
+  //     });
+  //     setTimeout(() => {
+  //       onSuccess?.();
+  //     }, 2000);
+  //   } catch (e) {
+  //     showWalletToast({
+  //       title: 'Transaction Error',
+  //       message: 'Please try again',
+  //       type: 'error',
+  //     });
+  //   }
+  //   setTimeout(closeWalletToast, 3000);
+  // }, [
+  //   address,
+  //   amountWithDecimals,
+  //   chainId,
+  //   closeWalletToast,
+  //   onSuccess,
+  //   oracleAddress,
+  //   showWalletToast,
+  //   singer,
+  //   tokenAddress,
+  //   writeAsync,
+  // ]);
+
   return useMemo(() => {
     return {
       handleCreatePool,
+      steps,
     };
-  }, [handleCreatePool]);
+  }, [handleCreatePool, steps]);
 };

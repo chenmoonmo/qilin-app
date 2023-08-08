@@ -94,6 +94,16 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
     return +data.pnl + +data.fundingFee - +data.serviceFee;
   }, [data.fundingFee, data.pnl, data.serviceFee]);
 
+  const warning = useMemo(() => {
+    if (positionValue?.marginExist) {
+      return 'Warning:Insufficient liquidity pool for full redemption. Confirm to proceed.';
+    }
+    if (positionValue?.limited) {
+      return "Warning: Price difference between spot and futures markets too large. Can't proceed.";
+    }
+    return undefined;
+  }, [positionValue?.limited, positionValue?.marginExist]);
+
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>{children}</Dialog.Trigger>
@@ -133,16 +143,10 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
               </TextWithDirection>
             </span>
           </InfoItem>
-          <Note>
-            {positionValue?.limited && (
-              <>
-                Warning: Price difference between spot and futures markets too
-                large. Can&apos;t proceed.
-              </>
-            )}
-          </Note>
+          <Note>{warning}</Note>
           <SubmitButton
             disabled={positionValue?.limited}
+            backgroundColor={positionValue?.marginExist ? '#FF3B30' : '#2e71ff'}
             onClick={() => {
               if (data.needLiquidation) {
                 handleLiquidate(data.positionId);
@@ -152,7 +156,7 @@ export const ClosePositionDialog: React.FC<AddLiquidityDialogPropsType> = ({
               setOpen(false);
             }}
           >
-            Confirm
+            {positionValue?.marginExist ? 'Confirm Anyway' : 'Confirm'}
           </SubmitButton>
         </Content>
       </Dialog.Portal>

@@ -18,6 +18,7 @@ import {
 } from '@/hooks';
 
 import { PoolSelector } from './PoolSelector';
+import { StepDialog } from './StepDialog';
 import { TextWithDirection } from './TextWithDirection';
 import { TokenIcon } from './TokenIcon';
 
@@ -147,6 +148,7 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
 }) => {
   const { address } = useAccount();
   const [open, setOpen] = useState(false);
+  const [stepOpen, setStepOpen] = useState(false);
 
   const [poolIndex, setPoolIndex] = useState<string | undefined>();
   const [amount, setAmount] = useState('');
@@ -163,12 +165,12 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     assetAddress: assetAddress,
     oracleAddress: currentItem?.oracleAddress,
     tokenAddress: currentItem?.tokenAddress,
-    enabled: open,
+    // enabled: open,
   });
 
   const { data: LPToken } = useBalance({
     token: poolParam?.lp,
-    enabled: open && !!poolParam?.lp,
+    enabled: !!poolParam?.lp,
     address,
   });
 
@@ -197,14 +199,14 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     setOpen(false);
   }, [onSuccess]);
 
-  const { handleAddLiquidty } = useAddLiquidity({
+  const { handleAddLiquidty, steps: addLiquiditySteps } = useAddLiquidity({
     marginTokenAddress: currentItem?.tokenAddress,
     assetAddress: poolParam?.assetAddress,
     onSuccess: handleSuccess,
     amount,
   });
 
-  const { handleCreatePool } = useCreatePool({
+  const { handleCreatePool, steps } = useCreatePool({
     oracleAddress: currentItem?.oracleAddress,
     tokenAddress: currentItem?.tokenAddress,
     onSuccess: handleSuccess,
@@ -238,6 +240,14 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     }
   }, [isNewPool]);
 
+  const currentSteps = useMemo(() => {
+    if (!isNewPool) {
+      return addLiquiditySteps;
+    } else {
+      return steps;
+    }
+  }, [addLiquiditySteps, isNewPool, steps]);
+
   const enableSubmit = useMemo(() => {
     return (
       poolIndex &&
@@ -247,19 +257,22 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
     );
   }, [amount, marginToken?.formatted, poolIndex]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (isNewPool) {
-      handleCreatePool();
+      await handleCreatePool();
+      setStepOpen(true);
+      setOpen(false);
     } else {
-      handleAddLiquidty();
+      const isNeedStep = await handleAddLiquidty();
+      if (isNeedStep) {
+        setStepOpen(true);
+        setOpen(false);
+      }
     }
   }, [handleAddLiquidty, handleCreatePool, isNewPool]);
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
-    if (!open) {
-      setPoolIndex(undefined);
-    }
   };
 
   useEffect(() => {
@@ -282,158 +295,167 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
   }, [oraclesList, oracleAddress, poolIndex, tokenAddress]);
 
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
-      <Dialog.Trigger asChild>{children}</Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay />
-        <Content>
-          <Title>
-            <Dialog.Close asChild>
-              <svg
-                width="12"
-                height="18"
-                viewBox="0 0 12 18"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M10.3162 0L12 1.51539L3.42286 9.10566L11.9883 16.4632L10.3296 18L0 9.12911L10.3162 0Z"
-                  fill="white"
+    <>
+      <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+        <Dialog.Trigger asChild>{children}</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Overlay />
+          <Content>
+            <Title>
+              <Dialog.Close asChild>
+                <svg
+                  width="12"
+                  height="18"
+                  viewBox="0 0 12 18"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.3162 0L12 1.51539L3.42286 9.10566L11.9883 16.4632L10.3296 18L0 9.12911L10.3162 0Z"
+                    fill="white"
+                  />
+                </svg>
+              </Dialog.Close>
+              {titleText}
+            </Title>
+            <Contianer>
+              <div>
+                <SubTitle>Select Oracle</SubTitle>
+                <PoolSelector
+                  disabled
+                  selections={[{ text: 'chainlink', value: 'chainlink' }]}
+                  value="chainlink"
                 />
-              </svg>
-            </Dialog.Close>
-            {titleText}
-          </Title>
-          <Contianer>
-            <div>
-              <SubTitle>Select Oracle</SubTitle>
-              <PoolSelector
-                disabled
-                selections={[{ text: 'chainlink', value: 'chainlink' }]}
-                value="chainlink"
-              />
-              <SubTitle
-                css={css`
-                  margin-top: 20px;
-                `}
-              >
-                Select Pool
-              </SubTitle>
-              <PoolSelector
-                value={poolIndex}
-                selections={oraclesList}
-                onValueChange={(item: any) => setPoolIndex(item.value)}
-                searchInfo={searchInfo}
-                onSearchInfoChange={setSearchInfo}
-              />
-              <SubTitle
-                css={css`
-                  display: flex;
-                  align-items: center;
-                  justify-content: space-between;
-                  margin-top: 20px;
-                `}
-              >
-                Amount
-                <Balance>
-                  balance: {formatAmount(marginToken?.formatted)}
-                </Balance>
-              </SubTitle>
-              <AmountInput>
-                <input
-                  type="text"
-                  value={amount}
-                  placeholder="0.0"
-                  onChange={e => setAmount(formatInput(e.target.value))}
+                <SubTitle
+                  css={css`
+                    margin-top: 20px;
+                  `}
+                >
+                  Select Pool
+                </SubTitle>
+                <PoolSelector
+                  value={poolIndex}
+                  selections={oraclesList}
+                  onValueChange={(item: any) => setPoolIndex(item.value)}
+                  searchInfo={searchInfo}
+                  onSearchInfoChange={setSearchInfo}
                 />
-                <div
+                <SubTitle
                   css={css`
                     display: flex;
                     align-items: center;
+                    justify-content: space-between;
+                    margin-top: 20px;
                   `}
                 >
-                  <MaxButton
-                    disabled={!marginToken}
-                    onClick={() =>
-                      setAmount(formatInput(marginToken!.formatted))
-                    }
+                  Amount
+                  <Balance>
+                    balance: {formatAmount(marginToken?.formatted)}
+                  </Balance>
+                </SubTitle>
+                <AmountInput>
+                  <input
+                    type="text"
+                    value={amount}
+                    placeholder="0.0"
+                    onChange={e => setAmount(formatInput(e.target.value))}
+                  />
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                    `}
                   >
-                    Max
-                  </MaxButton>
-                  <TokenInfo>
-                    <TokenIcon size={26} />
-                    <TokenSymbol>{marginToken?.symbol ?? '-'}</TokenSymbol>
-                  </TokenInfo>
-                </div>
-              </AmountInput>
-              <SubmitButton disabled={!enableSubmit} onClick={handleSubmit}>
-                {buttonText}
-              </SubmitButton>
-            </div>
-            <div>
-              <SubTitle>Select Oracle</SubTitle>
-              <InfoItem>
-                <span>Liquidity</span>
-                <span>
-                  {formatAmount(poolParam?.liquidity)} {marginToken?.symbol}
-                  {poolParam?.liquidityValue && (
-                    <>($ {formatAmount(poolParam?.liquidityValue)})</>
-                  )}
-                </span>
-              </InfoItem>
-              <InfoItem>
-                <span>LP Price</span>
-                <span>
-                  {formatPrice(poolParam?.LPPrice)} {marginToken?.symbol}
-                </span>
-              </InfoItem>
-              <InfoItem>
-                <span>APY</span>
-                <TextWithDirection>
-                  {poolParam?.apy === undefined
-                    ? '-'
-                    : `${foramtPrecent(poolParam?.apy)}%`}
-                </TextWithDirection>
-              </InfoItem>
-              <InfoItem>
-                <span>Share Of Pool</span>
-                <span>{share ? `${foramtPrecent(share * 100)}%` : '-'}</span>
-              </InfoItem>
-              <SubTitle
-                css={css`
-                  margin-top: 40px;
-                `}
-              >
-                Parameters
-              </SubTitle>
-              <InfoItem>
-                <span>Fee</span>
-                <span>
-                  {poolParam?.feeRatio === undefined
-                    ? '-'
-                    : `${foramtPrecent(poolParam?.feeRatio)}%`}
-                </span>
-              </InfoItem>
-              <InfoItem>
-                <span>Leverage Rate (L)</span>
-                <span>
-                  {poolParam?.assetLevel === undefined
-                    ? '-'
-                    : `${foramtPrecent(poolParam?.assetLevel)}`}
-                </span>
-              </InfoItem>
-              <InfoItem>
-                <span>Min Margin Ratio (Dmin)</span>
-                <span>
-                  {poolParam?.marginRatio === undefined
-                    ? '-'
-                    : `${foramtPrecent(poolParam?.marginRatio)}%`}
-                </span>
-              </InfoItem>
-            </div>
-          </Contianer>
-        </Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+                    <MaxButton
+                      disabled={!marginToken}
+                      onClick={() =>
+                        setAmount(formatInput(marginToken!.formatted))
+                      }
+                    >
+                      Max
+                    </MaxButton>
+                    <TokenInfo>
+                      <TokenIcon size={26} />
+                      <TokenSymbol>{marginToken?.symbol ?? '-'}</TokenSymbol>
+                    </TokenInfo>
+                  </div>
+                </AmountInput>
+                <SubmitButton disabled={!enableSubmit} onClick={handleSubmit}>
+                  {buttonText}
+                </SubmitButton>
+              </div>
+              <div>
+                <SubTitle>Select Oracle</SubTitle>
+                <InfoItem>
+                  <span>Liquidity</span>
+                  <span>
+                    {formatAmount(poolParam?.liquidity)} {marginToken?.symbol}
+                    {poolParam?.liquidityValue && (
+                      <>($ {formatAmount(poolParam?.liquidityValue)})</>
+                    )}
+                  </span>
+                </InfoItem>
+                <InfoItem>
+                  <span>LP Price</span>
+                  <span>
+                    {formatPrice(poolParam?.LPPrice)} {marginToken?.symbol}
+                  </span>
+                </InfoItem>
+                <InfoItem>
+                  <span>APY</span>
+                  <TextWithDirection>
+                    {poolParam?.apy === undefined
+                      ? '-'
+                      : `${foramtPrecent(poolParam?.apy)}%`}
+                  </TextWithDirection>
+                </InfoItem>
+                <InfoItem>
+                  <span>Share Of Pool</span>
+                  <span>{share ? `${foramtPrecent(share * 100)}%` : '-'}</span>
+                </InfoItem>
+                <SubTitle
+                  css={css`
+                    margin-top: 40px;
+                  `}
+                >
+                  Parameters
+                </SubTitle>
+                <InfoItem>
+                  <span>Fee</span>
+                  <span>
+                    {poolParam?.feeRatio === undefined
+                      ? '-'
+                      : `${foramtPrecent(poolParam?.feeRatio)}%`}
+                  </span>
+                </InfoItem>
+                <InfoItem>
+                  <span>Leverage Rate (L)</span>
+                  <span>
+                    {poolParam?.assetLevel === undefined
+                      ? '-'
+                      : `${foramtPrecent(poolParam?.assetLevel)}`}
+                  </span>
+                </InfoItem>
+                <InfoItem>
+                  <span>Min Margin Ratio (Dmin)</span>
+                  <span>
+                    {poolParam?.marginRatio === undefined
+                      ? '-'
+                      : `${foramtPrecent(poolParam?.marginRatio)}%`}
+                  </span>
+                </InfoItem>
+              </div>
+            </Contianer>
+          </Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+      <StepDialog
+        title={titleText}
+        steps={currentSteps}
+        open={stepOpen}
+        defaultStep={1}
+        onOpenChange={setStepOpen}
+      />
+    </>
   );
 };

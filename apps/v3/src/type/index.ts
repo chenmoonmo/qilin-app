@@ -29,6 +29,8 @@ export type PoolInfo = {
   rate: Address;
   name: string;
   reserve: boolean;
+  liquidity_time: number;
+  asset_liquidity: string;
 };
 
 export type PoolItem = {
@@ -69,6 +71,9 @@ export type Pool = {
     price_threshold_Ratio: number;
     price_effective_time: number;
     price_shock_ratio: number;
+    liquidity_move_ratio: number;
+    liquidity_move_time: number;
+    base_liquidity: string;
   };
 };
 
@@ -156,6 +161,11 @@ export type MyLiquidityItem = {
   user_liquidity: string;
   user_liquidity_value: string;
   token_name: string;
+  epoch_end_time: number;
+  epoch_index: number;
+  epoch_start_time: number;
+  lp_price: string;
+  withdraw_request: number;
 };
 
 export type OracleItem = {
@@ -181,6 +191,7 @@ export type PositionValue = {
   close_price: string;
   size: string;
   can_close: boolean;
+  margin_exist: boolean;
 };
 
 export type liquidityItem = {
@@ -194,4 +205,20 @@ export type liquidityItem = {
   pool_address: Address;
   token: Address;
   token_name: string;
+  epoch_end_time: number;
+  epoch_index: number;
+  epoch_start_time: number;
+};
+
+export type ApplyRemoveItem = {
+  name: string;
+  asset_address: Address;
+  index: number;
+  owner: Address;
+  receipt: Address;
+  lp_amount: string;
+  token_amount: string;
+  out_epoch: number;
+  status: number; //1:不能领取，2:可以领取
+  out_time: number; //可以移除的秒数
 };
