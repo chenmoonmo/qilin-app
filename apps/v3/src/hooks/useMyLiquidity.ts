@@ -33,6 +33,11 @@ export const useMyLiquidity = () => {
             user_liquidity_value,
             token,
             token_name,
+            epoch_start_time,
+            epoch_end_time,
+            epoch_index,
+            lp_price,
+            withdraw_request,
           } = item;
 
           const share =
@@ -53,12 +58,17 @@ export const useMyLiquidity = () => {
             oracleAddress: oracle_address,
             assetAddress: asset_address,
             poolAddress: pool_address,
+            epochStartTime: epoch_start_time,
+            epochEndTime: epoch_end_time,
+            epochIndex: epoch_index,
+            marginTokenSymbol: token_name,
             liquidity: formatUnits(liquidity, decimal),
             LPAmount: formatUnits(lp_amount, decimal),
             userLPAmount: formatUnits(user_lp_amount, decimal),
             userLiquidity: formatUnits(user_liquidity, decimal),
             userLiquidityValue: formatUnits(user_liquidity_value, decimal),
-            marginTokenSymbol: token_name,
+            withdrawRequest: formatUnits(withdraw_request, decimal),
+            LPPrice: +formatUnits(lp_price, decimal),
             roi: +formatUnits(roi, 4) * 100,
           };
         }) ?? []

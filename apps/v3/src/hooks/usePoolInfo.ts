@@ -52,6 +52,8 @@ export const usePoolInfo = ({
             last_price: lastPrice,
           },
           setting: {
+            liquidity_move_ratio,
+            base_liquidity,
             margin_ratio: marginRatio,
             fee_ratio: closeRatio,
             legal_level: leverages,
@@ -59,12 +61,12 @@ export const usePoolInfo = ({
             asset_level: assetLevels,
             price_shock_ratio: priceShockRatio,
             price_effective_time: priceEffectiveTime,
+            liquidity_move_time: liquidityMoveTime,
           },
         },
       } = result;
 
       const {
-        liquidity,
         pool_decimal: poolDecimal,
         lp_amount: LPAmount,
         pool_decimal: decimal,
@@ -73,7 +75,14 @@ export const usePoolInfo = ({
         pool_name: marginTokenSymbol,
       } = asset_info;
 
-      const { name: pairName, oracle: oracleAddress } = pool_info;
+      const liquidity = +formatUnits(asset_info.liquidity, poolDecimal);
+
+      const {
+        name: pairName,
+        oracle: oracleAddress,
+        liquidity_time: liquidityTime,
+        asset_liquidity,
+      } = pool_info;
 
       const futurePrice = +formatUnits(future_price, decimal);
       const spotPrice = +formatUnits(spot_price, decimal);
@@ -90,6 +99,28 @@ export const usePoolInfo = ({
       const [token0Symbol, token1Symbol] = pairName
         .split('/')
         .map(item => item.trim());
+
+      const priceDiff = futurePrice - spotPrice / spotPrice;
+      const liquidityMoveRatio = +formatUnits(liquidity_move_ratio, 4);
+      const assetLiquidity = +formatUnits(asset_liquidity, poolDecimal);
+      const baseLiquidity = +formatUnits(base_liquidity, poolDecimal);
+
+      const T =
+        (priceThresholdRatio *
+          liquidityMoveRatio *
+          (requestTime - liquidityTime) *
+          assetLiquidity) /
+        (Math.abs(priceDiff) * liquidityMoveTime);
+
+      const T1 = T * assetLiquidity;
+
+      let T2 = T1;
+
+      if (assetLiquidity < liquidity) {
+        T2 = Math.min(assetLiquidity + T1, liquidity);
+      } else {
+        T2 = Math.max(assetLiquidity - T1, liquidity);
+      }
 
       return {
         ID,
@@ -110,13 +141,13 @@ export const usePoolInfo = ({
         requestTime,
         lastRebaseTime,
         priceEffectiveTime,
+        liquidity: Math.max(T2, baseLiquidity),
         leverages: leverages.map(item => item.toString()),
         lastPrice: +formatUnits(lastPrice, decimal),
         positionLong: +formatUnits(positionLong, decimal),
         positionShort: +formatUnits(positionShort, decimal),
         rebaseLong: +formatUnits(rebaseLong, decimal),
         rebaseShort: +formatUnits(rebaseShort, decimal),
-        liquidity: +formatUnits(liquidity, poolDecimal),
         nakePosition: formatUnits(nakePosition, decimal),
         volume: formatUnits(volume, decimal),
         funding: +formatUnits(funding, 4) * 100,

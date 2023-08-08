@@ -4,7 +4,7 @@ import { type FC, forwardRef } from 'react';
 import { NoData } from './NoData';
 
 type ColumnType = {
-  title: string;
+  title: string | JSX.Element;
   key?: string;
   render?: (
     value: any,

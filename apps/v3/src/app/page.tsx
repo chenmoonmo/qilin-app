@@ -1,7 +1,7 @@
 'use client';
 import { css, keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Button } from '@qilin/component';
+import { Button, Tooltip } from '@qilin/component';
 import {
   foramtPrecent,
   formatAmount,
@@ -652,20 +652,35 @@ export default function Home() {
           const ratiaText = positionRatio >= marginRatio * 2 ? 'safe' : 'risk';
 
           return (
-            <>
-              <span
+            <Tooltip
+              text={
+                <>
+                  Margin Ratio = Realized PNL / Margin + 1.
+                  <br />
+                  Min Margin Ratio: {formatAmount(marginRatio, 2)}%. This is the
+                  min required
+                  <br />
+                  margin ratio for the current trading pair to
+                  <br />
+                  ensure position safety. If the ratio falls below
+                  <br />
+                  20%, liquidation may occur.
+                </>
+              }
+            >
+              <div
                 css={css`
                   color: ${ratiaText === 'risk'
                     ? 'rgba(225, 92, 72, 1)'
-                    : '#fff'};
+                    : null};
+                  text-decoration: underline 1px currentColor;
+                  text-underline-offset: 2px;
+                  cursor: help;
                 `}
               >
                 {foramtPrecent(positionRatio)}%
-              </span>
-              <span>
-                ({'>'} {foramtPrecent(marginRatio)}% {ratiaText})
-              </span>
-            </>
+              </div>
+            </Tooltip>
           );
         },
       },
