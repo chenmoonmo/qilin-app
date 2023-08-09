@@ -64,21 +64,19 @@ export const StepDialog: FC<StepDialogProps> = ({
   onError,
 }) => {
   const currentStep = useMemo(
-    () => steps[Math.min(steps.length, activeStep)],
+    () => steps[Math.min(steps.length - 1, activeStep)],
     [activeStep, steps]
   );
 
   const currentHandle = useCallback(async () => {
     try {
       await currentStep.onClick();
-      if (activeStep < steps.length - 1) {
-        onActiveStepChange(activeStep + 1);
-      } else {
-        onActiveStepChange(activeStep + 1);
+      onActiveStepChange(Math.min(activeStep + 1, steps.length));
+      if (activeStep === steps.length - 1) {
         setTimeout(() => {
           onOpenChange(false);
           onSuccess?.();
-        }, 2000);
+        }, 2500);
       }
     } catch {
       onError?.();
@@ -94,8 +92,8 @@ export const StepDialog: FC<StepDialogProps> = ({
   ]);
 
   const currentButtonText = useMemo(
-    () => currentStep.buttonText,
-    [currentStep.buttonText]
+    () => currentStep?.buttonText,
+    [currentStep?.buttonText]
   );
 
   return (
