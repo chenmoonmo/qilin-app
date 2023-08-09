@@ -28,8 +28,10 @@ export const useApplyRemoveList = () => {
           status,
           name,
           out_time,
+          lp_amount,
+          token_amount,
           asset_address: assetAddress,
-          lp_amount: LPAmount,
+          pool_name: poolName,
         } = item;
 
         return {
@@ -37,7 +39,9 @@ export const useApplyRemoveList = () => {
           index,
           status,
           assetAddress,
-          LPAmount: formatUnits(LPAmount, 18),
+          poolName,
+          LPAmount: formatUnits(lp_amount, 18),
+          tokenAmount: formatUnits(token_amount, 18),
           outTime: dayjs.unix(out_time).utc().format('YYYY-MM-DD HH:mm:ss UTC'),
         };
       });

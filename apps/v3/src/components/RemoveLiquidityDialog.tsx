@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import { Button, Dialog } from '@qilin/component';
 import { formatAmount, formatPrice } from '@qilin/utils';
 import * as Slider from '@radix-ui/react-slider';
-import { addDays } from 'date-fns';
+import { addSeconds } from 'date-fns';
 import dayjs from 'dayjs';
 import { BigNumber } from 'ethers';
 import { useMemo, useState } from 'react';
@@ -165,9 +165,9 @@ export const RemoveLiquidityDialog: React.FC<
   const [epochNumber, epochEndTimeDate] = useMemo(() => {
     if (!poolInfo) return ['-', '-'];
     let epoch = 0;
-    const { epochEndTime } = data;
+    const { epochEndTime, epochCycle } = data;
     const { spotPrice, futurePrice, priceThresholdRatio } = poolInfo;
-    const priceDiff = futurePrice - spotPrice / spotPrice;
+    const priceDiff = (futurePrice - spotPrice) / spotPrice;
 
     if (priceDiff >= priceThresholdRatio) {
       epoch = 3;
@@ -177,9 +177,9 @@ export const RemoveLiquidityDialog: React.FC<
       epoch = 1;
     }
 
-    const epochEndTimeDate = addDays(
+    const epochEndTimeDate = addSeconds(
       new Date(epochEndTime * 1000),
-      epoch * 2
+      epoch * epochCycle
     ).valueOf();
 
     return [
@@ -236,7 +236,10 @@ export const RemoveLiquidityDialog: React.FC<
             <PoolInfo>
               <span>Current wait period</span>
               {/* TODO: 计算期限价差和 epochs */}
-              <span>{epochNumber} epochs</span>
+              <span>
+                {epochNumber}{' '}
+                {epochNumber !== '-' && +epochNumber > 1 ? 'epochs' : 'epoch'}
+              </span>
             </PoolInfo>
             <PoolInfo>
               <span>Withdraw date</span>
