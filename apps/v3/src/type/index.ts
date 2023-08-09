@@ -221,4 +221,5 @@ export type ApplyRemoveItem = {
   out_epoch: number;
   status: number; //1:不能领取，2:可以领取
   out_time: number; //可以移除的秒数
+  pool_name: string;
 };

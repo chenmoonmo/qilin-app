@@ -61,9 +61,9 @@ const ClaimTable = () => {
       },
       {
         title: 'Liquidity',
-        key: 'LPAmount',
-        render: (_: any, item: any) => {
-          return formatAmount(item.LPAmount);
+        key: 'tokenAmount',
+        render: (tokenAmount: any, item: any) => {
+          return `${formatAmount(tokenAmount)} ${item.poolName}`;
         },
       },
       {
@@ -123,7 +123,8 @@ const MyLiquidityTable = () => {
       {
         title: 'Withdraw Request',
         key: 'withdrawRequest',
-        render: (value: any) => formatAmount(value),
+        render: (value: any, item: any) =>
+          `${formatAmount(value)} ${item.marginTokenSymbol}`,
       },
       {
         title: 'LP Price',

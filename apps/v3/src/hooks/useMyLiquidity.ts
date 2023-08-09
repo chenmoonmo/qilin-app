@@ -60,6 +60,7 @@ export const useMyLiquidity = () => {
             poolAddress: pool_address,
             epochStartTime: epoch_start_time,
             epochEndTime: epoch_end_time,
+            epochCycle: epoch_end_time - epoch_start_time,
             epochIndex: epoch_index,
             marginTokenSymbol: token_name,
             liquidity: formatUnits(liquidity, decimal),
