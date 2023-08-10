@@ -57,7 +57,7 @@ const useApprove = (
       approve,
       refetch,
     };
-  }, [isNeedApprove, approve]);
+  }, [isNeedApprove, approve, refetch]);
 };
 
 export const useApproveTokens = ({

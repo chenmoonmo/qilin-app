@@ -81,14 +81,16 @@ export const useAddLiquidity = ({
           type: 'success',
         });
       }
+      setTimeout(closeWalletToast, 2000);
     } catch (e) {
       showWalletToast({
         title: 'Transaction Error',
         message: 'Please try again',
         type: 'error',
       });
+      setTimeout(closeWalletToast, 2000);
+      throw e;
     }
-    setTimeout(closeWalletToast, 2000);
   }, [approve, closeWalletToast, isNeedApprove, showWalletToast, writeAsync]);
 
   const steps = useMemo(() => {
