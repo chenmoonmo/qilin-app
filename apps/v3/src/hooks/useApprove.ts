@@ -1,12 +1,7 @@
 import { BigNumber } from 'ethers';
 import { useCallback, useMemo } from 'react';
 import type { Address } from 'wagmi';
-import {
-  erc20ABI,
-  useAccount,
-  useContractRead,
-  useContractWrite,
-} from 'wagmi';
+import { erc20ABI, useAccount, useContractRead, useContractWrite } from 'wagmi';
 
 export const useApprove = (
   token?: Address,
@@ -52,6 +47,7 @@ export const useApprove = (
       refetch();
     } catch (e) {
       console.error(e);
+      throw e;
     }
   }, [approve, refetch]);
 

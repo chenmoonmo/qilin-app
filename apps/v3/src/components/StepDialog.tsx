@@ -78,7 +78,7 @@ export const StepDialog: FC<StepDialogProps> = ({
           onSuccess?.();
         }, 2500);
       }
-    } catch {
+    } catch (e) {
       onError?.();
     }
   }, [
