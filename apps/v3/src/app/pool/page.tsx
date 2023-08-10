@@ -1,7 +1,7 @@
 'use client';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { Button, Tooltip } from '@qilin/component';
+import { Button, Tooltip, useToast } from '@qilin/component';
 import { foramtPrecent, formatAmount, formatPrice } from '@qilin/utils';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -36,6 +36,7 @@ const TableTitle = styled.div`
 `;
 
 const ClaimTable = () => {
+  const { showToast } = useToast();
   const { data, mutate } = useApplyRemoveList();
 
   const { handleRemoveLiquidityAfterApply } = useRemoveLiquidityAfterApply();
@@ -78,6 +79,14 @@ const ClaimTable = () => {
             <Button
               disabled={item.status === 1}
               onClick={() => handleClaim(item)}
+              onDisabledClick={() => {
+                showToast({
+                  type: 'warning',
+                  title: 'Claim the assets after the withdrawal date.',
+                  message: '',
+                  duration: 2000,
+                });
+              }}
             >
               Claim
             </Button>

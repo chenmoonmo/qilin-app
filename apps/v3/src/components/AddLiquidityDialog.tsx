@@ -277,9 +277,17 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
       await handleAddLiquidty();
       if (isNeedApprove) {
         setActiveStep(1);
+      } else {
+        handleSuccess();
       }
     }
-  }, [handleAddLiquidty, handleCreatePool, isNeedApprove, isNewPool]);
+  }, [
+    handleAddLiquidty,
+    handleCreatePool,
+    handleSuccess,
+    isNeedApprove,
+    isNewPool,
+  ]);
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
