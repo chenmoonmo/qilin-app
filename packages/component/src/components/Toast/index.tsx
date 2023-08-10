@@ -1,7 +1,7 @@
 import { keyframes } from '@emotion/react';
 import styled from '@emotion/styled';
 import * as RadixAlertDialog from '@radix-ui/react-alert-dialog';
-import { Cross2Icon } from '@radix-ui/react-icons';
+// import { Cross2Icon } from '@radix-ui/react-icons';
 import * as RadixToast from '@radix-ui/react-toast';
 import {
   createContext,
@@ -103,14 +103,14 @@ const Description = styled(RadixToast.Description)`
   color: #bcc3d6;
 `;
 
-const Close = styled(RadixToast.Close)`
-  position: absolute;
-  top: 25px;
-  right: 20px;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-`;
+// const Close = styled(RadixToast.Close)`
+//   position: absolute;
+//   top: 25px;
+//   right: 20px;
+//   width: 20px;
+//   height: 20px;
+//   cursor: pointer;
+// `;
 
 const Viewport = styled(RadixToast.Viewport)`
   all: unset;
@@ -154,9 +154,9 @@ export const Toast: FC<ToastPropsType> = ({
       <Root open={open} onOpenChange={hanldeOpenChange} duration={duration}>
         <Status>{Icons[type]}</Status>
         <Content>
-          <Close>
+          {/* <Close>
             <Cross2Icon width={18} height={18} />
-          </Close>
+          </Close> */}
           <Title>{title}</Title>
           <Description>{message}</Description>
         </Content>
