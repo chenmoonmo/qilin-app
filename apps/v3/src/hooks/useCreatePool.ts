@@ -165,16 +165,16 @@ export const useCreatePool = ({
               });
               await res?.wait();
             }
-          } catch {
+            setTimeout(closeWalletToast, 2000);
+          } catch (e) {
             showWalletToast({
               title: 'Transaction Confirmation',
               message: 'Transaction Confirmed',
               type: 'success',
             });
+            setTimeout(closeWalletToast, 2000);
+            throw e;
           }
-          setTimeout(() => {
-            closeWalletToast();
-          }, 2000);
         },
       },
       {
@@ -218,17 +218,16 @@ export const useCreatePool = ({
               message: 'Transaction Confirmed',
               type: 'success',
             });
-          } catch {
+            setTimeout(closeWalletToast, 2000);
+          } catch (e) {
             showWalletToast({
               title: 'Transaction Error',
               message: 'Please try again',
               type: 'error',
             });
+            setTimeout(closeWalletToast, 2000);
+            throw e;
           }
-
-          setTimeout(() => {
-            closeWalletToast();
-          }, 2000);
         },
       },
     ];
