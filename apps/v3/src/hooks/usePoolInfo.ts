@@ -100,7 +100,7 @@ export const usePoolInfo = ({
         .split('/')
         .map(item => item.trim());
 
-      const priceDiff = futurePrice - spotPrice / spotPrice;
+      const priceDiff = (futurePrice - spotPrice) / spotPrice;
       const liquidityMoveRatio = +formatUnits(liquidity_move_ratio, 4);
       const assetLiquidity = +formatUnits(asset_liquidity, poolDecimal);
       const baseLiquidity = +formatUnits(base_liquidity, poolDecimal);
