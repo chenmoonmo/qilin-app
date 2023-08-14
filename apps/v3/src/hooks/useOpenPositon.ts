@@ -45,6 +45,8 @@ export const useOpenPositon = (
     return { long, short };
   }, [leverage, margin, poolInfo]);
 
+  console.log(long, short);
+
   const { isNeedApprove, approve } = useApprove(
     poolInfo?.marginTokenAddress,
     assetAddress,
@@ -200,6 +202,8 @@ const getOpenPrice = (
   const priceUpperBound = spotPrice * (1 + priceThresholdRatio);
   // 价格下边界
   const priceLowerBound = spotPrice * (1 - priceThresholdRatio);
+
+  console.log(PF, priceUpperBound, priceLowerBound, direction);
 
   if (PF > priceUpperBound) {
     // 限制开多，不限制开空
