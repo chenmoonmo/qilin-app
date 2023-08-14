@@ -203,8 +203,6 @@ const getOpenPrice = (
   // 价格下边界
   const priceLowerBound = spotPrice * (1 - priceThresholdRatio);
 
-  console.log(PF, priceUpperBound, priceLowerBound, direction);
-
   if (PF > priceUpperBound) {
     // 限制开多，不限制开空
     limited = direction === '1';
