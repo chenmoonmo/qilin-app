@@ -901,7 +901,7 @@ export default function Home() {
           <OpenInfoContainer>
             <PositionInfo>
               <PositionInfoItem>
-                <div>Bid Price</div>
+                <div>Open Price</div>
                 <div>{formatPrice(long.estPrice)}</div>
               </PositionInfoItem>
               <PositionInfoItem>
@@ -946,7 +946,7 @@ export default function Home() {
           <OpenInfoContainer>
             <PositionInfo>
               <PositionInfoItem>
-                <div>Ask Price</div>
+                <div>Open Price</div>
                 <div>{formatPrice(short.estPrice)}</div>
               </PositionInfoItem>
               <PositionInfoItem>
