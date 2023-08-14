@@ -118,9 +118,9 @@ export const usePoolInfo = ({
           (Math.abs(priceDiff) * liquidityMoveTime);
 
         if (assetLiquidity < liquidity) {
-          T2 = Math.min(currentLiquidty + T, liquidity);
+          T2 = Math.min(assetLiquidity + T, liquidity);
         } else {
-          T2 = Math.max(currentLiquidty - T, liquidity);
+          T2 = Math.max(assetLiquidity - T, liquidity);
         }
       }
 
