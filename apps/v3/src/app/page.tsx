@@ -31,6 +31,7 @@ import {
   TokenIcon,
   TradingView,
 } from '@/components';
+import { ClaimButton } from '@/components/ClaimButton';
 import {
   useHistoryPositions,
   useKLine,
@@ -58,7 +59,13 @@ const PairInfoContainer = styled.div`
   grid-row: 1 / 2;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 0 24px;
+`;
+
+const PairInfoInner = styled.div`
+  display: flex;
+  align-items: center;
   > div {
     position: relative;
     &::after {
@@ -787,60 +794,63 @@ export default function Home() {
   return (
     <Main>
       <PairInfoContainer>
-        <PairSelector value={poolInfo?.ID}>
-          <PairInfo>
-            <PairIcon>
-              <TokenIcon size={36} />
-              <TokenIcon size={36} />
-            </PairIcon>
-            <span>{poolInfo?.pairName}</span>
-            <svg
-              width="14"
-              height="10"
-              viewBox="0 0 14 10"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M6.80756 10L0.911934 2.5L12.7032 2.5L6.80756 10Z"
-                fill="white"
-              />
-            </svg>
-          </PairInfo>
-        </PairSelector>
-        <PairPrice>{formatPrice(poolInfo?.futurePrice)}</PairPrice>
-        <PairDataItem>
-          <div>Chainlink Price</div>
-          <div>
-            {formatPrice(poolInfo?.spotPrice)} {poolInfo?.token1Symbol}
-          </div>
-        </PairDataItem>
-        <PairDataItem>
-          <div>24h Change</div>
-          <div>
-            <TextWithDirection>
-              {foramtPrecent(poolInfo?.change)}%
-            </TextWithDirection>
-          </div>
-        </PairDataItem>
-        <PairDataItem>
-          <div>24h Volume</div>
-          <div>$ {formatAmount(poolInfo?.volume)}</div>
-        </PairDataItem>
-        <PairDataItem>
-          <div>Funding</div>
-          <div>
-            <TextWithDirection>
-              {foramtPrecent(poolInfo?.funding)}%
-            </TextWithDirection>
-          </div>
-        </PairDataItem>
-        <PairDataItem>
-          <div>Naked Positions</div>
-          <div>
-            {formatAmount(poolInfo?.nakePosition)} {marginToken?.symbol}
-          </div>
-        </PairDataItem>
+        <PairInfoInner>
+          <PairSelector value={poolInfo?.ID}>
+            <PairInfo>
+              <PairIcon>
+                <TokenIcon size={36} />
+                <TokenIcon size={36} />
+              </PairIcon>
+              <span>{poolInfo?.pairName}</span>
+              <svg
+                width="14"
+                height="10"
+                viewBox="0 0 14 10"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M6.80756 10L0.911934 2.5L12.7032 2.5L6.80756 10Z"
+                  fill="white"
+                />
+              </svg>
+            </PairInfo>
+          </PairSelector>
+          <PairPrice>{formatPrice(poolInfo?.futurePrice)}</PairPrice>
+          <PairDataItem>
+            <div>Chainlink Price</div>
+            <div>
+              {formatPrice(poolInfo?.spotPrice)} {poolInfo?.token1Symbol}
+            </div>
+          </PairDataItem>
+          <PairDataItem>
+            <div>24h Change</div>
+            <div>
+              <TextWithDirection>
+                {foramtPrecent(poolInfo?.change)}%
+              </TextWithDirection>
+            </div>
+          </PairDataItem>
+          <PairDataItem>
+            <div>24h Volume</div>
+            <div>$ {formatAmount(poolInfo?.volume)}</div>
+          </PairDataItem>
+          <PairDataItem>
+            <div>Funding</div>
+            <div>
+              <TextWithDirection>
+                {foramtPrecent(poolInfo?.funding)}%
+              </TextWithDirection>
+            </div>
+          </PairDataItem>
+          <PairDataItem>
+            <div>Naked Positions</div>
+            <div>
+              {formatAmount(poolInfo?.nakePosition)} {marginToken?.symbol}
+            </div>
+          </PairDataItem>
+        </PairInfoInner>
+        <ClaimButton />
         {!!totalReward && (
           <LiquidateLink href={`/liquidate/${assetAddress}/${poolAddress}`}>
             <div>
