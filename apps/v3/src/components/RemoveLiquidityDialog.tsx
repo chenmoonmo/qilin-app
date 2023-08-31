@@ -164,7 +164,8 @@ export const RemoveLiquidityDialog: React.FC<
 
   const [epochNumber, epochEndTimeDate] = useMemo(() => {
     if (!poolInfo) return ['-', '-'];
-    let epoch = 0;
+    let epoch = 1;
+
     const { epochEndTime, epochCycle } = data;
     const { spotPrice, futurePrice, priceThresholdRatio } = poolInfo;
     const priceDiff = (futurePrice - spotPrice) / spotPrice;
@@ -173,7 +174,8 @@ export const RemoveLiquidityDialog: React.FC<
       epoch = 3;
     } else if (priceDiff >= priceThresholdRatio / 2) {
       epoch = 2;
-    } else if (priceDiff >= 0) {
+      // } else if (priceDiff >= 0) {
+    } else {
       epoch = 1;
     }
 
