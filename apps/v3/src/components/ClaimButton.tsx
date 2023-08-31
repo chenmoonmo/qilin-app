@@ -1,12 +1,7 @@
 'use client';
 import styled from '@emotion/styled';
 import { Button, useToast } from '@qilin/component';
-import {
-  useAccount,
-  useContractRead,
-  useContractWrite,
-  usePrepareContractWrite,
-} from 'wagmi';
+import { useAccount, useContractRead, useContractWrite } from 'wagmi';
 
 import MockToken from '@/abis/MockToken.json';
 import { useContractAddress } from '@/hooks/useContractAddress';
@@ -24,25 +19,24 @@ const CButton = styled(Button)`
 export const ClaimButton = () => {
   const { address } = useAccount();
   const { testToken } = useContractAddress();
+  console.log(testToken);
 
   const { showWalletToast, closeWalletToast } = useToast();
 
-  const { data: mintAlready } = useContractRead({
+  const { data: mintAlready, refetch } = useContractRead({
     address: testToken,
     abi: MockToken.abi,
-    functionName: 'mintAlready',
+    functionName: '_mintAlready',
     args: [address],
     enabled: !!address,
   });
 
-  const { data: config } = usePrepareContractWrite({
+  const { writeAsync: mintTest } = useContractWrite({
     address: testToken,
     abi: MockToken.abi,
     functionName: 'mintTest',
-    enabled: !!address && !mintAlready,
+    mode: 'recklesslyUnprepared',
   });
-
-  const { writeAsync: mintTest } = useContractWrite(config);
 
   const handleClaim = async () => {
     showWalletToast({
@@ -58,6 +52,7 @@ export const ClaimButton = () => {
         type: 'loading',
       });
       await res?.wait();
+      refetch();
       showWalletToast({
         title: 'Transaction Confirmation',
         message: 'Transaction Confirmed',
