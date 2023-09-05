@@ -56,10 +56,6 @@ const Route = styled(Link)<{ active?: boolean }>`
   }
 `;
 
-// const ChainInfo = styled.div`
-
-// `;
-
 const More = styled.a`
   grid-column: 5/ 6;
   display: flex;
@@ -79,11 +75,8 @@ const More = styled.a`
 `;
 
 More.defaultProps = {
-  children: 'More',
-  as: 'a',
+  children: 'DOC',
 };
-
-// const;
 
 export const Header: FC<HeaderPropsType> = ({ routes }) => {
   const pathname = usePathname();
