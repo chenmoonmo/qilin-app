@@ -56,11 +56,15 @@ const Route = styled(Link)<{ active?: boolean }>`
   }
 `;
 
-const ChainInfo = styled.div`
-  height: 33px;
-  grid-column: 4 / 5;
+// const ChainInfo = styled.div`
+
+// `;
+
+const More = styled.a`
+  grid-column: 5/ 6;
   display: flex;
   align-items: center;
+  height: 33px;
   padding: 8px 12px;
   border: 1px solid #363a45;
   border-radius: 6px;
@@ -69,17 +73,14 @@ const ChainInfo = styled.div`
   font-size: 14px;
   line-height: 21px;
   color: #737884;
-`;
-
-const More = styled(ChainInfo)`
-  height: 33px;
   margin-left: 14px;
-  grid-column: 5/ 6;
   cursor: pointer;
+  box-sizing: border-box;
 `;
 
 More.defaultProps = {
   children: 'More',
+  as: 'a',
 };
 
 // const;
@@ -117,7 +118,7 @@ export const Header: FC<HeaderPropsType> = ({ routes }) => {
       </RoutesContainer>
       <div />
       <AccountInfo />
-      <More />
+      <More href="https://rc.qilin.fi/qiqi/" target="_blank" />
     </HeaderContainer>
   );
 };
