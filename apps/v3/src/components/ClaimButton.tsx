@@ -72,7 +72,7 @@ export const ClaimButton = () => {
   return (
     <CButton disabled={!address || !!mintAlready} onClick={handleClaim}>
       <div>Claim</div>
-      <div>10000 qiqi/account</div>
+      <div>10000 QI/account</div>
     </CButton>
   );
 };
