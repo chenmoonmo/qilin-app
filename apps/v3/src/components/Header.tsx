@@ -111,7 +111,10 @@ export const Header: FC<HeaderPropsType> = ({ routes }) => {
       </RoutesContainer>
       <div />
       <AccountInfo />
-      <More href="https://rc.qilin.fi/qiqi/" target="_blank" />
+      <More
+        href="https://whobroketheheart2020s-organizati.gitbook.io/qiqi/"
+        target="_blank"
+      />
     </HeaderContainer>
   );
 };
