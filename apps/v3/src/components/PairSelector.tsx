@@ -196,8 +196,8 @@ export const PairSelector: React.FC<PairSelectorType> = ({
                         `}
                       >
                         <PairIcon>
-                          <TokenIcon size={24} />
-                          <TokenIcon size={24} />
+                          <TokenIcon size={24} src={pool.token0Icon} />
+                          <TokenIcon size={24} src={pool.token1Icon} />
                         </PairIcon>
                         <span>{pool.pairName}</span>
                       </div>

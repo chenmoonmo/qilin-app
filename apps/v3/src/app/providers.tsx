@@ -6,6 +6,11 @@ import { arbitrum } from 'wagmi/chains';
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Web3Provider
+      // defaultChains={[
+      //   process.env.NEXT_PUBLIC_DOMAIN_ENV === 'development'
+      //     ? arbitrumGoerli
+      //     : arbitrum,
+      // ]}
       defaultChains={[arbitrum]}
       connectorNames={['MetaMask', 'WallectConnect']}
     >

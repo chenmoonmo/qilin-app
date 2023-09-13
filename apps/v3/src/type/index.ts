@@ -21,6 +21,7 @@ export type AssetInfo = {
   pool_decimal: number;
   pool_name: string;
   liquidity_value: string;
+  token_image_url: string;
 };
 
 export type PoolInfo = {
@@ -31,6 +32,8 @@ export type PoolInfo = {
   reserve: boolean;
   liquidity_time: number;
   asset_liquidity: string;
+  token1_image_url: string;
+  token0_image_url: string;
 };
 
 export type PoolItem = {
@@ -173,6 +176,7 @@ export type OracleItem = {
   name: string;
   token_address: Address;
   token_name: string;
+  token_image_url: string;
 };
 
 export type PositionValue = {

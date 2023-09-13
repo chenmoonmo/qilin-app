@@ -73,6 +73,7 @@ export const usePoolInfo = ({
         pool_token: marginTokenAddress,
         lp_token: LPAddress,
         pool_name: marginTokenSymbol,
+        token_image_url: marginTokenIcon,
       } = asset_info;
 
       const liquidity = +formatUnits(asset_info.liquidity, poolDecimal);
@@ -82,6 +83,8 @@ export const usePoolInfo = ({
         oracle: oracleAddress,
         liquidity_time: liquidityTime,
         asset_liquidity,
+        token0_image_url: token0Icon,
+        token1_image_url: token1Icon,
       } = pool_info;
 
       const futurePrice = +formatUnits(future_price, decimal);
@@ -143,6 +146,9 @@ export const usePoolInfo = ({
         requestTime,
         lastRebaseTime,
         priceEffectiveTime,
+        token0Icon,
+        token1Icon,
+        marginTokenIcon,
         liquidity: T2,
         leverages: leverages.map(item => item.toString()),
         lastPrice: +formatUnits(lastPrice, decimal),

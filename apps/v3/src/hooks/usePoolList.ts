@@ -47,6 +47,9 @@ export const usePoolList = (withoutZero = true) => {
           const poolAddress = pool.pool_info.pool;
           const oracleAddress = pool.pool_info.oracle;
 
+          const token0Icon = pool.pool_info.token0_image_url;
+          const token1Icon = pool.pool_info.token1_image_url;
+
           const marginTokenAddress = pool.asset_info.pool_token;
           const marginTokenSymbol = pool.asset_info.pool_name;
 
@@ -54,6 +57,7 @@ export const usePoolList = (withoutZero = true) => {
           const liquidity_value = pool.asset_info.liquidity_value;
           const LPAmount = pool.asset_info.lp_amount;
           const poolDecimal = pool.asset_info.pool_decimal;
+          const marginTokenIcon = pool.asset_info.token_image_url;
 
           const apy = pool.apy;
 
@@ -76,6 +80,9 @@ export const usePoolList = (withoutZero = true) => {
             token0Symbol,
             token1Symbol,
             LPPrice,
+            token0Icon,
+            token1Icon,
+            marginTokenIcon,
             apy: apy ? +formatUnits(apy, 4) * 100 : apy,
             ID: pool.ID,
             volumn: pool.volumn_24

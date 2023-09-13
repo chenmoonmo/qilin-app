@@ -798,8 +798,8 @@ export default function Home() {
           <PairSelector value={poolInfo?.ID}>
             <PairInfo>
               <PairIcon>
-                <TokenIcon size={36} />
-                <TokenIcon size={36} />
+                <TokenIcon size={36} src={poolInfo?.token0Icon} />
+                <TokenIcon size={36} src={poolInfo?.token1Icon} />
               </PairIcon>
               <span>{poolInfo?.pairName}</span>
               <svg
@@ -894,7 +894,7 @@ export default function Home() {
                 Max
               </MaxButton>
               <TokenInfo>
-                <TokenIcon size={26} />
+                <TokenIcon size={26} src={poolInfo?.marginTokenIcon} />
                 <TokenSymbol>{marginToken?.symbol}</TokenSymbol>
               </TokenInfo>
             </TokenInfoContainer>

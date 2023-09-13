@@ -393,7 +393,7 @@ export const AddLiquidityDialog: React.FC<AddLiquidityDialogPropsType> = ({
                       Max
                     </MaxButton>
                     <TokenInfo>
-                      <TokenIcon size={26} />
+                      <TokenIcon size={26} src={currentItem?.marginTokenIcon} />
                       <TokenSymbol>{marginToken?.symbol ?? '-'}</TokenSymbol>
                     </TokenInfo>
                   </div>
