@@ -19,6 +19,7 @@ export const useOracles = (currentIndex?: string) => {
         value: index + '',
         oracleAddress: item.address,
         tokenAddress: item.token_address,
+        marginTokenIcon: item.token_image_url,
       };
     });
   });
